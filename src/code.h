@@ -34,17 +34,21 @@ class Code {
 
 	private:
 		friend class CodeList;
-		std::vector<std::shared_ptr<Code>> stack_;
+		const std::vector<std::shared_ptr<Code>> stack_;
 };
 
 class CodeList : public Code {
 	public:
-		CodeList() {}
-		CodeList(const std::vector<std::shared_ptr<Code>>& stack) : Code(stack) {}
+		CodeList() : size_(1) {}
+		CodeList(const std::vector<std::shared_ptr<Code>>& stack) : Code(stack) {calc_size_();}
 
 		bool is_atom() const {return false;}
 		unsigned operator()(Env& env) const override;
-		unsigned size() const override;
+		unsigned size() const override {return size_;}
+
+	private:
+		unsigned size_;
+		void calc_size_();
 };
 
 class CodeAtom : public Code {

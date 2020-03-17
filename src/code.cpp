@@ -30,13 +30,11 @@ unsigned CodeList::operator()(Env& env) const {
 	return 1;
 }
 
-// TODO(hopibel): can probably cache this and force recalculate on modification
-unsigned CodeList::size() const {
-	unsigned size = 1; // +1 for the list itself
+void CodeList::calc_size_() {
+	size_ = 1; // +1 for the list itself
 	for (auto i : stack_) {
-		size += i->size();
+		size_ += i->size();
 	}
-	return size;
 }
 
 } // namespace cppush
