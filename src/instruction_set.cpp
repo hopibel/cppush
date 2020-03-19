@@ -61,10 +61,33 @@ void InstructionSet::register_core() {
 	register(bool_from_float, "BOOLEAN.FROMFLOAT");
 
 	// int
-	
+	register(add, "INTEGER.+");
+	register(sub, "INTEGER.-");
+	register(mul, "INTEGER.*");
+	register(div, "INTEGER./");
+	register(int_mod, "INTEGER.%");
+	register(less_than, "INTEGER.<");
+	register(greater_than, "INTEGER.>");
+	register(int_from_bool, "INTEGER.FROMBOOLEAN");
+	register(int_from_float, "INTEGER.FROMFLOAT");
+	register(max, "INTEGER.MAX");
+	register(min, "INTEGER.MIN");
 
 	// float
-	
+	register(add<double>, "FLOAT.+");
+	register(sub<double>, "FLOAT.-");
+	register(mul<double>, "FLOAT.*");
+	register(div<double>, "FLOAT./");
+	register(float_mod, "FLOAT.%");
+	register(less_than<double>, "FLOAT.<");
+	register(greater_than<double>, "FLOAT.>");
+	register(float_from_bool, "FLOAT.FROMBOOLEAN");
+	register(float_from_int, "FLOAT.FROMINTEGER");
+	register(max<double>, "FLOAT.MAX");
+	register(min<double>, "FLOAT.MIN");
+	register(trig_cos, "FLOAT.COS");
+	register(trig_sin, "FLOAT.SIN");
+	register(trig_tan, "FLOAT.TAN");
 
 	// common
 	
