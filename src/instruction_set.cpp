@@ -90,7 +90,56 @@ void InstructionSet::register_core() {
 	register(trig_tan, "FLOAT.TAN");
 
 	// common
-	
+	register(equal<std::shared_ptr<Code>>, "CODE.=");
+	register(equal<int>, "INTEGER.=");
+	register(equal<double>, "FLOAT.=");
+	register(equal<bool>, "BOOLEAN.=");
+	register(exec_equal, "EXEC.=");
+	register(protected_pop<std::shared_ptr<Code>>, "CODE.POP");
+	register(protected_pop<int>, "INTEGER.POP");
+	register(protected_pop<double>, "FLOAT.POP");
+	register(protected_pop<bool>, "BOOLEAN.POP");
+	register(protected_exec_pop, "EXEC.POP", 1);
+	register(dup<std::shared_ptr<Code>>, "CODE.DUP");
+	register(dup<int>, "INTEGER.DUP");
+	register(dup<double>, "FLOAT.DUP");
+	register(dup<bool>, "BOOLEAN.DUP");
+	register(exec_dup, "EXEC.DUP", 1);
+	register(flush<std::shared_ptr<Code>>, "CODE.FLUSH");
+	register(flush<int>, "INTEGER.FLUSH");
+	register(flush<double>, "FLOAT.FLUSH");
+	register(flush<bool>, "BOOLEAN.FLUSH");
+	register(exec_flush, "EXEC.FLUSH");
+	register(rot<std::shared_ptr<Code>>, "CODE.ROT");
+	register(rot<int>, "INTEGER.ROT");
+	register(rot<double>, "FLOAT.ROT");
+	register(rot<bool>, "BOOLEAN.ROT");
+	register(exec_rot, "EXEC.ROT", 3);
+	register(shove<std::shared_ptr<Code>>, "CODE.SHOVE");
+	register(shove<int>, "INTEGER.SHOVE");
+	register(shove<double>, "FLOAT.SHOVE");
+	register(shove<bool>, "BOOLEAN.SHOVE");
+	register(exec_shove, "EXEC.SHOVE", 1);
+	register(stackdepth<std::shared_ptr<Code>>, "CODE.STACKDEPTH");
+	register(stackdepth<int>, "INTEGER.STACKDEPTH");
+	register(stackdepth<double>, "FLOAT.STACKDEPTH");
+	register(stackdepth<bool>, "BOOLEAN.STACKDEPTH");
+	register(exec_stackdepth, "EXEC.STACKDEPTH");
+	register(swap<std::shared_ptr<Code>>, "CODE.SWAP");
+	register(swap<int>, "INTEGER.SWAP");
+	register(swap<double>, "FLOAT.SWAP");
+	register(swap<bool>, "BOOLEAN.SWAP");
+	register(exec_swap, "EXEC.SWAP", 2);
+	register(yank<std::shared_ptr<Code>>, "CODE.YANK");
+	register(yank<int>, "INTEGER.YANK");
+	register(yank<double>, "FLOAT.YANK");
+	register(yank<bool>, "BOOLEAN.YANK");
+	register(exec_yank, "EXEC.YANK");
+	register(yankdup<std::shared_ptr<Code>>, "CODE.YANKDUP");
+	register(yankdup<int>, "INTEGER.YANKDUP");
+	register(yankdup<double>, "FLOAT.YANKDUP");
+	register(yankdup<bool>, "BOOLEAN.YANKDUP");
+	register(exec_yankdup, "EXEC.YANKDUP");
 }
 
 } // cppush
