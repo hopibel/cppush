@@ -4,6 +4,8 @@ add_library(cppush
 	env.cpp
 	env.h
 	instruction.h
+	instruction_manager.h
+	instruction_manager.cpp
 	literal.h
 	bool_ops.h
 	code_ops.h

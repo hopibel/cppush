@@ -10,6 +10,14 @@
 
 namespace cppush {
 
+enum {
+	EXEC = 1 << 0,
+	CODE = 1 << 1,
+	BOOL = 1 << 2,
+	INT = 1 << 3,
+	FLOAT = 1 << 4,
+};
+
 class Instruction : public CodeAtom {
 	private:
 		unsigned (*const op_)(Env&);

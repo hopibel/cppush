@@ -4,6 +4,7 @@
 #include "code.h"
 #include "common_ops.h"
 #include "env.h"
+#include "instruction.h"
 
 #include <algorithm>
 #include <memory>
@@ -152,7 +153,8 @@ inline unsigned code_do(Env& env) {
 	if (stack.size() > 0) {
 		static std::shared_ptr<Instruction> code_pop = std::make_shared<Instruction>(
 				protected_pop<std::shared_ptr<Code>>,
-				"CODE.POP");
+				"CODE.POP",
+				CODE);
 		env.exec_stack.push_back(code_pop);
 		env.exec_stack.push_back(stack.back());
 	}
@@ -188,10 +190,13 @@ inline unsigned code_do_range(Env& env) {
 
 			static auto do_range_insn = std::make_shared<Instruction>(
 					code_do_range,
-					"CODE.DO*RANGE");
+					"CODE.DO*RANGE",
+					CODE | EXEC | INT);
 			static auto quote_insn = std::make_shared<Instruction>(
 					code_quote,
-					"CODE.QUOTE");
+					"CODE.QUOTE",
+					CODE | EXEC,
+					1);
 
 			std::vector<std::shared_ptr<Code>> rcall{
 					std::make_shared<Literal<int>>(index),
@@ -220,10 +225,13 @@ inline unsigned code_do_count(Env& env) {
 
 		static auto do_range_insn = std::make_shared<Instruction>(
 				code_do_range,
-				"CODE.DO*RANGE");
+				"CODE.DO*RANGE",
+				CODE | EXEC | INT);
 		static auto quote_insn = std::make_shared<Instruction>(
 				code_quote,
-				"CODE.QUOTE");
+				"CODE.QUOTE",
+				CODE | EXEC,
+				1);
 
 		std::vector<std::shared_ptr<Code>> rcall{
 			std::make_shared<Literal<int>>(0),
@@ -246,13 +254,17 @@ inline unsigned code_do_times(Env& env) {
 
 		static auto do_range_insn = std::make_shared<Instruction>(
 				code_do_range,
-				"CODE.DO*RANGE");
+				"CODE.DO*RANGE",
+				CODE | EXEC | INT);
 		static auto quote_insn = std::make_shared<Instruction>(
 				code_quote,
-				"CODE.QUOTE");
+				"CODE.QUOTE",
+				CODE | EXEC,
+				1);
 		static auto int_pop = std::make_shared<Instruction>(
 				protected_pop<int>,
-				"INTEGER.POP");
+				"INTEGER.POP",
+				INT);
 
 		std::vector<std::shared_ptr<Code>> pop_code{int_pop, code};
 

@@ -1,4 +1,5 @@
-#include "instruction_set.h"
+#include "instruction.h"
+#include "instruction_manager.h"
 #include "bool_ops.h"
 #include "code_ops.h"
 #include "exec_ops.h"
@@ -8,7 +9,7 @@
 namespace cppush {
 
 // TODO(hopibel): should be InstructionManager that can load core insns and return subsets as vectors
-void InstructionSet::register_core() {
+void InstructionManager::register_core() {
 	// exec
 	register(exec_do_range, "EXEC.DO*RANGE", EXEC | INT, 1);
 	register(exec_do_count, "EXEC.DO*COUNT", EXEC | INT, 1);
