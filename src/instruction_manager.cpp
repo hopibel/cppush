@@ -6,142 +6,148 @@
 #include "numeric_ops.h"
 #include "common_ops.h"
 
+#include <map>
+
 namespace cppush {
 
 // TODO(hopibel): should be InstructionManager that can load core insns and return subsets as vectors
 void InstructionManager::register_core() {
 	// exec
-	register(exec_do_range, "EXEC.DO*RANGE", EXEC | INT, 1);
-	register(exec_do_count, "EXEC.DO*COUNT", EXEC | INT, 1);
-	register(exec_do_times, "EXEC.DO*TIMES", EXEC | INT, 1);
-	register(exec_if, "EXEC.IF", EXEC | BOOL, 2);
-	register(exec_k, "EXEC.K", EXEC, 2);
-	register(exec_s, "EXEC.S", EXEC, 3);
-	register(exec_y, "EXEC.Y", EXEC, 1);
+	register_op(exec_do_range, "EXEC.DO*RANGE", EXEC | INT, 1);
+	register_op(exec_do_count, "EXEC.DO*COUNT", EXEC | INT, 1);
+	register_op(exec_do_times, "EXEC.DO*TIMES", EXEC | INT, 1);
+	register_op(exec_if, "EXEC.IF", EXEC | BOOL, 2);
+	register_op(exec_k, "EXEC.K", EXEC, 2);
+	register_op(exec_s, "EXEC.S", EXEC, 3);
+	register_op(exec_y, "EXEC.Y", EXEC, 1);
 
 	// code
-	register(code_append, "CODE.APPEND", CODE);
-	register(code_atom, "CODE.ATOM", CODE);
-	register(code_car, "CODE.CAR", CODE);
-	register(code_cdr, "CODE.CDR", CODE);
-	register(code_cons, "CODE.CONS", CODE);
-	register(code_container, "CODE.CONTAINER", CODE);
-	register(code_contains, "CODE.CONTAINS", CODE | BOOL);
-	register(code_do, "CODE.DO", CODE | EXEC);
-	register(code_do_star, "CODE.DO*STAR", CODE | EXEC);
-	register(code_quote, "CODE.QUOTE", CODE | EXEC, 1);
-	register(code_do_range, "CODE.DO*RANGE", CODE | EXEC | INT);
-	register(code_do_count, "CODE.DO*COUNT", CODE | EXEC | INT);
-	register(code_do_times, "CODE.DO*TIMES", CODE | EXEC | INT);
-	register(code_extract, "CODE.EXTRACT", CODE | INT);
-	register(code_from_bool, "CODE.FROMBOOL", CODE | BOOL);
-	register(code_from_float, "CODE.FROMFLOAT", CODE | FLOAT);
-	register(code_from_int, "CODE.FROMINT", CODE | INT);
-	register(code_if, "CODE.IF", CODE | BOOL | EXEC);
-	register(code_insert, "CODE.INSERT", CODE | INT);
-	register(code_length, "CODE.LENGTH", CODE | INT);
-	register(code_list, "CODE.LIST", CODE);
-	register(code_member, "CODE.MEMBER", CODE | BOOL);
-	register(code_noop, "CODE.NOOP", 0);
-	register(code_nth, "CODE.NTH", CODE | INT);
-	register(code_nthcdr, "CODE.NTHCDR", CODE | INT);
-	register(code_null, "CODE.NULL", CODE | BOOL);
-	register(code_position, "CODE.POSITION", CODE | INT);
-	register(code_size, "CODE.SIZE", CODE | INT);
-	register(code_subst, "CODE.SUBST", CODE);
+	register_op(code_append, "CODE.APPEND", CODE);
+	register_op(code_atom, "CODE.ATOM", CODE);
+	register_op(code_car, "CODE.CAR", CODE);
+	register_op(code_cdr, "CODE.CDR", CODE);
+	register_op(code_cons, "CODE.CONS", CODE);
+	register_op(code_container, "CODE.CONTAINER", CODE);
+	register_op(code_contains, "CODE.CONTAINS", CODE | BOOL);
+	register_op(code_do, "CODE.DO", CODE | EXEC);
+	register_op(code_do_star, "CODE.DO*STAR", CODE | EXEC);
+	register_op(code_quote, "CODE.QUOTE", CODE | EXEC, 1);
+	register_op(code_do_range, "CODE.DO*RANGE", CODE | EXEC | INT);
+	register_op(code_do_count, "CODE.DO*COUNT", CODE | EXEC | INT);
+	register_op(code_do_times, "CODE.DO*TIMES", CODE | EXEC | INT);
+	register_op(code_extract, "CODE.EXTRACT", CODE | INT);
+	register_op(code_from_bool, "CODE.FROMBOOL", CODE | BOOL);
+	register_op(code_from_float, "CODE.FROMFLOAT", CODE | FLOAT);
+	register_op(code_from_int, "CODE.FROMINT", CODE | INT);
+	register_op(code_if, "CODE.IF", CODE | BOOL | EXEC);
+	register_op(code_insert, "CODE.INSERT", CODE | INT);
+	register_op(code_length, "CODE.LENGTH", CODE | INT);
+	register_op(code_list, "CODE.LIST", CODE);
+	register_op(code_member, "CODE.MEMBER", CODE | BOOL);
+	register_op(code_noop, "CODE.NOOP", 0);
+	register_op(code_nth, "CODE.NTH", CODE | INT);
+	register_op(code_nthcdr, "CODE.NTHCDR", CODE | INT);
+	register_op(code_null, "CODE.NULL", CODE | BOOL);
+	register_op(code_position, "CODE.POSITION", CODE | INT);
+	register_op(code_size, "CODE.SIZE", CODE | INT);
+	register_op(code_subst, "CODE.SUBST", CODE);
 
 	// bool
-	register(and_, "BOOLEAN.AND", BOOL);
-	register(or_, "BOOLEAN.OR", BOOL);
-	register(not_, "BOOLEAN.NOT", BOOL);
-	register(nand_, "BOOLEAN.NAND", BOOL);
-	register(nor_, "BOOLEAN.NOR", BOOL);
-	register(xor_, "BOOLEAN.XOR", BOOL);
-	register(invert_first_then_and, "BOOLEAN.INVERT_FIRST_THEN_AND", BOOL);
-	register(invert_second_then_and, "BOOLEAN.INVERT_SECOND_THEN_AND", BOOL);
-	register(bool_from_int, "BOOLEAN.FROMINT", BOOL | INT);
-	register(bool_from_float, "BOOLEAN.FROMFLOAT", BOOL | FLOAT);
+	register_op(and_, "BOOLEAN.AND", BOOL);
+	register_op(or_, "BOOLEAN.OR", BOOL);
+	register_op(not_, "BOOLEAN.NOT", BOOL);
+	register_op(nand_, "BOOLEAN.NAND", BOOL);
+	register_op(nor_, "BOOLEAN.NOR", BOOL);
+	register_op(xor_, "BOOLEAN.XOR", BOOL);
+	register_op(invert_first_then_and, "BOOLEAN.INVERT_FIRST_THEN_AND", BOOL);
+	register_op(invert_second_then_and, "BOOLEAN.INVERT_SECOND_THEN_AND", BOOL);
+	register_op(bool_from_int, "BOOLEAN.FROMINT", BOOL | INT);
+	register_op(bool_from_float, "BOOLEAN.FROMFLOAT", BOOL | FLOAT);
 
 	// int
-	register(add, "INTEGER.+", INT);
-	register(sub, "INTEGER.-", INT);
-	register(mul, "INTEGER.*", INT);
-	register(div, "INTEGER./", INT);
-	register(int_mod, "INTEGER.%", INT);
-	register(less_than, "INTEGER.<", INT | BOOL);
-	register(greater_than, "INTEGER.>", INT | BOOL);
-	register(int_from_bool, "INTEGER.FROMBOOLEAN", INT | BOOL);
-	register(int_from_float, "INTEGER.FROMFLOAT", INT | FLOAT);
-	register(max, "INTEGER.MAX", INT);
-	register(min, "INTEGER.MIN", INT);
+	register_op(add<int>, "INTEGER.+", INT);
+	register_op(sub<int>, "INTEGER.-", INT);
+	register_op(mul<int>, "INTEGER.*", INT);
+	register_op(div<int>, "INTEGER./", INT);
+	register_op(int_mod, "INTEGER.%", INT);
+	register_op(less_than<int>, "INTEGER.<", INT | BOOL);
+	register_op(greater_than<int>, "INTEGER.>", INT | BOOL);
+	register_op(int_from_bool, "INTEGER.FROMBOOLEAN", INT | BOOL);
+	register_op(int_from_float, "INTEGER.FROMFLOAT", INT | FLOAT);
+	register_op(max<int>, "INTEGER.MAX", INT);
+	register_op(min<int>, "INTEGER.MIN", INT);
 
-	// float
-	register(add<double>, "FLOAT.+", FLOAT);
-	register(sub<double>, "FLOAT.-", FLOAT);
-	register(mul<double>, "FLOAT.*", FLOAT);
-	register(div<double>, "FLOAT./", FLOAT);
-	register(float_mod, "FLOAT.%", FLOAT);
-	register(less_than<double>, "FLOAT.<", FLOAT | BOOL);
-	register(greater_than<double>, "FLOAT.>", FLOAT | BOOL);
-	register(float_from_bool, "FLOAT.FROMBOOLEAN", FLOAT | BOOL);
-	register(float_from_int, "FLOAT.FROMINTEGER", FLOAT | INT);
-	register(max<double>, "FLOAT.MAX", FLOAT);
-	register(min<double>, "FLOAT.MIN", FLOAT);
-	register(trig_cos, "FLOAT.COS", FLOAT);
-	register(trig_sin, "FLOAT.SIN", FLOAT);
-	register(trig_tan, "FLOAT.TAN", FLOAT);
+	// float_op
+	register_op(add<double>, "FLOAT.+", FLOAT);
+	register_op(sub<double>, "FLOAT.-", FLOAT);
+	register_op(mul<double>, "FLOAT.*", FLOAT);
+	register_op(div<double>, "FLOAT./", FLOAT);
+	register_op(float_mod, "FLOAT.%", FLOAT);
+	register_op(less_than<double>, "FLOAT.<", FLOAT | BOOL);
+	register_op(greater_than<double>, "FLOAT.>", FLOAT | BOOL);
+	register_op(float_from_bool, "FLOAT.FROMBOOLEAN", FLOAT | BOOL);
+	register_op(float_from_int, "FLOAT.FROMINTEGER", FLOAT | INT);
+	register_op(max<double>, "FLOAT.MAX", FLOAT);
+	register_op(min<double>, "FLOAT.MIN", FLOAT);
+	register_op(trig_cos, "FLOAT.COS", FLOAT);
+	register_op(trig_sin, "FLOAT.SIN", FLOAT);
+	register_op(trig_tan, "FLOAT.TAN", FLOAT);
 
-	// common
-	register(equal<std::shared_ptr<Code>>, "CODE.=", CODE | BOOL);
-	register(equal<int>, "INTEGER.=", INT | BOOL);
-	register(equal<double>, "FLOAT.=", FLOAT | BOOL);
-	register(equal<bool>, "BOOLEAN.=", BOOL);
-	register(exec_equal, "EXEC.=", EXEC | BOOL);
-	register(protected_pop<std::shared_ptr<Code>>, "CODE.POP", CODE);
-	register(protected_pop<int>, "INTEGER.POP", INT);
-	register(protected_pop<double>, "FLOAT.POP", FLOAT);
-	register(protected_pop<bool>, "BOOLEAN.POP", BOOL);
-	register(protected_exec_pop, "EXEC.POP", EXEC, 1);
-	register(dup<std::shared_ptr<Code>>, "CODE.DUP", CODE);
-	register(dup<int>, "INTEGER.DUP", INT);
-	register(dup<double>, "FLOAT.DUP", FLOAT);
-	register(dup<bool>, "BOOLEAN.DUP", BOOL);
-	register(exec_dup, "EXEC.DUP", EXEC, 1);
-	register(flush<std::shared_ptr<Code>>, "CODE.FLUSH", CODE);
-	register(flush<int>, "INTEGER.FLUSH", INT);
-	register(flush<double>, "FLOAT.FLUSH", FLOAT);
-	register(flush<bool>, "BOOLEAN.FLUSH". BOOL);
-	register(exec_flush, "EXEC.FLUSH", EXEC);
-	register(rot<std::shared_ptr<Code>>, "CODE.ROT", CODE);
-	register(rot<int>, "INTEGER.ROT", INT);
-	register(rot<double>, "FLOAT.ROT", FLOAT);
-	register(rot<bool>, "BOOLEAN.ROT", BOOL);
-	register(exec_rot, "EXEC.ROT", EXEC, 3);
-	register(shove<std::shared_ptr<Code>>, "CODE.SHOVE", CODE | INT);
-	register(shove<int>, "INTEGER.SHOVE", INT);
-	register(shove<double>, "FLOAT.SHOVE", FLOAT | INT);
-	register(shove<bool>, "BOOLEAN.SHOVE", BOOL | INT);
-	register(exec_shove, "EXEC.SHOVE", EXEC | INT, 1);
-	register(stackdepth<std::shared_ptr<Code>>, "CODE.STACKDEPTH", CODE | INT);
-	register(stackdepth<int>, "INTEGER.STACKDEPTH", INT);
-	register(stackdepth<double>, "FLOAT.STACKDEPTH", FLOAT | INT);
-	register(stackdepth<bool>, "BOOLEAN.STACKDEPTH", BOOL | INT);
-	register(exec_stackdepth, "EXEC.STACKDEPTH", EXEC | INT);
-	register(swap<std::shared_ptr<Code>>, "CODE.SWAP", CODE);
-	register(swap<int>, "INTEGER.SWAP", INT);
-	register(swap<double>, "FLOAT.SWAP", FLOAT);
-	register(swap<bool>, "BOOLEAN.SWAP", BOOL);
-	register(exec_swap, "EXEC.SWAP", EXEC, 2);
-	register(yank<std::shared_ptr<Code>>, "CODE.YANK", CODE | INT);
-	register(yank<int>, "INTEGER.YANK", INT);
-	register(yank<double>, "FLOAT.YANK", FLOAT | INT);
-	register(yank<bool>, "BOOLEAN.YANK", BOOL | INT);
-	register(exec_yank, "EXEC.YANK", EXEC | INT);
-	register(yankdup<std::shared_ptr<Code>>, "CODE.YANKDUP", CODE | INT);
-	register(yankdup<int>, "INTEGER.YANKDUP", INT);
-	register(yankdup<double>, "FLOAT.YANKDUP", FLOAT | INT);
-	register(yankdup<bool>, "BOOLEAN.YANKDUP", BOOL | INT);
-	register(exec_yankdup, "EXEC.YANKDUP", EXEC | INT);
+	// commo_opn
+	register_op(equal<std::shared_ptr<Code>>, "CODE.=", CODE | BOOL);
+	register_op(equal<int>, "INTEGER.=", INT | BOOL);
+	register_op(equal<double>, "FLOAT.=", FLOAT | BOOL);
+	register_op(equal<bool>, "BOOLEAN.=", BOOL);
+	register_op(exec_equal, "EXEC.=", EXEC | BOOL);
+	register_op(protected_pop<std::shared_ptr<Code>>, "CODE.POP", CODE);
+	register_op(protected_pop<int>, "INTEGER.POP", INT);
+	register_op(protected_pop<double>, "FLOAT.POP", FLOAT);
+	register_op(protected_pop<bool>, "BOOLEAN.POP", BOOL);
+	register_op(protected_exec_pop, "EXEC.POP", EXEC, 1);
+	register_op(dup<std::shared_ptr<Code>>, "CODE.DUP", CODE);
+	register_op(dup<int>, "INTEGER.DUP", INT);
+	register_op(dup<double>, "FLOAT.DUP", FLOAT);
+	register_op(dup<bool>, "BOOLEAN.DUP", BOOL);
+	register_op(exec_dup, "EXEC.DUP", EXEC, 1);
+	register_op(flush<std::shared_ptr<Code>>, "CODE.FLUSH", CODE);
+	register_op(flush<int>, "INTEGER.FLUSH", INT);
+	register_op(flush<double>, "FLOAT.FLUSH", FLOAT);
+	register_op(flush<bool>, "BOOLEAN.FLUSH", BOOL);
+	register_op(exec_flush, "EXEC.FLUSH", EXEC);
+	register_op(rot<std::shared_ptr<Code>>, "CODE.ROT", CODE);
+	register_op(rot<int>, "INTEGER.ROT", INT);
+	register_op(rot<double>, "FLOAT.ROT", FLOAT);
+	register_op(rot<bool>, "BOOLEAN.ROT", BOOL);
+	register_op(exec_rot, "EXEC.ROT", EXEC, 3);
+	register_op(shove<std::shared_ptr<Code>>, "CODE.SHOVE", CODE | INT);
+	register_op(shove<int>, "INTEGER.SHOVE", INT);
+	register_op(shove<double>, "FLOAT.SHOVE", FLOAT | INT);
+	register_op(shove<bool>, "BOOLEAN.SHOVE", BOOL | INT);
+	register_op(exec_shove, "EXEC.SHOVE", EXEC | INT, 1);
+	register_op(stackdepth<std::shared_ptr<Code>>, "CODE.STACKDEPTH", CODE | INT);
+	register_op(stackdepth<int>, "INTEGER.STACKDEPTH", INT);
+	register_op(stackdepth<double>, "FLOAT.STACKDEPTH", FLOAT | INT);
+	register_op(stackdepth<bool>, "BOOLEAN.STACKDEPTH", BOOL | INT);
+	register_op(exec_stackdepth, "EXEC.STACKDEPTH", EXEC | INT);
+	register_op(swap<std::shared_ptr<Code>>, "CODE.SWAP", CODE);
+	register_op(swap<int>, "INTEGER.SWAP", INT);
+	register_op(swap<double>, "FLOAT.SWAP", FLOAT);
+	register_op(swap<bool>, "BOOLEAN.SWAP", BOOL);
+	register_op(exec_swap, "EXEC.SWAP", EXEC, 2);
+	register_op(yank<std::shared_ptr<Code>>, "CODE.YANK", CODE | INT);
+	register_op(yank<int>, "INTEGER.YANK", INT);
+	register_op(yank<double>, "FLOAT.YANK", FLOAT | INT);
+	register_op(yank<bool>, "BOOLEAN.YANK", BOOL | INT);
+	register_op(exec_yank, "EXEC.YANK", EXEC | INT);
+	register_op(yankdup<std::shared_ptr<Code>>, "CODE.YANKDUP", CODE | INT);
+	register_op(yankdup<int>, "INTEGER.YANKDUP", INT);
+	register_op(yankdup<double>, "FLOAT.YANKDUP", FLOAT | INT);
+	register_op(yankdup<bool>, "BOOLEAN.YANKDUP", BOOL | INT);
+	register_op(exec_yankdup, "EXEC.YANKDUP", EXEC | INT);
+}
+
+void InstructionManager::register_op(unsigned (*op)(Env&), std::string name, int typemask, unsigned parens) {
+	insns_[name] = std::make_shared<Instruction>(op, name, typemask, parens);
 }
 
 } // cppush

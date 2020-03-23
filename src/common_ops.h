@@ -11,10 +11,6 @@ inline unsigned equal(Env& env) {
 		auto first = pop<T>(env);
 		auto second = pop<T>(env);
 		get_stack<bool>(env).push_back(first == second);
-
-		int fsize = first->size();
-		int ssize = second->size();
-		return fsize < ssize ? fsize : ssize;
 	}
 	return 1;
 }
@@ -108,9 +104,9 @@ inline unsigned rot(Env& env) {
 inline unsigned exec_rot(Env& env) {
 	auto& stack = get_exec_stack(env);
 	if (stack.size() >= 3) {
-		auto first = pop<T>(env);
-		auto second = pop<T>(env);
-		auto third = pop<T>(env);
+		auto first = pop_exec(env);
+		auto second = pop_exec(env);
+		auto third = pop_exec(env);
 
 		stack.push_back(second);
 		stack.push_back(first);

@@ -98,7 +98,7 @@ inline unsigned exec_do_times(Env& env) {
 		std::vector<std::shared_ptr<Code>> rcall{
 				std::make_shared<Literal<int>>(0),
 				std::make_shared<Literal<int>>(count),
-				do_range_insn, pop_code
+				do_range_insn, std::make_shared<CodeList>(pop_code)
 		};
 
 		get_exec_stack(env).push_back(std::make_shared<CodeList>(rcall));
@@ -154,7 +154,7 @@ inline unsigned exec_y(Env& env) {
 				1);
 
 		std::vector<std::shared_ptr<Code>> rcall{y_insn, first};
-		get_exec_stack(env).push_back(rcall);
+		get_exec_stack(env).push_back(std::make_shared<CodeList>(rcall));
 		get_exec_stack(env).push_back(first);
 	}
 	return 1;

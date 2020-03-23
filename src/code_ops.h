@@ -5,6 +5,7 @@
 #include "common_ops.h"
 #include "env.h"
 #include "instruction.h"
+#include "literal.h"
 
 #include <algorithm>
 #include <memory>
@@ -28,7 +29,7 @@ inline unsigned code_append(Env& env) {
 		}
 
 		second_stack.insert(second_stack.end(), first_stack.begin(), first_stack.end());
-		stack.push_back(CodeList(second_stack));
+		stack.push_back(std::make_shared<CodeList>(second_stack));
 
 		return first_stack.size();
 	}
@@ -50,7 +51,7 @@ inline unsigned code_car(Env& env) {
 		auto first = stack.back();
 
 		if (!first->get_stack().empty()) {
-			stack.back() = top->get_stack().front();
+			stack.back() = first->get_stack().front();
 		}
 	}
 	return 1;
@@ -64,14 +65,15 @@ inline unsigned code_cdr(Env& env) {
 		if (!top_stack.empty()) {
 			top_stack.erase(top_stack.begin());
 		}
-		stack.back() = CodeList(top_stack);
+		stack.back() = std::make_shared<CodeList>(top_stack);
 	}
 	return 1;
 }
 
 // prepend second item on stack to first. if second is a list, don't expand
 inline unsigned code_cons(Env& env) {
-	if (get_stack<std::shared_ptr<Code>>(env).size() >= 2) {
+	auto& stack = get_stack<std::shared_ptr<Code>>(env);
+	if (stack.size() >= 2) {
 		auto first = pop<std::shared_ptr<Code>>(env);
 		auto second = pop<std::shared_ptr<Code>>(env);
 
@@ -83,7 +85,7 @@ inline unsigned code_cons(Env& env) {
 			first_stack.push_back(first);
 		}
 
-		get_stack<std::shared_ptr<Code>>(env).push_back(CodeList(first_stack));
+		stack.push_back(std::make_shared<CodeList>(first_stack));
 	}
 	return 1;
 }
@@ -108,7 +110,7 @@ std::shared_ptr<Code> find_container(std::shared_ptr<Code> tree, std::shared_ptr
 	}
 
 	// no match. return empty list
-	return CodeList();
+	return std::make_shared<CodeList>();
 	}
 
 bool contains(const std::shared_ptr<Code> tree, const std::shared_ptr<Code> subtree) {
@@ -213,7 +215,7 @@ inline unsigned code_do_range(Env& env) {
 
 inline unsigned code_do_count(Env& env) {
 	auto code_stack_size = get_stack<std::shared_ptr<Code>>(env).size();
-	auto int_stack.size = get_stack<int>(env).size();
+	auto int_stack_size = get_stack<int>(env).size();
 
 	if (code_stack_size > 0 && int_stack_size > 0) {
 		int count = pop<int>(env);
@@ -271,7 +273,7 @@ inline unsigned code_do_times(Env& env) {
 		std::vector<std::shared_ptr<Code>> rcall{
 			std::make_shared<Literal<int>>(0),
 			std::make_shared<Literal<int>>(count),
-			quote_insn, pop_code, do_range_insn
+			quote_insn, std::make_shared<CodeList>(pop_code), do_range_insn
 		};
 
 		get_exec_stack(env).push_back(std::make_shared<CodeList>(rcall));
@@ -295,6 +297,9 @@ std::shared_ptr<Code> extract_recursive(std::shared_ptr<Code> code, int index) {
 		}
 		index -= el->size();
 	}
+
+	// shouldn't reach
+	return code;
 }
 
 }
@@ -371,6 +376,9 @@ std::shared_ptr<Code> insert_recursive(std::shared_ptr<Code> code, std::shared_p
 		}
 		index -= stack[i]->size();
 	}
+
+	// shouldn't reach
+	return subtree;
 }
 
 }
@@ -459,8 +467,8 @@ inline unsigned code_nthcdr(Env& env) {
 			auto code_list = pop<std::shared_ptr<Code>>(env)->get_stack();
 			int index = pop<int>(env);
 			index = (index < 0 ? -index : index) % code_list.size();
-			stack.push_back(std::make_shared<CodeList>(
-						code_list.erase(code_list.begin(), code_list.begin() + index)));
+			code_list.erase(code_list.begin(), code_list.begin() + index);
+			stack.push_back(std::make_shared<CodeList>(code_list));
 
 			return code_list.size();
 		}
@@ -471,7 +479,7 @@ inline unsigned code_nthcdr(Env& env) {
 inline unsigned code_null(Env& env) {
 	if (get_stack<std::shared_ptr<Code>>(env).size() > 0) {
 		auto code = pop<std::shared_ptr<Code>>(env);
-		if (code->is_list() && code->get_stack.empty()) {
+		if (code->is_list() && code->get_stack().empty()) {
 			get_stack<bool>(env).push_back(true);
 		} else {
 			get_stack<bool>(env).push_back(false);

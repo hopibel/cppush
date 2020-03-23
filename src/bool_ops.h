@@ -6,7 +6,7 @@
 namespace cppush {
 
 inline unsigned and_(Env& env) {
-	auto stack& = get_stack<bool>(env);
+	auto& stack = get_stack<bool>(env);
 	if (stack.size() >= 2) {
 		bool top = pop<bool>(env);
 		stack.back() = stack.back() && top;
@@ -15,7 +15,7 @@ inline unsigned and_(Env& env) {
 }
 
 inline unsigned or_(Env& env) {
-	auto stack& = get_stack<bool>(env);
+	auto& stack = get_stack<bool>(env);
 	if (stack.size() >= 2) {
 		bool top = pop<bool>(env);
 		stack.back() = stack.back() || top;
@@ -24,7 +24,7 @@ inline unsigned or_(Env& env) {
 }
 
 inline unsigned not_(Env& env) {
-	auto stack& = get_stack<bool>(env);
+	auto& stack = get_stack<bool>(env);
 	if (stack.size() > 0) {
 		stack.back() = !stack.back();
 	}
@@ -32,7 +32,7 @@ inline unsigned not_(Env& env) {
 }
 
 inline unsigned nand_(Env& env) {
-	auto stack& = get_stack<bool>(env);
+	auto& stack = get_stack<bool>(env);
 	if (stack.size() >= 2) {
 		bool top = pop<bool>(env);
 		stack.back() = !(stack.back() && top);
@@ -41,7 +41,7 @@ inline unsigned nand_(Env& env) {
 }
 
 inline unsigned nor_(Env& env) {
-	auto stack& = get_stack<bool>(env);
+	auto& stack = get_stack<bool>(env);
 	if (stack.size() >= 2) {
 		bool top = pop<bool>(env);
 		stack.back() = !(stack.back() || top);
@@ -50,7 +50,7 @@ inline unsigned nor_(Env& env) {
 }
 
 inline unsigned xor_(Env& env) {
-	auto stack& = get_stack<bool>(env);
+	auto& stack = get_stack<bool>(env);
 	if (stack.size() >= 2) {
 		bool top = pop<bool>(env);
 		stack.back() = stack.back() != top;
@@ -59,7 +59,7 @@ inline unsigned xor_(Env& env) {
 }
 
 inline unsigned invert_first_then_and(Env& env) {
-	auto stack& = get_stack<bool>(env);
+	auto& stack = get_stack<bool>(env);
 	if (stack.size() >= 2) {
 		bool top = pop<bool>(env);
 		stack.back() = stack.back() && ~top;
@@ -68,7 +68,7 @@ inline unsigned invert_first_then_and(Env& env) {
 }
 
 inline unsigned invert_second_then_and(Env& env) {
-	auto stack& = get_stack<bool>(env);
+	auto& stack = get_stack<bool>(env);
 	if (stack.size() >= 2) {
 		bool top = pop<bool>(env);
 		stack.back() = ~stack.back() && top;

@@ -19,7 +19,7 @@ int main(void) {
 	cppush::Env env;
 
 	std::shared_ptr<cppush::Instruction> noop = std::make_shared<cppush::Instruction>(
-			cppush::sub<int>, "INTEGER.-", INT);
+			cppush::sub<int>, "INTEGER.-", cppush::INT);
 	std::vector<std::shared_ptr<cppush::Code>> code_block;
 
 	code_block.push_back(noop);
@@ -42,7 +42,7 @@ int main(void) {
 	std::cout << "\n";
 
 	std::shared_ptr<cppush::Instruction> sub2 = std::make_shared<cppush::Instruction>(
-			cppush::sub<int>, "INTEGER.-", INT);
+			cppush::sub<int>, "INTEGER.-", cppush::INT);
 	std::cout << (*sub2 == *noop ? "equal" : "not equal") << "\n";
 
 	return 0;
