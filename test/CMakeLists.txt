@@ -1,4 +1,10 @@
+find_package(Catch2 REQUIRED)
+
 add_executable(cppush_test
-	main.cpp
+	test_main.cpp
+	bool_ops_test.cpp
 )
-target_link_libraries(cppush_test PUBLIC cppush)
+target_link_libraries(cppush_test cppush Catch2::Catch2)
+
+include(Catch)
+catch_discover_tests(cppush_test)

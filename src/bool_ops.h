@@ -62,7 +62,7 @@ inline unsigned invert_first_then_and(Env& env) {
 	auto& stack = get_stack<bool>(env);
 	if (stack.size() >= 2) {
 		bool top = pop<bool>(env);
-		stack.back() = stack.back() && ~top;
+		stack.back() = stack.back() && !top;
 	}
 	return 1;
 }
@@ -71,7 +71,7 @@ inline unsigned invert_second_then_and(Env& env) {
 	auto& stack = get_stack<bool>(env);
 	if (stack.size() >= 2) {
 		bool top = pop<bool>(env);
-		stack.back() = ~stack.back() && top;
+		stack.back() = !stack.back() && top;
 	}
 	return 1;
 }
