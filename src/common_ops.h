@@ -120,7 +120,7 @@ inline unsigned shove(Env& env) {
 	auto& stack = get_stack<T>(env);
 	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
 		int index = pop<int>(env);
-		index = index < 0 ? 0 : (index >= stack.size() ? stack.size()-1 : index);
+		index = index < 0 ? 0 : (static_cast<size_t>(index) >= stack.size() ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 		stack.insert(stack.begin() + index, pop<T>(env));
 
@@ -133,7 +133,7 @@ inline unsigned exec_shove(Env& env) {
 	auto& stack = get_exec_stack(env);
 	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
 		int index = pop<int>(env);
-		index = index < 0 ? 0 : (index >= stack.size() ? stack.size()-1 : index);
+		index = index < 0 ? 0 : (static_cast<size_t>(index) >= stack.size() ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 		stack.insert(stack.begin() + index, pop_exec(env));
 
@@ -179,9 +179,9 @@ inline unsigned exec_swap(Env& env) {
 template <typename T>
 inline unsigned yank(Env& env) {
 	auto& stack = get_stack<T>(env);
-	if (stack.size() >= 0 && get_stack<int>(env).size() > 0) {
+	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
 		int index = pop<int>(env);
-		index = index < 0 ? 0 : (index >= stack.size() ? stack.size()-1 : index);
+		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 
 		auto value = stack[index];
@@ -195,9 +195,9 @@ inline unsigned yank(Env& env) {
 
 inline unsigned exec_yank(Env& env) {
 	auto& stack = get_exec_stack(env);
-	if (stack.size() >= 0 && get_stack<int>(env).size() > 0) {
+	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
 		int index = pop<int>(env);
-		index = index < 0 ? 0 : (index >= stack.size() ? stack.size()-1 : index);
+		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) <= index ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 
 		auto value = stack[index];
@@ -214,7 +214,7 @@ inline unsigned yankdup(Env& env) {
 	auto& stack = get_stack<T>(env);
 	if (stack.size() >= 0 && get_stack<int>(env).size() > 0) {
 		int index = pop<int>(env);
-		index = index < 0 ? 0 : (index >= stack.size() ? stack.size()-1 : index);
+		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 
 		stack.push_back(stack[index]);
@@ -224,9 +224,9 @@ inline unsigned yankdup(Env& env) {
 
 inline unsigned exec_yankdup(Env& env) {
 	auto& stack = get_exec_stack(env);
-	if (stack.size() >= 0 && get_stack<int>(env).size() > 0) {
+	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
 		int index = pop<int>(env);
-		index = index < 0 ? 0 : (index >= stack.size() ? stack.size()-1 : index);
+		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 
 		stack.push_back(stack[index]);

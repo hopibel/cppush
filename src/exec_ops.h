@@ -2,8 +2,10 @@
 #define EXEC_OPS_H
 
 #include "code.h"
+#include "common_ops.h"
 #include "env.h"
 #include "instruction.h"
+#include "literal.h"
 
 #include <memory>
 #include <vector>
@@ -46,13 +48,9 @@ inline unsigned exec_do_count(Env& env) {
 	auto exec_stack_size = get_exec_stack(env).size();
 	auto int_stack_size = get_stack<int>(env).size();
 
-	if (exec_stack_size > 0 && int_stack_size > 0) {
+	if (exec_stack_size > 0 && int_stack_size > 0 && get_stack<int>(env).back() > 0) {
 		int count = pop<int>(env);
 		auto code = pop_exec(env);
-
-		if (count <= 0) {
-			return 1;
-		}
 
 		static auto do_range_insn = std::make_shared<Instruction>(
 				exec_do_range,
@@ -62,7 +60,7 @@ inline unsigned exec_do_count(Env& env) {
 
 		std::vector<std::shared_ptr<Code>> rcall{
 				std::make_shared<Literal<int>>(0),
-				std::make_shared<Literal<int>>(count),
+				std::make_shared<Literal<int>>(count - 1),
 				do_range_insn, code
 		};
 
@@ -75,13 +73,9 @@ inline unsigned exec_do_times(Env& env) {
 	auto exec_stack_size = get_exec_stack(env).size();
 	auto int_stack_size = get_stack<int>(env).size();
 
-	if (exec_stack_size > 0 && int_stack_size > 0) {
-		int count = pop<int>(env);
+	if (exec_stack_size > 0 && int_stack_size > 0 && get_stack<int>(env).back() > 0) {
+		int times = pop<int>(env);
 		auto code = pop_exec(env);
-
-		if (count <= 0) {
-			return 1;
-		}
 
 		static auto do_range_insn = std::make_shared<Instruction>(
 				exec_do_range,
@@ -97,7 +91,7 @@ inline unsigned exec_do_times(Env& env) {
 
 		std::vector<std::shared_ptr<Code>> rcall{
 				std::make_shared<Literal<int>>(0),
-				std::make_shared<Literal<int>>(count),
+				std::make_shared<Literal<int>>(times - 1),
 				do_range_insn, std::make_shared<CodeList>(pop_code)
 		};
 
