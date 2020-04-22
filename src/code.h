@@ -1,6 +1,7 @@
 #ifndef CODE_H
 #define CODE_H
 
+#include <initializer_list>
 #include <memory>
 #include <string>
 #include <vector>

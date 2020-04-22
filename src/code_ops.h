@@ -8,6 +8,7 @@
 #include "literal.h"
 
 #include <algorithm>
+#include <cmath>
 #include <memory>
 
 namespace cppush {
@@ -18,6 +19,7 @@ inline unsigned code_append(Env& env) {
 		auto first = pop<std::shared_ptr<Code>>(env);
 		auto second = pop<std::shared_ptr<Code>>(env);
 
+		// important! copy, not reference
 		auto first_stack = first->get_stack();
 		if (first->is_atom()) {
 			first_stack.push_back(first);
@@ -217,13 +219,9 @@ inline unsigned code_do_count(Env& env) {
 	auto code_stack_size = get_stack<std::shared_ptr<Code>>(env).size();
 	auto int_stack_size = get_stack<int>(env).size();
 
-	if (code_stack_size > 0 && int_stack_size > 0) {
+	if (code_stack_size > 0 && int_stack_size > 0 && get_stack<int>(env).back() > 0) {
 		int count = pop<int>(env);
 		auto code = pop<std::shared_ptr<Code>>(env);
-
-		if (count <= 0) {
-			return 1;
-		}
 
 		static auto do_range_insn = std::make_shared<Instruction>(
 				code_do_range,
@@ -237,7 +235,7 @@ inline unsigned code_do_count(Env& env) {
 
 		std::vector<std::shared_ptr<Code>> rcall{
 			std::make_shared<Literal<int>>(0),
-			std::make_shared<Literal<int>>(count),
+			std::make_shared<Literal<int>>(count - 1),
 			quote_insn, code, do_range_insn
 		};
 
@@ -251,7 +249,7 @@ inline unsigned code_do_times(Env& env) {
 	auto& int_stack = get_stack<int>(env);
 
 	if (code_stack.size() > 0 && int_stack.size() > 0 && int_stack.back() > 0) {
-		int count = pop<int>(env);
+		int times = pop<int>(env);
 		auto code = pop<std::shared_ptr<Code>>(env);
 
 		static auto do_range_insn = std::make_shared<Instruction>(
@@ -272,7 +270,7 @@ inline unsigned code_do_times(Env& env) {
 
 		std::vector<std::shared_ptr<Code>> rcall{
 			std::make_shared<Literal<int>>(0),
-			std::make_shared<Literal<int>>(count),
+			std::make_shared<Literal<int>>(times - 1),
 			quote_insn, std::make_shared<CodeList>(pop_code), do_range_insn
 		};
 
@@ -292,7 +290,7 @@ std::shared_ptr<Code> extract_recursive(std::shared_ptr<Code> code, int index) {
 	index -= 1;
 	const auto& stack = code->get_stack();
 	for (auto el : stack) {
-		if (index < el->size()) {
+		if (index < static_cast<int>(el->size())) {
 			return extract_recursive(el, index);
 		}
 		index -= el->size();
@@ -310,7 +308,7 @@ inline unsigned code_extract(Env& env) {
 		auto code = code_stack.back();
 		auto index = pop<int>(env);
 
-		index = (index < 0 ? -index : index) % code->size(); // restrict to reasonable range
+		index = std::abs(index) % code->size(); // restrict to reasonable range
 		if (index == 0) { // no need to change code stack
 			return 1;
 		}
@@ -361,6 +359,7 @@ inline unsigned code_if(Env& env) {
 
 namespace detail {
 
+// insert subtree into code at index (based on depth-first traversal)
 std::shared_ptr<Code> insert_recursive(std::shared_ptr<Code> code, std::shared_ptr<Code> subtree, int index) {
 	if (index == 0) {
 		return subtree;
@@ -368,8 +367,8 @@ std::shared_ptr<Code> insert_recursive(std::shared_ptr<Code> code, std::shared_p
 	index -= 1;
 
 	auto stack = code->get_stack();
-	for (int i = 0; i < stack.size(); ++i) {
-		if (index < stack[i]->size()) {
+	for (int i = 0; i < static_cast<int>(stack.size()); ++i) {
+		if (index < static_cast<int>(stack[i]->size())) {
 			auto new_code = insert_recursive(stack[i], subtree, index);
 			stack[i] = new_code;
 			return std::make_shared<CodeList>(stack);
@@ -390,7 +389,7 @@ inline unsigned code_insert(Env& env) {
 		auto second = pop<std::shared_ptr<Code>>(env);
 		int index = pop<int>(env);
 
-		index = (index < 0 ? -index : index) % first->size();
+		index = std::abs(index) % first->size();
 		auto result = detail::insert_recursive(first, second, index);
 
 		stack.push_back(result);
@@ -443,15 +442,15 @@ inline unsigned code_member(Env& env) {
 	return 1;
 }
 
-inline unsigned code_noop(Env& env) {return 1;}
+inline unsigned code_noop(Env&) {return 1;}
 
 inline unsigned code_nth(Env& env) {
 	auto& stack = get_stack<std::shared_ptr<Code>>(env);
 	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
+		int index = pop<int>(env);
 		if (!stack.back()->get_stack().empty()) {
 			auto code_list = pop<std::shared_ptr<Code>>(env)->get_stack();
-			int index = pop<int>(env);
-			index = (index < 0 ? -index : index) % code_list.size();
+			index = std::abs(index) % code_list.size();
 			stack.push_back(code_list[index]);
 
 			return code_list.size();
@@ -463,10 +462,10 @@ inline unsigned code_nth(Env& env) {
 inline unsigned code_nthcdr(Env& env) {
 	auto& stack = get_stack<std::shared_ptr<Code>>(env);
 	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
+		int index = pop<int>(env);
 		if (!stack.back()->get_stack().empty()) {
 			auto code_list = pop<std::shared_ptr<Code>>(env)->get_stack();
-			int index = pop<int>(env);
-			index = (index < 0 ? -index : index) % code_list.size();
+			index = std::abs(index) % code_list.size();
 			code_list.erase(code_list.begin(), code_list.begin() + index);
 			stack.push_back(std::make_shared<CodeList>(code_list));
 
@@ -496,17 +495,18 @@ inline unsigned code_position(Env& env) {
 
 		if (stack.empty()) {
 			get_stack<int>(env).push_back(*first == *second ? 0 : -1);
+			return 1;
 		}
 
-		for (int i = 0; i < stack.size(); ++i) {
+		for (int i = 0; i < static_cast<int>(stack.size()); ++i) {
 			if (*stack[i] == *second) {
 				get_stack<int>(env).push_back(i);
-				return stack.size() * second->get_stack().size();
+				return stack.size() * second->size();
 			}
 		}
 
 		get_stack<int>(env).push_back(-1);
-		return stack.size() * second->get_stack().size();
+		return stack.size() * second->size();
 	}
 	return 1;
 }
@@ -515,7 +515,6 @@ inline unsigned code_size(Env& env) {
 	if (get_stack<std::shared_ptr<Code>>(env).size() > 0) {
 		auto code = pop<std::shared_ptr<Code>>(env);
 		get_stack<int>(env).push_back(code->size());
-		return code->size();
 	}
 	return 1;
 }
@@ -548,7 +547,7 @@ inline unsigned code_subst(Env& env) {
 		}
 
 		auto stack = first->get_stack();
-		for (int i = 0; i < stack.size(); ++i) {
+		for (int i = 0; i < static_cast<int>(stack.size()); ++i) {
 			if (*stack[i] == *third) {
 				stack[i] = second;
 			}
