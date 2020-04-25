@@ -77,7 +77,7 @@ void InstructionManager::register_core() {
 	register_op(max<int>, "INTEGER.MAX", INT);
 	register_op(min<int>, "INTEGER.MIN", INT);
 
-	// float_op
+	// float
 	register_op(add<double>, "FLOAT.+", FLOAT);
 	register_op(sub<double>, "FLOAT.-", FLOAT);
 	register_op(mul<double>, "FLOAT.*", FLOAT);
@@ -93,7 +93,7 @@ void InstructionManager::register_core() {
 	register_op(trig_sin, "FLOAT.SIN", FLOAT);
 	register_op(trig_tan, "FLOAT.TAN", FLOAT);
 
-	// commo_opn
+	// common stack ops
 	register_op(equal<std::shared_ptr<Code>>, "CODE.=", CODE | BOOL);
 	register_op(equal<int>, "INTEGER.=", INT | BOOL);
 	register_op(equal<double>, "FLOAT.=", FLOAT | BOOL);
@@ -150,4 +150,14 @@ void InstructionManager::register_op(unsigned (*op)(Env&), std::string name, int
 	insns_[name] = std::make_shared<Instruction>(op, name, typemask, parens);
 }
 
-} // cppush
+std::vector<std::shared_ptr<Instruction>> InstructionManager::get_by_stack(int bitmask, int exclude_mask) {
+	std::vector<std::shared_ptr<Instruction>> ops;
+	for (auto const& el : insns_) {
+		if ((el.second->types & bitmask) > 0 && (el.second->types & exclude_mask) == 0) {
+			ops.push_back(el.second);
+		}
+	}
+	return ops;
+}
+
+} // namespace cppush

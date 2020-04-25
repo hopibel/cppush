@@ -6,6 +6,8 @@ add_executable(cppush_test
 	code_ops_test.cpp
 	exec_ops_test.cpp
 	numeric_ops_test.cpp
+
+	instruction_manager_test.cpp
 )
 target_link_libraries(cppush_test cppush Catch2::Catch2)
 

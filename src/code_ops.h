@@ -94,7 +94,7 @@ inline unsigned code_cons(Env& env) {
 
 namespace detail {
 
-std::shared_ptr<Code> find_container(std::shared_ptr<Code> tree, std::shared_ptr<Code> subtree) {
+inline std::shared_ptr<Code> find_container(std::shared_ptr<Code> tree, std::shared_ptr<Code> subtree) {
 	// check if we're already in the container
 	auto& stack = tree->get_stack();
 	for (auto c : stack) {
@@ -115,7 +115,7 @@ std::shared_ptr<Code> find_container(std::shared_ptr<Code> tree, std::shared_ptr
 	return std::make_shared<CodeList>();
 	}
 
-bool contains(const std::shared_ptr<Code> tree, const std::shared_ptr<Code> subtree) {
+inline bool contains(const std::shared_ptr<Code> tree, const std::shared_ptr<Code> subtree) {
 	auto& stack = tree->get_stack();
 	for (auto el : stack) {
 		if (contains(el, subtree)) {
@@ -280,10 +280,11 @@ inline unsigned code_do_times(Env& env) {
 }
 
 // TODO(hopibel): should probably factor these helper functions out into a private library
+// remove inline when you do
 namespace detail {
 
 // assumptions: 0 <= index < code->size()
-std::shared_ptr<Code> extract_recursive(std::shared_ptr<Code> code, int index) {
+inline std::shared_ptr<Code> extract_recursive(std::shared_ptr<Code> code, int index) {
 	if (index == 0) {
 		return code;
 	}
@@ -360,7 +361,7 @@ inline unsigned code_if(Env& env) {
 namespace detail {
 
 // insert subtree into code at index (based on depth-first traversal)
-std::shared_ptr<Code> insert_recursive(std::shared_ptr<Code> code, std::shared_ptr<Code> subtree, int index) {
+inline std::shared_ptr<Code> insert_recursive(std::shared_ptr<Code> code, std::shared_ptr<Code> subtree, int index) {
 	if (index == 0) {
 		return subtree;
 	}
