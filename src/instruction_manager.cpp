@@ -146,11 +146,11 @@ void InstructionManager::register_core() {
 	register_op(exec_yankdup, "EXEC.YANKDUP", EXEC | INT);
 }
 
-void InstructionManager::register_op(unsigned (*op)(Env&), std::string name, int typemask, unsigned parens) {
-	insns_[name] = std::make_shared<Instruction>(op, name, typemask, parens);
+void InstructionManager::register_op(unsigned (*op)(Env&), std::string name, unsigned types, unsigned parens) {
+	insns_[name] = std::make_shared<Instruction>(op, name, types, parens);
 }
 
-std::vector<std::shared_ptr<Instruction>> InstructionManager::get_by_stack(int bitmask, int exclude_mask) {
+std::vector<std::shared_ptr<Instruction>> InstructionManager::get_by_stack(unsigned bitmask, unsigned exclude_mask) {
 	std::vector<std::shared_ptr<Instruction>> ops;
 	for (auto const& el : insns_) {
 		if ((el.second->types & bitmask) > 0 && (el.second->types & exclude_mask) == 0) {

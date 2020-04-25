@@ -24,11 +24,11 @@ class Instruction : public CodeAtom {
 
 	public:
 		const std::string name;
-		const int types;
+		const unsigned types;
 		const unsigned parens;
 
-		Instruction(unsigned (*op)(Env&), std::string name, int typemask, unsigned parens = 0) :
-			op_(op), name(name), types(typemask), parens(parens) {}
+		Instruction(unsigned (*op)(Env&), std::string name, int types, unsigned parens = 0) :
+			op_(op), name(name), types(types), parens(parens) {}
 
 		unsigned operator()(Env& env) const override {return op_(env);}
 

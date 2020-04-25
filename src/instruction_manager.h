@@ -18,11 +18,11 @@ class InstructionManager {
 
 		// register a new instruction
 		// TODO(hopibel): directly register shared_ptr<Instruction>? needs <memory> and "instruction.h"
-		void register_op(unsigned (*op)(Env&), std::string name, int typemask, unsigned parens = 0);
+		void register_op(unsigned (*op)(Env&), std::string name, unsigned types, unsigned parens = 0);
 
 		// retrieve a vector of instructions that access any of the stacks in the bitmask (OR).
 		// optionally exclude instructions based on a second bitmask
-		std::vector<std::shared_ptr<Instruction>> get_by_stack(int bitmask, int exclude_mask = 0);
+		std::vector<std::shared_ptr<Instruction>> get_by_stack(unsigned bitmask, unsigned exclude_mask = 0);
 
 		// TODO(hopibel): get_by_name
 
