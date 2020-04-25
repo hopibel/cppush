@@ -66,14 +66,8 @@ T Env::pop_impl_(std::vector<T>& stack) {
 	return top;
 }
 
-template <typename T>
-T Env::pop() {
-	return pop_impl_(get_stack<T>());
-}
-
-Code_ptr Env::pop_exec() {
-	return pop_impl_(get_exec_stack());
-}
+template <typename T> T Env::pop() {return pop_impl_(get_stack<T>());}
+Code_ptr Env::pop_exec() {return pop_impl_(get_exec_stack());}
 
 } // namespace cppush
 

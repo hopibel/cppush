@@ -156,7 +156,7 @@ inline unsigned code_do(Env& env) {
 	auto& stack = env.get_stack<Code_ptr>();
 	if (stack.size() > 0) {
 		static std::shared_ptr<Instruction> code_pop = std::make_shared<Instruction>(
-				protected_code_pop,
+				protected_pop<Code_ptr>,
 				"CODE.POP",
 				CODE);
 		env.exec_stack.push_back(code_pop);

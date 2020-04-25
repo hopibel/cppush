@@ -283,7 +283,7 @@ TEST_CASE("Instruction: CODE.DO") {
 	cppush::Instruction op(cppush::code_do, "CODE.DO", 0);
 
 	std::shared_ptr<cppush::Instruction> pop_insn = std::make_shared<cppush::Instruction>(
-			cppush::protected_code_pop, "CODE.POP", cppush::CODE);
+			cppush::protected_pop<cppush::Code_ptr>, "CODE.POP", cppush::CODE);
 	std::shared_ptr<cppush::CodeList> code_list = std::make_shared<cppush::CodeList>();
 
 	env.code_stack.push_back(code_list);
