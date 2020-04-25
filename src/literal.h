@@ -12,7 +12,7 @@ class Literal : public CodeAtom {
 		Literal(T val) : value_(val) {}
 
 		unsigned operator()(Env& env) const override {
-			cppush::get_stack<T>(env).push_back(value_);
+			env.get_stack<T>().push_back(value_);
 			return 1;
 		}
 

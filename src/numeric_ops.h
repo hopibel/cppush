@@ -10,9 +10,9 @@ namespace cppush {
 
 template <typename T>
 inline unsigned add(Env& env) {
-	auto& stack = get_stack<T>(env);
+	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2) {
-		T top = pop<T>(env);
+		T top = env.pop<T>();
 		stack.back() += top;
 	}
 	return 1;
@@ -20,9 +20,9 @@ inline unsigned add(Env& env) {
 
 template <typename T>
 inline unsigned sub(Env& env) {
-	auto& stack = get_stack<T>(env);
+	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2) {
-		T top = pop<T>(env);
+		T top = env.pop<T>();
 		stack.back() -= top;
 	}
 	return 1;
@@ -30,9 +30,9 @@ inline unsigned sub(Env& env) {
 
 template <typename T>
 inline unsigned mul(Env& env) {
-	auto& stack = get_stack<T>(env);
+	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2) {
-		T top = pop<T>(env);
+		T top = env.pop<T>();
 		stack.back() *= top;
 	}
 	return 1;
@@ -40,28 +40,28 @@ inline unsigned mul(Env& env) {
 
 template <typename T>
 inline unsigned div(Env& env) {
-	auto& stack = get_stack<T>(env);
+	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2 && stack.back() != T(0)) {
-		T top = pop<T>(env);
+		T top = env.pop<T>();
 		stack.back() /= top;
 	}
 	return 1;
 }
 
 inline unsigned int_mod(Env& env) {
-	auto& stack = get_stack<int>(env);
+	auto& stack = env.get_stack<int>();
 	if (stack.size() >= 2 && stack.back() != 0) {
-		int top = pop<int>(env);
+		int top = env.pop<int>();
 		stack.back() %= top;
 	}
 	return 1;
 }
 
 inline unsigned float_mod(Env& env) {
-	auto& stack = get_stack<double>(env);
+	auto& stack = env.get_stack<double>();
 	if (stack.size() >= 2 && stack.back() != 0.0) {
-		double top = pop<double>(env);
-		double second = pop<double>(env);
+		double top = env.pop<double>();
+		double second = env.pop<double>();
 
 		stack.push_back(std::fmod(second, top));
 	}
@@ -70,24 +70,24 @@ inline unsigned float_mod(Env& env) {
 
 template <typename T>
 inline unsigned less_than(Env& env) {
-	auto& stack = get_stack<T>(env);
+	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2) {
-		T top = pop<T>(env);
-		T second = pop<T>(env);
+		T top = env.pop<T>();
+		T second = env.pop<T>();
 
-		get_stack<bool>(env).push_back(second < top);
+		env.get_stack<bool>().push_back(second < top);
 	}
 	return 1;
 }
 
 template <typename T>
 inline unsigned greater_than(Env& env) {
-	auto& stack = get_stack<T>(env);
+	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2) {
-		T top = pop<T>(env);
-		T second = pop<T>(env);
+		T top = env.pop<T>();
+		T second = env.pop<T>();
 
-		get_stack<bool>(env).push_back(second > top);
+		env.get_stack<bool>().push_back(second > top);
 	}
 	return 1;
 }
@@ -97,11 +97,11 @@ namespace detail {
 
 template <typename From, typename To>
 inline unsigned push_cast(Env& env) {
-	auto& stack = get_stack<From>(env);
+	auto& stack = env.get_stack<From>();
 	if (stack.size() > 0) {
-		From top = pop<From>(env);
+		From top = env.pop<From>();
 
-		get_stack<To>(env).push_back(static_cast<To>(top));
+		env.get_stack<To>().push_back(static_cast<To>(top));
 	}
 	return 1;
 }
@@ -117,9 +117,9 @@ inline unsigned bool_from_float(Env& env) {return detail::push_cast<double, bool
 
 template <typename T>
 inline unsigned max(Env& env) {
-	auto& stack = get_stack<T>(env);
+	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2) {
-		T top = pop<T>(env);
+		T top = env.pop<T>();
 
 		if (stack.back() < top) {
 			stack.back() = top;
@@ -130,9 +130,9 @@ inline unsigned max(Env& env) {
 
 template <typename T>
 inline unsigned min(Env& env) {
-	auto& stack = get_stack<T>(env);
+	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2) {
-		T top = pop<T>(env);
+		T top = env.pop<T>();
 
 		if (stack.back() > top) {
 			stack.back() = top;
@@ -142,7 +142,7 @@ inline unsigned min(Env& env) {
 }
 
 inline unsigned trig_cos(Env& env) {
-	auto& stack = get_stack<double>(env);
+	auto& stack = env.get_stack<double>();
 	if (stack.size() > 0) {
 		stack.back() = std::cos(stack.back());
 	}
@@ -150,7 +150,7 @@ inline unsigned trig_cos(Env& env) {
 }
 
 inline unsigned trig_sin(Env& env) {
-	auto& stack = get_stack<double>(env);
+	auto& stack = env.get_stack<double>();
 	if (stack.size() > 0) {
 		stack.back() = std::sin(stack.back());
 	}
@@ -158,7 +158,7 @@ inline unsigned trig_sin(Env& env) {
 }
 
 inline unsigned trig_tan(Env& env) {
-	auto& stack = get_stack<double>(env);
+	auto& stack = env.get_stack<double>();
 	if (stack.size() > 0) {
 		stack.back() = std::tan(stack.back());
 	}

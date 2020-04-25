@@ -8,7 +8,7 @@
 
 TEST_CASE("Instruction: BOOLEAN.AND") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::and_, "BOOLEAN.AND", cppush::BOOL);
+	cppush::Instruction op(cppush::bool_and, "BOOLEAN.AND", cppush::BOOL);
 
 	SECTION("F & F = F") {
 		env.bool_stack = std::vector<bool>{false, false};
@@ -37,7 +37,7 @@ TEST_CASE("Instruction: BOOLEAN.AND") {
 
 TEST_CASE("Instruction: BOOLEAN.OR") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::or_, "BOOLEAN.OR", cppush::BOOL);
+	cppush::Instruction op(cppush::bool_or, "BOOLEAN.OR", cppush::BOOL);
 
 	SECTION("F | F = F") {
 		env.bool_stack = std::vector<bool>{false, false};
@@ -66,7 +66,7 @@ TEST_CASE("Instruction: BOOLEAN.OR") {
 
 TEST_CASE("Instruction: BOOLEAN.NOT") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::not_, "BOOLEAN.NOT", cppush::BOOL);
+	cppush::Instruction op(cppush::bool_not, "BOOLEAN.NOT", cppush::BOOL);
 
 	SECTION("!F = T") {
 		env.bool_stack = std::vector<bool>{false};
@@ -83,7 +83,7 @@ TEST_CASE("Instruction: BOOLEAN.NOT") {
 
 TEST_CASE("Instruction: BOOLEAN.NAND") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::nand_, "BOOLEAN.NAND", cppush::BOOL);
+	cppush::Instruction op(cppush::bool_nand, "BOOLEAN.NAND", cppush::BOOL);
 
 	SECTION("F nand F = T") {
 		env.bool_stack = std::vector<bool>{false, false};
@@ -113,7 +113,7 @@ TEST_CASE("Instruction: BOOLEAN.NAND") {
 
 TEST_CASE("Instruction: BOOLEAN.NOR") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::nor_, "BOOLEAN.NOR", cppush::BOOL);
+	cppush::Instruction op(cppush::bool_nor, "BOOLEAN.NOR", cppush::BOOL);
 
 	SECTION("F nor F = T") {
 		env.bool_stack = std::vector<bool>{false, false};
@@ -142,7 +142,7 @@ TEST_CASE("Instruction: BOOLEAN.NOR") {
 
 TEST_CASE("Instruction: BOOLEAN.XOR") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::xor_, "BOOLEAN.XOR", cppush::BOOL);
+	cppush::Instruction op(cppush::bool_xor, "BOOLEAN.XOR", cppush::BOOL);
 
 	SECTION("F ^ F = F") {
 		env.bool_stack = std::vector<bool>{false, false};
@@ -171,7 +171,7 @@ TEST_CASE("Instruction: BOOLEAN.XOR") {
 
 TEST_CASE("Instruction: BOOLEAN.INVERT_FIRST_THEN_AND") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::invert_first_then_and, "BOOLEAN.INVERT_FIRST_THEN_AND", cppush::BOOL);
+	cppush::Instruction op(cppush::bool_invert_first_then_and, "BOOLEAN.INVERT_FIRST_THEN_AND", cppush::BOOL);
 
 	SECTION("!F & F = F") {
 		env.bool_stack = std::vector<bool>{false, false};
@@ -200,7 +200,7 @@ TEST_CASE("Instruction: BOOLEAN.INVERT_FIRST_THEN_AND") {
 
 TEST_CASE("Instruction: BOOLEAN.INVERT_SECOND_THEN_AND") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::invert_second_then_and, "BOOLEAN.INVERT_SECOND_THEN_AND", cppush::BOOL);
+	cppush::Instruction op(cppush::bool_invert_second_then_and, "BOOLEAN.INVERT_SECOND_THEN_AND", cppush::BOOL);
 
 	SECTION("F & !F = F") {
 		env.bool_stack = std::vector<bool>{false, false};
@@ -226,4 +226,3 @@ TEST_CASE("Instruction: BOOLEAN.INVERT_SECOND_THEN_AND") {
 		REQUIRE(env.bool_stack == std::vector<bool>{false});
 	}
 }
-

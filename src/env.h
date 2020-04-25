@@ -37,35 +37,42 @@ class Env {
 
 		void load_program(const std::shared_ptr<Code>& program); // TODO(hopibel): Program struct with config
 		void run();
+
+		// needed for generic stack manipulation functions
+		template <typename T> std::vector<T>& get_stack() = delete;
+		// exec is just another Code_ptr stack. can't template it
+		std::vector<Code_ptr>& get_exec_stack() {return exec_stack;}
+
+		template <typename T> inline T pop();
+		inline Code_ptr pop_exec();
 	
 	private:
 		std::vector<std::shared_ptr<Code>> instruction_set_;
+
+		// avoid duplicating code for exec functions
+		template <typename T> T pop_impl_(std::vector<T>& stack);
 };
 
-template <typename T> inline std::vector<T>& get_stack(Env& env) = delete;
-template <> inline std::vector<int>& get_stack(Env& env) {return env.int_stack;}
-template <> inline std::vector<double>& get_stack(Env& env) {return env.float_stack;}
-template <> inline std::vector<bool>& get_stack(Env& env) {return env.bool_stack;}
-inline std::vector<std::shared_ptr<Code>>& get_code_stack(Env& env) {return env.code_stack;}
-inline std::vector<std::shared_ptr<Code>>& get_exec_stack(Env& env) {return env.exec_stack;}
-// implement exec_stack functions manually
+template <> inline std::vector<int>& Env::get_stack() {return int_stack;}
+template <> inline std::vector<double>& Env::get_stack() {return float_stack;}
+template <> inline std::vector<bool>& Env::get_stack() {return bool_stack;}
+template <> inline std::vector<Code_ptr>& Env::get_stack() {return code_stack;}
 
-template <typename T> inline T pop(Env& env) {
-	T first = get_stack<T>(env).back();
-	get_stack<T>(env).pop_back();
-	return first;
-}
-inline std::shared_ptr<Code> pop_code(Env& env) {
-	auto& stack = get_code_stack(env);
-	auto first = stack.back();
+// pop from a stack and return element popped
+template <typename T>
+T Env::pop_impl_(std::vector<T>& stack) {
+	T top = stack.back();
 	stack.pop_back();
-	return first;
+	return top;
 }
-inline std::shared_ptr<Code> pop_exec(Env& env) {
-	auto& stack = get_exec_stack(env);
-	auto first = stack.back();
-	stack.pop_back();
-	return first;
+
+template <typename T>
+T Env::pop() {
+	return pop_impl_(get_stack<T>());
+}
+
+Code_ptr Env::pop_exec() {
+	return pop_impl_(get_exec_stack());
 }
 
 } // namespace cppush

@@ -9,7 +9,7 @@
 
 TEMPLATE_TEST_CASE("Instruction: ADD", "", int, double) {
 	cppush::Env env;
-	auto& stack = cppush::get_stack<TestType>(env);
+	auto& stack = env.get_stack<TestType>();
 	cppush::Instruction op(cppush::add<TestType>, "+", 0);
 
 	for (int i = -2; i <= 2; ++i) {
@@ -26,7 +26,7 @@ TEMPLATE_TEST_CASE("Instruction: ADD", "", int, double) {
 
 TEMPLATE_TEST_CASE("Instruction: SUB", "", int, double) {
 	cppush::Env env;
-	auto& stack = cppush::get_stack<TestType>(env);
+	auto& stack = env.get_stack<TestType>();
 	cppush::Instruction op(cppush::sub<TestType>, "-", 0);
 
 	for (int i = -2; i <= 2; ++i) {
@@ -43,7 +43,7 @@ TEMPLATE_TEST_CASE("Instruction: SUB", "", int, double) {
 
 TEMPLATE_TEST_CASE("Instruction: MUL", "", int, double) {
 	cppush::Env env;
-	auto& stack = cppush::get_stack<TestType>(env);
+	auto& stack = env.get_stack<TestType>();
 	cppush::Instruction op(cppush::mul<TestType>, "*", 0);
 
 	for (int i = -2; i <= 2; ++i) {
@@ -60,7 +60,7 @@ TEMPLATE_TEST_CASE("Instruction: MUL", "", int, double) {
 
 TEMPLATE_TEST_CASE("Instruction: DIV", "", int, double) {
 	cppush::Env env;
-	auto& stack = cppush::get_stack<TestType>(env);
+	auto& stack = env.get_stack<TestType>();
 	cppush::Instruction op(cppush::div<TestType>, "/", 0);
 
 	SECTION("Division by zero is noop") {
@@ -145,8 +145,8 @@ TEST_CASE("Instruction: FLOAT.%") {
 
 TEMPLATE_TEST_CASE("Instruction: LT", "", int, double) {
 	cppush::Env env;
-	auto& stack = cppush::get_stack<TestType>(env);
-	auto& bool_stack = cppush::get_stack<bool>(env);
+	auto& stack = env.get_stack<TestType>();
+	auto& bool_stack = env.get_stack<bool>();
 	cppush::Instruction op(cppush::less_than<TestType>, "<", 0);
 
 	for (int i = -2; i <= 2; ++i) {
@@ -164,8 +164,8 @@ TEMPLATE_TEST_CASE("Instruction: LT", "", int, double) {
 
 TEMPLATE_TEST_CASE("Instruction: GT", "", int, double) {
 	cppush::Env env;
-	auto& stack = cppush::get_stack<TestType>(env);
-	auto& bool_stack = cppush::get_stack<bool>(env);
+	auto& stack = env.get_stack<TestType>();
+	auto& bool_stack = env.get_stack<bool>();
 	cppush::Instruction op(cppush::greater_than<TestType>, ">", 0);
 
 	for (int i = -2; i <= 2; ++i) {
@@ -277,7 +277,7 @@ TEST_CASE("Instruction: BOOLEAN.FROMFLOAT") {
 TEMPLATE_TEST_CASE("Instruction: MAX", "", int, double) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::max<TestType>, "MAX", 0);
-	auto& stack = cppush::get_stack<TestType>(env);
+	auto& stack = env.get_stack<TestType>();
 
 	for (TestType i = -2; i <= 2; ++i) {
 		for (TestType j = -2; j <= 2; ++j) {
@@ -293,7 +293,7 @@ TEMPLATE_TEST_CASE("Instruction: MAX", "", int, double) {
 TEMPLATE_TEST_CASE("Instruction: MIN", "", int, double) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::min<TestType>, "MIN", 0);
-	auto& stack = cppush::get_stack<TestType>(env);
+	auto& stack = env.get_stack<TestType>();
 
 	for (TestType i = -2; i <= 2; ++i) {
 		for (TestType j = -2; j <= 2; ++j) {

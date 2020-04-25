@@ -13,13 +13,13 @@
 namespace cppush {
 
 inline unsigned exec_do_range(Env& env) {
-	auto exec_stack_size = get_exec_stack(env).size();
-	auto int_stack_size = get_stack<int>(env).size();
+	auto exec_stack_size = env.get_exec_stack().size();
+	auto int_stack_size = env.get_stack<int>().size();
 
 	if (exec_stack_size > 0 && int_stack_size >= 2) {
-		int dest = pop<int>(env);
-		int index = get_stack<int>(env).back();
-		auto code = pop_exec(env);
+		int dest = env.pop<int>();
+		int index = env.get_stack<int>().back();
+		auto code = env.pop_exec();
 
 		if (index != dest) {
 			index += index > dest ? -1 : 1;
@@ -36,21 +36,21 @@ inline unsigned exec_do_range(Env& env) {
 					do_range_insn, code
 			};
 
-			get_exec_stack(env).push_back(std::make_shared<CodeList>(rcall));
+			env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));
 		}
-		get_exec_stack(env).push_back(code);
+		env.get_exec_stack().push_back(code);
 	}
 
 	return 1;
 }
 
 inline unsigned exec_do_count(Env& env) {
-	auto exec_stack_size = get_exec_stack(env).size();
-	auto int_stack_size = get_stack<int>(env).size();
+	auto exec_stack_size = env.get_exec_stack().size();
+	auto int_stack_size = env.get_stack<int>().size();
 
-	if (exec_stack_size > 0 && int_stack_size > 0 && get_stack<int>(env).back() > 0) {
-		int count = pop<int>(env);
-		auto code = pop_exec(env);
+	if (exec_stack_size > 0 && int_stack_size > 0 && env.get_stack<int>().back() > 0) {
+		int count = env.pop<int>();
+		auto code = env.pop_exec();
 
 		static auto do_range_insn = std::make_shared<Instruction>(
 				exec_do_range,
@@ -64,18 +64,18 @@ inline unsigned exec_do_count(Env& env) {
 				do_range_insn, code
 		};
 
-		get_exec_stack(env).push_back(std::make_shared<CodeList>(rcall));
+		env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));
 	}
 	return 1;
 }
 
 inline unsigned exec_do_times(Env& env) {
-	auto exec_stack_size = get_exec_stack(env).size();
-	auto int_stack_size = get_stack<int>(env).size();
+	auto exec_stack_size = env.get_exec_stack().size();
+	auto int_stack_size = env.get_stack<int>().size();
 
-	if (exec_stack_size > 0 && int_stack_size > 0 && get_stack<int>(env).back() > 0) {
-		int times = pop<int>(env);
-		auto code = pop_exec(env);
+	if (exec_stack_size > 0 && int_stack_size > 0 && env.get_stack<int>().back() > 0) {
+		int times = env.pop<int>();
+		auto code = env.pop_exec();
 
 		static auto do_range_insn = std::make_shared<Instruction>(
 				exec_do_range,
@@ -95,39 +95,39 @@ inline unsigned exec_do_times(Env& env) {
 				do_range_insn, std::make_shared<CodeList>(pop_code)
 		};
 
-		get_exec_stack(env).push_back(std::make_shared<CodeList>(rcall));
+		env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));
 	}
 	return 1;
 }
 
 inline unsigned exec_if(Env& env) {
-	if (get_exec_stack(env).size() >= 2 && get_stack<bool>(env).size() > 0) {
-		auto first = pop_exec(env);
-		auto second = pop_exec(env);
-		if (pop<bool>(env)) {
-			get_exec_stack(env).push_back(first);
+	if (env.get_exec_stack().size() >= 2 && env.get_stack<bool>().size() > 0) {
+		auto first = env.pop_exec();
+		auto second = env.pop_exec();
+		if (env.pop<bool>()) {
+			env.get_exec_stack().push_back(first);
 		} else {
-			get_exec_stack(env).push_back(second);
+			env.get_exec_stack().push_back(second);
 		}
 	}
 	return 1;
 }
 
 inline unsigned exec_k(Env& env) {
-	if (get_exec_stack(env).size() >= 2) {
-		auto first = pop_exec(env);
-		auto second = pop_exec(env);
-		get_exec_stack(env).push_back(first);
+	if (env.get_exec_stack().size() >= 2) {
+		auto first = env.pop_exec();
+		auto second = env.pop_exec();
+		env.get_exec_stack().push_back(first);
 	}
 	return 1;
 }
 
 inline unsigned exec_s(Env& env) {
-	auto& stack = get_exec_stack(env);
+	auto& stack = env.get_exec_stack();
 	if (stack.size() >= 3) {
-		auto a = pop_exec(env);
-		auto b = pop_exec(env);
-		auto c = pop_exec(env);
+		auto a = env.pop_exec();
+		auto b = env.pop_exec();
+		auto c = env.pop_exec();
 
 		std::vector<std::shared_ptr<Code>> bc{b, c};
 
@@ -139,8 +139,8 @@ inline unsigned exec_s(Env& env) {
 }
 
 inline unsigned exec_y(Env& env) {
-	if (get_exec_stack(env).size() > 0) {
-		auto first = pop_exec(env);
+	if (env.get_exec_stack().size() > 0) {
+		auto first = env.pop_exec();
 		static auto y_insn = std::make_shared<Instruction>(
 				exec_y,
 				"EXEC.Y",
@@ -148,8 +148,8 @@ inline unsigned exec_y(Env& env) {
 				1);
 
 		std::vector<std::shared_ptr<Code>> rcall{y_insn, first};
-		get_exec_stack(env).push_back(std::make_shared<CodeList>(rcall));
-		get_exec_stack(env).push_back(first);
+		env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));
+		env.get_exec_stack().push_back(first);
 	}
 	return 1;
 }

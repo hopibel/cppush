@@ -53,14 +53,14 @@ void InstructionManager::register_core() {
 	register_op(code_subst, "CODE.SUBST", CODE);
 
 	// bool
-	register_op(and_, "BOOLEAN.AND", BOOL);
-	register_op(or_, "BOOLEAN.OR", BOOL);
-	register_op(not_, "BOOLEAN.NOT", BOOL);
-	register_op(nand_, "BOOLEAN.NAND", BOOL);
-	register_op(nor_, "BOOLEAN.NOR", BOOL);
-	register_op(xor_, "BOOLEAN.XOR", BOOL);
-	register_op(invert_first_then_and, "BOOLEAN.INVERT_FIRST_THEN_AND", BOOL);
-	register_op(invert_second_then_and, "BOOLEAN.INVERT_SECOND_THEN_AND", BOOL);
+	register_op(bool_and, "BOOLEAN.AND", BOOL);
+	register_op(bool_or, "BOOLEAN.OR", BOOL);
+	register_op(bool_not, "BOOLEAN.NOT", BOOL);
+	register_op(bool_nand, "BOOLEAN.NAND", BOOL);
+	register_op(bool_nor, "BOOLEAN.NOR", BOOL);
+	register_op(bool_xor, "BOOLEAN.XOR", BOOL);
+	register_op(bool_invert_first_then_and, "BOOLEAN.INVERT_FIRST_THEN_AND", BOOL);
+	register_op(bool_invert_second_then_and, "BOOLEAN.INVERT_SECOND_THEN_AND", BOOL);
 	register_op(bool_from_int, "BOOLEAN.FROMINT", BOOL | INT);
 	register_op(bool_from_float, "BOOLEAN.FROMFLOAT", BOOL | FLOAT);
 

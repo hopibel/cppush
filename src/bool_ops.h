@@ -5,72 +5,72 @@
 
 namespace cppush {
 
-inline unsigned and_(Env& env) {
-	auto& stack = get_stack<bool>(env);
+inline unsigned bool_and(Env& env) {
+	auto& stack = env.get_stack<bool>();
 	if (stack.size() >= 2) {
-		bool top = pop<bool>(env);
+		bool top = env.pop<bool>();
 		stack.back() = stack.back() && top;
 	}
 	return 1;
 }
 
-inline unsigned or_(Env& env) {
-	auto& stack = get_stack<bool>(env);
+inline unsigned bool_or(Env& env) {
+	auto& stack = env.get_stack<bool>();
 	if (stack.size() >= 2) {
-		bool top = pop<bool>(env);
+		bool top = env.pop<bool>();
 		stack.back() = stack.back() || top;
 	}
 	return 1;
 }
 
-inline unsigned not_(Env& env) {
-	auto& stack = get_stack<bool>(env);
+inline unsigned bool_not(Env& env) {
+	auto& stack = env.get_stack<bool>();
 	if (stack.size() > 0) {
 		stack.back() = !stack.back();
 	}
 	return 1;
 }
 
-inline unsigned nand_(Env& env) {
-	auto& stack = get_stack<bool>(env);
+inline unsigned bool_nand(Env& env) {
+	auto& stack = env.get_stack<bool>();
 	if (stack.size() >= 2) {
-		bool top = pop<bool>(env);
+		bool top = env.pop<bool>();
 		stack.back() = !(stack.back() && top);
 	}
 	return 1;
 }
 
-inline unsigned nor_(Env& env) {
-	auto& stack = get_stack<bool>(env);
+inline unsigned bool_nor(Env& env) {
+	auto& stack = env.get_stack<bool>();
 	if (stack.size() >= 2) {
-		bool top = pop<bool>(env);
+		bool top = env.pop<bool>();
 		stack.back() = !(stack.back() || top);
 	}
 	return 1;
 }
 
-inline unsigned xor_(Env& env) {
-	auto& stack = get_stack<bool>(env);
+inline unsigned bool_xor(Env& env) {
+	auto& stack = env.get_stack<bool>();
 	if (stack.size() >= 2) {
-		bool top = pop<bool>(env);
+		bool top = env.pop<bool>();
 		stack.back() = stack.back() != top;
 	}
 	return 1;
 }
 
-inline unsigned invert_first_then_and(Env& env) {
-	auto& stack = get_stack<bool>(env);
+inline unsigned bool_invert_first_then_and(Env& env) {
+	auto& stack = env.get_stack<bool>();
 	if (stack.size() >= 2) {
-		bool top = pop<bool>(env);
+		bool top = env.pop<bool>();
 		stack.back() = stack.back() && !top;
 	}
 	return 1;
 }
 
-inline unsigned invert_second_then_and(Env& env) {
-	auto& stack = get_stack<bool>(env);
+inline unsigned bool_invert_second_then_and(Env& env) {
+	auto& stack = env.get_stack<bool>();
 	if (stack.size() >= 2) {
-		bool top = pop<bool>(env);
+		bool top = env.pop<bool>();
 		stack.back() = !stack.back() && top;
 	}
 	return 1;

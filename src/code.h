@@ -8,9 +8,10 @@
 
 namespace cppush {
 
+class Code;
 class Env;
 
-// TODO(hopibel): write an instruction library class for easy filtering and creation of instruction sets
+using Code_ptr = std::shared_ptr<Code>;
 
 class Code {
 	public:

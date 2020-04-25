@@ -7,20 +7,20 @@ namespace cppush {
 
 template <typename T>
 inline unsigned equal(Env& env) {
-	if (get_stack<T>(env).size() >= 2) {
-		auto first = pop<T>(env);
-		auto second = pop<T>(env);
-		get_stack<bool>(env).push_back(first == second);
+	if (env.get_stack<T>().size() >= 2) {
+		auto first = env.pop<T>();
+		auto second = env.pop<T>();
+		env.get_stack<bool>().push_back(first == second);
 	}
 	return 1;
 }
 template <> inline unsigned equal<std::shared_ptr<Code>>(Env& env) = delete;
 
 inline unsigned code_equal(Env& env) {
-	if (get_code_stack(env).size() >= 2) {
-		auto first = pop_code(env);
-		auto second = pop_code(env);
-		get_stack<bool>(env).push_back(*first == *second);
+	if (env.get_stack<Code_ptr>().size() >= 2) {
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
+		env.get_stack<bool>().push_back(*first == *second);
 		
 		int fsize = first->size();
 		int ssize = second->size();
@@ -30,10 +30,10 @@ inline unsigned code_equal(Env& env) {
 }
 
 inline unsigned exec_equal(Env& env) {
-	if (get_exec_stack(env).size() >= 2) {
-		auto first = pop_exec(env);
-		auto second = pop_exec(env);
-		get_stack<bool>(env).push_back(*first == *second);
+	if (env.get_exec_stack().size() >= 2) {
+		auto first = env.pop_exec();
+		auto second = env.pop_exec();
+		env.get_stack<bool>().push_back(*first == *second);
 
 		int fsize = first->size();
 		int ssize = second->size();
@@ -44,8 +44,8 @@ inline unsigned exec_equal(Env& env) {
 
 template <typename T>
 inline unsigned protected_pop(Env& env) {
-	if (!get_stack<T>(env).empty()) {
-		pop<T>(env);
+	if (!env.get_stack<T>().empty()) {
+		env.pop<T>();
 	}
 	return 1;
 }
@@ -53,21 +53,21 @@ template <> inline unsigned protected_pop<std::shared_ptr<Code>>(Env& env) = del
 
 // can't template because exec_stack is same type as code_stack
 inline unsigned protected_code_pop(Env& env) {
-	if (!get_code_stack(env).empty()) {
-		pop_code(env);
+	if (!env.get_stack<Code_ptr>().empty()) {
+		env.pop<Code_ptr>();
 	}
 	return 1;
 }
 inline unsigned protected_exec_pop(Env& env) {
-	if (!get_exec_stack(env).empty()) {
-		pop_exec(env);
+	if (!env.get_exec_stack().empty()) {
+		env.pop_exec();
 	}
 	return 1;
 }
 
 template <typename T>
 inline unsigned dup(Env& env) {
-	auto& stack = get_stack<T>(env);
+	auto& stack = env.get_stack<T>();
 	if (stack.size() > 0) {
 		stack.push_back(stack.back());
 	}
@@ -76,14 +76,14 @@ inline unsigned dup(Env& env) {
 template <> inline unsigned dup<std::shared_ptr<Code>>(Env& env) = delete;
 
 inline unsigned code_dup(Env& env) {
-	auto& stack = get_code_stack(env);
+	auto& stack = env.get_stack<Code_ptr>();
 	if (stack.size() > 0) {
 		stack.push_back(stack.back());
 	}
 	return 1;
 }
 inline unsigned exec_dup(Env& env) {
-	auto& stack = get_exec_stack(env);
+	auto& stack = env.get_exec_stack();
 	if (stack.size() > 0) {
 		stack.push_back(stack.back());
 	}
@@ -92,27 +92,27 @@ inline unsigned exec_dup(Env& env) {
 
 template <typename T>
 inline unsigned flush(Env& env) {
-	get_stack<T>(env).clear();
+	env.get_stack<T>().clear();
 	return 1;
 }
 template <> inline unsigned flush<std::shared_ptr<Code>>(Env& env) = delete;
 
 inline unsigned code_flush(Env& env) {
-	get_code_stack(env).clear();
+	env.get_stack<Code_ptr>().clear();
 	return 1;
 }
 inline unsigned exec_flush(Env& env) {
-	get_exec_stack(env).clear();
+	env.get_exec_stack().clear();
 	return 1;
 }
 
 template <typename T>
 inline unsigned rot(Env& env) {
-	auto& stack = get_stack<T>(env);
+	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 3) {
-		auto first = pop<T>(env);
-		auto second = pop<T>(env);
-		auto third = pop<T>(env);
+		auto first = env.pop<T>();
+		auto second = env.pop<T>();
+		auto third = env.pop<T>();
 
 		stack.push_back(second);
 		stack.push_back(first);
@@ -123,11 +123,11 @@ inline unsigned rot(Env& env) {
 template <> inline unsigned rot<std::shared_ptr<Code>>(Env& env) = delete;
 
 inline unsigned code_rot(Env& env) {
-	auto& stack = get_code_stack(env);
+	auto& stack = env.get_stack<Code_ptr>();
 	if (stack.size() >= 3) {
-		auto first = pop_code(env);
-		auto second = pop_code(env);
-		auto third = pop_code(env);
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
+		auto third = env.pop<Code_ptr>();
 
 		stack.push_back(second);
 		stack.push_back(first);
@@ -136,11 +136,11 @@ inline unsigned code_rot(Env& env) {
 	return 1;
 }
 inline unsigned exec_rot(Env& env) {
-	auto& stack = get_exec_stack(env);
+	auto& stack = env.get_exec_stack();
 	if (stack.size() >= 3) {
-		auto first = pop_exec(env);
-		auto second = pop_exec(env);
-		auto third = pop_exec(env);
+		auto first = env.pop_exec();
+		auto second = env.pop_exec();
+		auto third = env.pop_exec();
 
 		stack.push_back(second);
 		stack.push_back(first);
@@ -151,12 +151,12 @@ inline unsigned exec_rot(Env& env) {
 
 template <typename T>
 inline unsigned shove(Env& env) {
-	auto& stack = get_stack<T>(env);
-	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
-		int index = pop<int>(env);
+	auto& stack = env.get_stack<T>();
+	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
+		int index = env.pop<int>();
 		index = index < 0 ? 0 : (static_cast<size_t>(index) >= stack.size() ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
-		stack.insert(stack.begin() + index, pop<T>(env));
+		stack.insert(stack.begin() + index, env.pop<T>());
 
 		return stack.size() - index + 1;
 	}
@@ -165,24 +165,24 @@ inline unsigned shove(Env& env) {
 template <> inline unsigned shove<std::shared_ptr<Code>>(Env& env) = delete;
 
 inline unsigned code_shove(Env& env) {
-	auto& stack = get_code_stack(env);
-	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
-		int index = pop<int>(env);
+	auto& stack = env.get_stack<Code_ptr>();
+	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
+		int index = env.pop<int>();
 		index = index < 0 ? 0 : (static_cast<size_t>(index) >= stack.size() ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
-		stack.insert(stack.begin() + index, pop_code(env));
+		stack.insert(stack.begin() + index, env.pop<Code_ptr>());
 
 		return stack.size() - index + 1;
 	}
 	return 1;
 }
 inline unsigned exec_shove(Env& env) {
-	auto& stack = get_exec_stack(env);
-	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
-		int index = pop<int>(env);
+	auto& stack = env.get_exec_stack();
+	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
+		int index = env.pop<int>();
 		index = index < 0 ? 0 : (static_cast<size_t>(index) >= stack.size() ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
-		stack.insert(stack.begin() + index, pop_exec(env));
+		stack.insert(stack.begin() + index, env.pop_exec());
 
 		return stack.size() - index + 1;
 	}
@@ -191,26 +191,26 @@ inline unsigned exec_shove(Env& env) {
 
 template <typename T>
 inline unsigned stackdepth(Env& env) {
-	get_stack<int>(env).push_back(get_stack<T>(env).size());
+	env.get_stack<int>().push_back(env.get_stack<T>().size());
 	return 1;
 }
 template <> inline unsigned stackdepth<std::shared_ptr<Code>>(Env& env) = delete;
 
 inline unsigned code_stackdepth(Env& env) {
-	get_stack<int>(env).push_back(get_code_stack(env).size());
+	env.get_stack<int>().push_back(env.get_stack<Code_ptr>().size());
 	return 1;
 }
 inline unsigned exec_stackdepth(Env& env) {
-	get_stack<int>(env).push_back(get_exec_stack(env).size());
+	env.get_stack<int>().push_back(env.get_exec_stack().size());
 	return 1;
 }
 
 template <typename T>
 inline unsigned swap(Env& env) {
-	auto& stack = get_stack<T>(env);
+	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2) {
-		auto first = pop<T>(env);
-		auto second = pop<T>(env);
+		auto first = env.pop<T>();
+		auto second = env.pop<T>();
 		stack.push_back(first);
 		stack.push_back(second);
 	}
@@ -219,20 +219,20 @@ inline unsigned swap(Env& env) {
 template <> inline unsigned swap<std::shared_ptr<Code>>(Env& env) = delete;
 
 inline unsigned code_swap(Env& env) {
-	auto& stack = get_code_stack(env);
+	auto& stack = env.get_stack<Code_ptr>();
 	if (stack.size() >= 2) {
-		auto first = pop_code(env);
-		auto second = pop_code(env);
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
 		stack.push_back(first);
 		stack.push_back(second);
 	}
 	return 1;
 }
 inline unsigned exec_swap(Env& env) {
-	auto& stack = get_exec_stack(env);
+	auto& stack = env.get_exec_stack();
 	if (stack.size() >= 2) {
-		auto first = pop_exec(env);
-		auto second = pop_exec(env);
+		auto first = env.pop_exec();
+		auto second = env.pop_exec();
 		stack.push_back(first);
 		stack.push_back(second);
 	}
@@ -241,9 +241,9 @@ inline unsigned exec_swap(Env& env) {
 
 template <typename T>
 inline unsigned yank(Env& env) {
-	auto& stack = get_stack<T>(env);
-	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
-		int index = pop<int>(env);
+	auto& stack = env.get_stack<T>();
+	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
+		int index = env.pop<int>();
 		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 
@@ -258,9 +258,9 @@ inline unsigned yank(Env& env) {
 template <> inline unsigned yank<std::shared_ptr<Code>>(Env& env) = delete;
 
 inline unsigned code_yank(Env& env) {
-	auto& stack = get_code_stack(env);
-	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
-		int index = pop<int>(env);
+	auto& stack = env.get_stack<Code_ptr>();
+	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
+		int index = env.pop<int>();
 		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) <= index ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 
@@ -273,9 +273,9 @@ inline unsigned code_yank(Env& env) {
 	return 1;
 }
 inline unsigned exec_yank(Env& env) {
-	auto& stack = get_exec_stack(env);
-	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
-		int index = pop<int>(env);
+	auto& stack = env.get_exec_stack();
+	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
+		int index = env.pop<int>();
 		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) <= index ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 
@@ -290,9 +290,9 @@ inline unsigned exec_yank(Env& env) {
 
 template <typename T>
 inline unsigned yankdup(Env& env) {
-	auto& stack = get_stack<T>(env);
-	if (stack.size() >= 0 && get_stack<int>(env).size() > 0) {
-		int index = pop<int>(env);
+	auto& stack = env.get_stack<T>();
+	if (stack.size() >= 0 && env.get_stack<int>().size() > 0) {
+		int index = env.pop<int>();
 		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 
@@ -303,9 +303,9 @@ inline unsigned yankdup(Env& env) {
 template <> inline unsigned yankdup<std::shared_ptr<Code>>(Env& env) = delete;
 
 inline unsigned code_yankdup(Env& env) {
-	auto& stack = get_code_stack(env);
-	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
-		int index = pop<int>(env);
+	auto& stack = env.get_stack<Code_ptr>();
+	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
+		int index = env.pop<int>();
 		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 
@@ -314,9 +314,9 @@ inline unsigned code_yankdup(Env& env) {
 	return 1;
 }
 inline unsigned exec_yankdup(Env& env) {
-	auto& stack = get_exec_stack(env);
-	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
-		int index = pop<int>(env);
+	auto& stack = env.get_exec_stack();
+	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
+		int index = env.pop<int>();
 		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 
