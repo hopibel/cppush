@@ -14,10 +14,10 @@ inline unsigned equal(Env& env) {
 	}
 	return 1;
 }
+template <> inline unsigned equal<std::shared_ptr<Code>>(Env& env) = delete;
 
-template <>
-inline unsigned equal<std::shared_ptr<Code>>(Env& env) {
-	if (get_stack<std::shared_ptr<Code>>(env).size() >= 2) {
+inline unsigned code_equal(Env& env) {
+	if (get_code_stack(env).size() >= 2) {
 		auto first = pop_code(env);
 		auto second = pop_code(env);
 		get_stack<bool>(env).push_back(*first == *second);
@@ -49,6 +49,7 @@ inline unsigned protected_pop(Env& env) {
 	}
 	return 1;
 }
+template <> inline unsigned protected_pop<std::shared_ptr<Code>>(Env& env) = delete;
 
 // can't template because exec_stack is same type as code_stack
 inline unsigned protected_code_pop(Env& env) {
@@ -72,7 +73,15 @@ inline unsigned dup(Env& env) {
 	}
 	return 1;
 }
+template <> inline unsigned dup<std::shared_ptr<Code>>(Env& env) = delete;
 
+inline unsigned code_dup(Env& env) {
+	auto& stack = get_code_stack(env);
+	if (stack.size() > 0) {
+		stack.push_back(stack.back());
+	}
+	return 1;
+}
 inline unsigned exec_dup(Env& env) {
 	auto& stack = get_exec_stack(env);
 	if (stack.size() > 0) {
@@ -86,7 +95,12 @@ inline unsigned flush(Env& env) {
 	get_stack<T>(env).clear();
 	return 1;
 }
+template <> inline unsigned flush<std::shared_ptr<Code>>(Env& env) = delete;
 
+inline unsigned code_flush(Env& env) {
+	get_code_stack(env).clear();
+	return 1;
+}
 inline unsigned exec_flush(Env& env) {
 	get_exec_stack(env).clear();
 	return 1;
@@ -106,7 +120,21 @@ inline unsigned rot(Env& env) {
 	}
 	return 1;
 }
+template <> inline unsigned rot<std::shared_ptr<Code>>(Env& env) = delete;
 
+inline unsigned code_rot(Env& env) {
+	auto& stack = get_code_stack(env);
+	if (stack.size() >= 3) {
+		auto first = pop_code(env);
+		auto second = pop_code(env);
+		auto third = pop_code(env);
+
+		stack.push_back(second);
+		stack.push_back(first);
+		stack.push_back(third);
+	}
+	return 1;
+}
 inline unsigned exec_rot(Env& env) {
 	auto& stack = get_exec_stack(env);
 	if (stack.size() >= 3) {
@@ -134,7 +162,20 @@ inline unsigned shove(Env& env) {
 	}
 	return 1;
 }
+template <> inline unsigned shove<std::shared_ptr<Code>>(Env& env) = delete;
 
+inline unsigned code_shove(Env& env) {
+	auto& stack = get_code_stack(env);
+	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
+		int index = pop<int>(env);
+		index = index < 0 ? 0 : (static_cast<size_t>(index) >= stack.size() ? stack.size()-1 : index);
+		index = stack.size()-1 - index;
+		stack.insert(stack.begin() + index, pop_code(env));
+
+		return stack.size() - index + 1;
+	}
+	return 1;
+}
 inline unsigned exec_shove(Env& env) {
 	auto& stack = get_exec_stack(env);
 	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
@@ -153,7 +194,12 @@ inline unsigned stackdepth(Env& env) {
 	get_stack<int>(env).push_back(get_stack<T>(env).size());
 	return 1;
 }
+template <> inline unsigned stackdepth<std::shared_ptr<Code>>(Env& env) = delete;
 
+inline unsigned code_stackdepth(Env& env) {
+	get_stack<int>(env).push_back(get_code_stack(env).size());
+	return 1;
+}
 inline unsigned exec_stackdepth(Env& env) {
 	get_stack<int>(env).push_back(get_exec_stack(env).size());
 	return 1;
@@ -170,7 +216,18 @@ inline unsigned swap(Env& env) {
 	}
 	return 1;
 }
+template <> inline unsigned swap<std::shared_ptr<Code>>(Env& env) = delete;
 
+inline unsigned code_swap(Env& env) {
+	auto& stack = get_code_stack(env);
+	if (stack.size() >= 2) {
+		auto first = pop_code(env);
+		auto second = pop_code(env);
+		stack.push_back(first);
+		stack.push_back(second);
+	}
+	return 1;
+}
 inline unsigned exec_swap(Env& env) {
 	auto& stack = get_exec_stack(env);
 	if (stack.size() >= 2) {
@@ -198,7 +255,23 @@ inline unsigned yank(Env& env) {
 	}
 	return 1;
 }
+template <> inline unsigned yank<std::shared_ptr<Code>>(Env& env) = delete;
 
+inline unsigned code_yank(Env& env) {
+	auto& stack = get_code_stack(env);
+	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
+		int index = pop<int>(env);
+		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) <= index ? stack.size()-1 : index);
+		index = stack.size()-1 - index;
+
+		auto value = stack[index];
+		stack.erase(stack.begin() + index);
+		stack.push_back(value);
+
+		return stack.size() - index + 1;
+	}
+	return 1;
+}
 inline unsigned exec_yank(Env& env) {
 	auto& stack = get_exec_stack(env);
 	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
@@ -227,7 +300,19 @@ inline unsigned yankdup(Env& env) {
 	}
 	return 1;
 }
+template <> inline unsigned yankdup<std::shared_ptr<Code>>(Env& env) = delete;
 
+inline unsigned code_yankdup(Env& env) {
+	auto& stack = get_code_stack(env);
+	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {
+		int index = pop<int>(env);
+		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) ? stack.size()-1 : index);
+		index = stack.size()-1 - index;
+
+		stack.push_back(stack[index]);
+	}
+	return 1;
+}
 inline unsigned exec_yankdup(Env& env) {
 	auto& stack = get_exec_stack(env);
 	if (stack.size() > 0 && get_stack<int>(env).size() > 0) {

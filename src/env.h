@@ -42,7 +42,7 @@ class Env {
 		std::vector<std::shared_ptr<Code>> instruction_set_;
 };
 
-template <typename T> inline std::vector<T>& get_stack(Env& env) {return get_stack<T>(env);}
+template <typename T> inline std::vector<T>& get_stack(Env& env) = delete;
 template <> inline std::vector<int>& get_stack(Env& env) {return env.int_stack;}
 template <> inline std::vector<double>& get_stack(Env& env) {return env.float_stack;}
 template <> inline std::vector<bool>& get_stack(Env& env) {return env.bool_stack;}
