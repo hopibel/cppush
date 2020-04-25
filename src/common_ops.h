@@ -18,8 +18,8 @@ inline unsigned equal(Env& env) {
 template <>
 inline unsigned equal<std::shared_ptr<Code>>(Env& env) {
 	if (get_stack<std::shared_ptr<Code>>(env).size() >= 2) {
-		auto first = pop<std::shared_ptr<Code>>(env);
-		auto second = pop<std::shared_ptr<Code>>(env);
+		auto first = pop_code(env);
+		auto second = pop_code(env);
 		get_stack<bool>(env).push_back(*first == *second);
 		
 		int fsize = first->size();
@@ -51,6 +51,12 @@ inline unsigned protected_pop(Env& env) {
 }
 
 // can't template because exec_stack is same type as code_stack
+inline unsigned protected_code_pop(Env& env) {
+	if (!get_code_stack(env).empty()) {
+		pop_code(env);
+	}
+	return 1;
+}
 inline unsigned protected_exec_pop(Env& env) {
 	if (!get_exec_stack(env).empty()) {
 		pop_exec(env);

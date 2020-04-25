@@ -43,10 +43,10 @@ class Env {
 };
 
 template <typename T> inline std::vector<T>& get_stack(Env& env) {return get_stack<T>(env);}
-template <> inline std::vector<std::shared_ptr<Code>>& get_stack(Env& env) {return env.code_stack;}
 template <> inline std::vector<int>& get_stack(Env& env) {return env.int_stack;}
 template <> inline std::vector<double>& get_stack(Env& env) {return env.float_stack;}
 template <> inline std::vector<bool>& get_stack(Env& env) {return env.bool_stack;}
+inline std::vector<std::shared_ptr<Code>>& get_code_stack(Env& env) {return env.code_stack;}
 inline std::vector<std::shared_ptr<Code>>& get_exec_stack(Env& env) {return env.exec_stack;}
 // implement exec_stack functions manually
 
@@ -55,9 +55,16 @@ template <typename T> inline T pop(Env& env) {
 	get_stack<T>(env).pop_back();
 	return first;
 }
+inline std::shared_ptr<Code> pop_code(Env& env) {
+	auto& stack = get_code_stack(env);
+	auto first = stack.back();
+	stack.pop_back();
+	return first;
+}
 inline std::shared_ptr<Code> pop_exec(Env& env) {
-	auto first = get_exec_stack(env).back();
-	get_exec_stack(env).pop_back();
+	auto& stack = get_exec_stack(env);
+	auto first = stack.back();
+	stack.pop_back();
 	return first;
 }
 
