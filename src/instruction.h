@@ -34,7 +34,7 @@ class Instruction : public CodeAtom {
 
 	protected:
 		bool equal_to(const Code& rhs) const override {
-			return op_ == static_cast<const Instruction&>(rhs).op_;
+			return name == static_cast<const Instruction&>(rhs).name;
 		}
 };
 

@@ -41,10 +41,10 @@ class Env {
 		// needed for generic stack manipulation functions
 		template <typename T> std::vector<T>& get_stack() = delete;
 		// exec is just another Code_ptr stack. can't template it
-		std::vector<Code_ptr>& get_exec_stack() {return exec_stack;}
+		std::vector<Code_ptr>& get_exec_stack() {return exec_stack;};
 
-		template <typename T> inline T pop();
-		inline Code_ptr pop_exec();
+		template <typename T> T pop();
+		Code_ptr pop_exec() {return pop_impl_(get_exec_stack());};
 	
 	private:
 		std::vector<std::shared_ptr<Code>> instruction_set_;
@@ -65,9 +65,7 @@ T Env::pop_impl_(std::vector<T>& stack) {
 	stack.pop_back();
 	return top;
 }
-
 template <typename T> T Env::pop() {return pop_impl_(get_stack<T>());}
-Code_ptr Env::pop_exec() {return pop_impl_(get_exec_stack());}
 
 } // namespace cppush
 
