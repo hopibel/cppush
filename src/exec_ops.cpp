@@ -23,10 +23,7 @@ unsigned exec_do_range(Env& env) {
 			index += index > dest ? -1 : 1;
 
 			static auto do_range_insn = std::make_shared<Instruction>(
-					exec_do_range,
-					"EXEC.DO*RANGE",
-					EXEC | INT,
-					1);
+					exec_do_range, "EXEC.DO*RANGE");
 
 			std::vector<std::shared_ptr<Code>> rcall{
 					std::make_shared<Literal<int>>(index),
@@ -51,10 +48,7 @@ unsigned exec_do_count(Env& env) {
 		auto code = env.pop_exec();
 
 		static auto do_range_insn = std::make_shared<Instruction>(
-				exec_do_range,
-				"EXEC.DO*RANGE",
-				EXEC | INT,
-				1);
+				exec_do_range, "EXEC.DO*RANGE");
 
 		std::vector<std::shared_ptr<Code>> rcall{
 				std::make_shared<Literal<int>>(0),
@@ -76,14 +70,9 @@ unsigned exec_do_times(Env& env) {
 		auto code = env.pop_exec();
 
 		static auto do_range_insn = std::make_shared<Instruction>(
-				exec_do_range,
-				"EXEC.DO*RANGE",
-				EXEC | INT,
-				1);
+				exec_do_range, "EXEC.DO*RANGE");
 		static auto int_pop = std::make_shared<Instruction>(
-				protected_pop<int>,
-				"INTEGER.POP",
-				INT);
+				protected_pop<int>, "INTEGER.POP");
 
 		std::vector<std::shared_ptr<Code>> pop_code{int_pop, code};
 
@@ -140,10 +129,7 @@ unsigned exec_y(Env& env) {
 	if (env.get_exec_stack().size() > 0) {
 		auto first = env.pop_exec();
 		static auto y_insn = std::make_shared<Instruction>(
-				exec_y,
-				"EXEC.Y",
-				EXEC,
-				1);
+				exec_y, "EXEC.Y");
 
 		std::vector<std::shared_ptr<Code>> rcall{y_insn, first};
 		env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));

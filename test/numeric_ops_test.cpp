@@ -10,7 +10,7 @@
 TEMPLATE_TEST_CASE("Instruction: ADD", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
-	cppush::Instruction op(cppush::add<TestType>, "+", 0);
+	cppush::Instruction op(cppush::add<TestType>, "+");
 
 	for (int i = -2; i <= 2; ++i) {
 		for (int j = -2; j <= 2; ++j) {
@@ -27,7 +27,7 @@ TEMPLATE_TEST_CASE("Instruction: ADD", "", int, double) {
 TEMPLATE_TEST_CASE("Instruction: SUB", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
-	cppush::Instruction op(cppush::sub<TestType>, "-", 0);
+	cppush::Instruction op(cppush::sub<TestType>, "-");
 
 	for (int i = -2; i <= 2; ++i) {
 		for (int j = -2; j <= 2; ++j) {
@@ -44,7 +44,7 @@ TEMPLATE_TEST_CASE("Instruction: SUB", "", int, double) {
 TEMPLATE_TEST_CASE("Instruction: MUL", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
-	cppush::Instruction op(cppush::mul<TestType>, "*", 0);
+	cppush::Instruction op(cppush::mul<TestType>, "*");
 
 	for (int i = -2; i <= 2; ++i) {
 		for (int j = -2; j <= 2; ++j) {
@@ -61,7 +61,7 @@ TEMPLATE_TEST_CASE("Instruction: MUL", "", int, double) {
 TEMPLATE_TEST_CASE("Instruction: DIV", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
-	cppush::Instruction op(cppush::div<TestType>, "/", 0);
+	cppush::Instruction op(cppush::div<TestType>, "/");
 
 	SECTION("Division by zero is noop") {
 		stack.push_back(1);
@@ -89,7 +89,7 @@ TEMPLATE_TEST_CASE("Instruction: DIV", "", int, double) {
 
 TEST_CASE("Instruction: INT.%") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::int_mod, "INT.%", 0);
+	cppush::Instruction op(cppush::int_mod, "INT.%");
 
 	SECTION("Int modulo 0 is noop") {
 		env.int_stack.push_back(1);
@@ -117,7 +117,7 @@ TEST_CASE("Instruction: INT.%") {
 
 TEST_CASE("Instruction: FLOAT.%") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::float_mod, "FLOAT.%", 0);
+	cppush::Instruction op(cppush::float_mod, "FLOAT.%");
 
 	SECTION("Float modulo 0 is noop") {
 		env.float_stack.push_back(1.0);
@@ -147,7 +147,7 @@ TEMPLATE_TEST_CASE("Instruction: LT", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
 	auto& bool_stack = env.get_stack<bool>();
-	cppush::Instruction op(cppush::less_than<TestType>, "<", 0);
+	cppush::Instruction op(cppush::less_than<TestType>, "<");
 
 	for (int i = -2; i <= 2; ++i) {
 		for (int j = -2; j <= 2; ++j) {
@@ -166,7 +166,7 @@ TEMPLATE_TEST_CASE("Instruction: GT", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
 	auto& bool_stack = env.get_stack<bool>();
-	cppush::Instruction op(cppush::greater_than<TestType>, ">", 0);
+	cppush::Instruction op(cppush::greater_than<TestType>, ">");
 
 	for (int i = -2; i <= 2; ++i) {
 		for (int j = -2; j <= 2; ++j) {
@@ -183,7 +183,7 @@ TEMPLATE_TEST_CASE("Instruction: GT", "", int, double) {
 
 TEST_CASE("Instruction: INT.FROMBOOL") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::int_from_bool, "INT.FROMBOOL", 0);
+	cppush::Instruction op(cppush::int_from_bool, "INT.FROMBOOL");
 
 	env.bool_stack.push_back(true);
 	op(env);
@@ -201,7 +201,7 @@ TEST_CASE("Instruction: INT.FROMBOOL") {
 
 TEST_CASE("Instruction: INT.FROMFLOAT") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::int_from_float, "INT.FROMFLOAT", 0);
+	cppush::Instruction op(cppush::int_from_float, "INT.FROMFLOAT");
 
 	for (double i = -2.0; i <= 2.0; i += 0.5) {
 		env.int_stack.clear();
@@ -215,7 +215,7 @@ TEST_CASE("Instruction: INT.FROMFLOAT") {
 
 TEST_CASE("Instruction: FLOAT.FROMBOOL") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::float_from_bool, "FLOAT.FROMBOOL", 0);
+	cppush::Instruction op(cppush::float_from_bool, "FLOAT.FROMBOOL");
 
 	SECTION("true -> 1.0") {
 		env.bool_stack.push_back(true);
@@ -234,7 +234,7 @@ TEST_CASE("Instruction: FLOAT.FROMBOOL") {
 
 TEST_CASE("Instruction: FLOAT.FROMINT") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::float_from_int, "FLOAT.FROMINT", 0);
+	cppush::Instruction op(cppush::float_from_int, "FLOAT.FROMINT");
 
 	for (int i = -2; i <= 2; ++i) {
 		env.float_stack.clear();
@@ -248,7 +248,7 @@ TEST_CASE("Instruction: FLOAT.FROMINT") {
 
 TEST_CASE("Instruction: BOOLEAN.FROMINT") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::bool_from_int, "BOOLEAN.FROMINT", 0);
+	cppush::Instruction op(cppush::bool_from_int, "BOOLEAN.FROMINT");
 
 	for (int i = -2; i <= 2; ++i) {
 		env.bool_stack.clear();
@@ -262,7 +262,7 @@ TEST_CASE("Instruction: BOOLEAN.FROMINT") {
 
 TEST_CASE("Instruction: BOOLEAN.FROMFLOAT") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::bool_from_float, "BOOLEAN.FROMFLOAT", 0);
+	cppush::Instruction op(cppush::bool_from_float, "BOOLEAN.FROMFLOAT");
 
 	for (double i = -2; i <= 2; i += 0.5) {
 		env.bool_stack.clear();
@@ -276,7 +276,7 @@ TEST_CASE("Instruction: BOOLEAN.FROMFLOAT") {
 
 TEMPLATE_TEST_CASE("Instruction: MAX", "", int, double) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::max<TestType>, "MAX", 0);
+	cppush::Instruction op(cppush::max<TestType>, "MAX");
 	auto& stack = env.get_stack<TestType>();
 
 	for (TestType i = -2; i <= 2; ++i) {
@@ -292,7 +292,7 @@ TEMPLATE_TEST_CASE("Instruction: MAX", "", int, double) {
 
 TEMPLATE_TEST_CASE("Instruction: MIN", "", int, double) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::min<TestType>, "MIN", 0);
+	cppush::Instruction op(cppush::min<TestType>, "MIN");
 	auto& stack = env.get_stack<TestType>();
 
 	for (TestType i = -2; i <= 2; ++i) {
@@ -308,7 +308,7 @@ TEMPLATE_TEST_CASE("Instruction: MIN", "", int, double) {
 
 TEST_CASE("Instruction: FLOAT.COS") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::trig_cos, "FLOAT.COS", 0);
+	cppush::Instruction op(cppush::trig_cos, "FLOAT.COS");
 
 	for (double i = -2; i <= 2; i += 0.1) {
 		env.float_stack.clear();
@@ -320,7 +320,7 @@ TEST_CASE("Instruction: FLOAT.COS") {
 
 TEST_CASE("Instruction: FLOAT.SIN") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::trig_sin, "FLOAT.SIN", 0);
+	cppush::Instruction op(cppush::trig_sin, "FLOAT.SIN");
 
 	for (double i = -2; i <= 2; i += 0.1) {
 		env.float_stack.clear();
@@ -332,7 +332,7 @@ TEST_CASE("Instruction: FLOAT.SIN") {
 
 TEST_CASE("Instruction: FLOAT.TAN") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::trig_tan, "FLOAT.TAN", 0);
+	cppush::Instruction op(cppush::trig_tan, "FLOAT.TAN");
 
 	for (double i = -2; i <= 2; i += 0.1) {
 		env.float_stack.clear();

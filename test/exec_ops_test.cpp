@@ -11,7 +11,7 @@
 
 TEST_CASE("Instruction: EXEC.DO*RANGE") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_do_range, "EXEC.DO*RANGE", 0);
+	cppush::Instruction op(cppush::exec_do_range, "EXEC.DO*RANGE");
 
 	cppush::CodeList body;
 	env.exec_stack.push_back(std::make_shared<cppush::CodeList>(body));
@@ -55,8 +55,8 @@ TEST_CASE("Instruction: EXEC.DO*RANGE") {
 
 TEST_CASE("Instruction: EXEC.DO*COUNT") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_do_count, "EXEC.DO*COUNT", 0);
-	cppush::Instruction do_range(cppush::exec_do_range, "EXEC.DO*RANGE", 0);
+	cppush::Instruction op(cppush::exec_do_count, "EXEC.DO*COUNT");
+	cppush::Instruction do_range(cppush::exec_do_range, "EXEC.DO*RANGE");
 	cppush::CodeList body;
 	env.exec_stack.push_back(std::make_shared<cppush::CodeList>(body));
 
@@ -88,9 +88,9 @@ TEST_CASE("Instruction: EXEC.DO*COUNT") {
 
 TEST_CASE("Instruction: EXEC.DO*TIMES") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_do_times, "EXEC.DO*TIMES", 0);
-	cppush::Instruction do_range(cppush::exec_do_range, "EXEC.DO*RANGE", 0);
-	cppush::Instruction pop_insn(cppush::protected_pop<int>, "INTEGER.POP", 0);
+	cppush::Instruction op(cppush::exec_do_times, "EXEC.DO*TIMES");
+	cppush::Instruction do_range(cppush::exec_do_range, "EXEC.DO*RANGE");
+	cppush::Instruction pop_insn(cppush::protected_pop<int>, "INTEGER.POP");
 	cppush::CodeList body;
 	env.exec_stack.push_back(std::make_shared<cppush::CodeList>(body));
 
@@ -125,7 +125,7 @@ TEST_CASE("Instruction: EXEC.DO*TIMES") {
 
 TEST_CASE("Instruction: EXEC.IF") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_if, "EXEC.IF", 0);
+	cppush::Instruction op(cppush::exec_if, "EXEC.IF");
 	cppush::CodeList branchA;
 	cppush::CodeList branchB({std::make_shared<cppush::CodeList>(branchA)});
 	env.exec_stack.push_back(std::make_shared<cppush::CodeList>(branchB));
@@ -152,7 +152,7 @@ TEST_CASE("Instruction: EXEC.IF") {
 
 TEST_CASE("Instruction: EXEC.K") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_k, "EXEC.K", 0);
+	cppush::Instruction op(cppush::exec_k, "EXEC.K");
 	cppush::CodeList branchA;
 	cppush::CodeList branchB({std::make_shared<cppush::CodeList>(branchA)});
 
@@ -170,7 +170,7 @@ TEST_CASE("Instruction: EXEC.K") {
 
 TEST_CASE("Instruction: EXEC.S") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_s, "EXEC.S", 0);
+	cppush::Instruction op(cppush::exec_s, "EXEC.S");
 	cppush::CodeList a;
 	cppush::CodeList b({std::make_shared<cppush::CodeList>(a)});
 	cppush::CodeList c({std::make_shared<cppush::CodeList>(b)});
@@ -200,7 +200,7 @@ TEST_CASE("Instruction: EXEC.S") {
 
 TEST_CASE("Instruction: EXEC.Y") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_y, "EXEC.Y", 0);
+	cppush::Instruction op(cppush::exec_y, "EXEC.Y");
 	cppush::CodeList body;
 
 	env.exec_stack.push_back(std::make_shared<cppush::CodeList>(body));

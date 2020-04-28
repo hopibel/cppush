@@ -154,9 +154,7 @@ unsigned code_do(Env& env) {
 	auto& stack = env.get_stack<Code_ptr>();
 	if (stack.size() > 0) {
 		static std::shared_ptr<Instruction> code_pop = std::make_shared<Instruction>(
-				protected_pop<Code_ptr>,
-				"CODE.POP",
-				CODE);
+				protected_pop<Code_ptr>, "CODE.POP");
 		env.exec_stack.push_back(code_pop);
 		env.exec_stack.push_back(stack.back());
 	}
@@ -191,14 +189,9 @@ unsigned code_do_range(Env& env) {
 			index += index > dest ? -1 : 1;
 
 			static auto do_range_insn = std::make_shared<Instruction>(
-					code_do_range,
-					"CODE.DO*RANGE",
-					CODE | EXEC | INT);
+					code_do_range, "CODE.DO*RANGE");
 			static auto quote_insn = std::make_shared<Instruction>(
-					code_quote,
-					"CODE.QUOTE",
-					CODE | EXEC,
-					1);
+					code_quote, "CODE.QUOTE");
 
 			std::vector<std::shared_ptr<Code>> rcall{
 					std::make_shared<Literal<int>>(index),
@@ -222,14 +215,9 @@ unsigned code_do_count(Env& env) {
 		auto code = env.pop<Code_ptr>();
 
 		static auto do_range_insn = std::make_shared<Instruction>(
-				code_do_range,
-				"CODE.DO*RANGE",
-				CODE | EXEC | INT);
+				code_do_range, "CODE.DO*RANGE");
 		static auto quote_insn = std::make_shared<Instruction>(
-				code_quote,
-				"CODE.QUOTE",
-				CODE | EXEC,
-				1);
+				code_quote, "CODE.QUOTE");
 
 		std::vector<std::shared_ptr<Code>> rcall{
 			std::make_shared<Literal<int>>(0),
@@ -251,18 +239,11 @@ unsigned code_do_times(Env& env) {
 		auto code = env.pop<Code_ptr>();
 
 		static auto do_range_insn = std::make_shared<Instruction>(
-				code_do_range,
-				"CODE.DO*RANGE",
-				CODE | EXEC | INT);
+				code_do_range, "CODE.DO*RANGE");
 		static auto quote_insn = std::make_shared<Instruction>(
-				code_quote,
-				"CODE.QUOTE",
-				CODE | EXEC,
-				1);
+				code_quote, "CODE.QUOTE");
 		static auto int_pop = std::make_shared<Instruction>(
-				protected_pop<int>,
-				"INTEGER.POP",
-				INT);
+				protected_pop<int>, "INTEGER.POP");
 
 		std::vector<std::shared_ptr<Code>> pop_code{int_pop, code};
 
@@ -277,8 +258,6 @@ unsigned code_do_times(Env& env) {
 	return 1;
 }
 
-// TODO(hopibel): should probably factor these helper functions out into a private library
-// remove when you do
 namespace detail {
 
 // assumptions: 0 <= index < code->size()

@@ -14,7 +14,7 @@
 
 TEST_CASE("Instruction: CODE.APPEND") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_append, "CODE.APPEND", 0);
+	cppush::Instruction op(cppush::code_append, "CODE.APPEND");
 
 	SECTION("Both atoms"){
 		auto first = std::make_shared<cppush::Literal<int>>(1);
@@ -78,7 +78,7 @@ TEST_CASE("Instruction: CODE.APPEND") {
 
 TEST_CASE("Instruction: CODE.ATOM") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_atom, "CODE.ATOM", 0);
+	cppush::Instruction op(cppush::code_atom, "CODE.ATOM");
 
 	SECTION("Atom") {
 		auto atom = std::make_shared<cppush::Literal<int>>(0);
@@ -99,7 +99,7 @@ TEST_CASE("Instruction: CODE.ATOM") {
 
 TEST_CASE("Instruction: CODE.CAR") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_car, "CODE.CAR", 0);
+	cppush::Instruction op(cppush::code_car, "CODE.CAR");
 
 	SECTION("Atom") {
 		auto atom = std::make_shared<cppush::Literal<int>>(0);
@@ -121,7 +121,7 @@ TEST_CASE("Instruction: CODE.CAR") {
 
 TEST_CASE("Instruction: CODE.CDR") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_cdr, "CODE.CDR", 0);
+	cppush::Instruction op(cppush::code_cdr, "CODE.CDR");
 
 	SECTION("Atom") {
 		auto atom = std::make_shared<cppush::Literal<int>>(0);
@@ -147,7 +147,7 @@ TEST_CASE("Instruction: CODE.CDR") {
 
 TEST_CASE("Instruction: CODE.CONS") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_cons, "CODE.CONS", 0);
+	cppush::Instruction op(cppush::code_cons, "CODE.CONS");
 
 	auto second = std::make_shared<cppush::Literal<int>>(1);
 
@@ -180,7 +180,7 @@ TEST_CASE("Instruction: CODE.CONS") {
 
 TEST_CASE("Instruction: CODE.CONTAINER") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_container, "CODE.CONTAINER", 0);
+	cppush::Instruction op(cppush::code_container, "CODE.CONTAINER");
 
 	/*
 	For example, if the top piece of code is "( B ( C ( A ) ) ( D ( A ) ) )" and the second piece of code is
@@ -225,7 +225,7 @@ TEST_CASE("Instruction: CODE.CONTAINER") {
 
 TEST_CASE("Instruction: CODE.CONTAINS") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_contains, "CODE.CONTAINS", 0);
+	cppush::Instruction op(cppush::code_contains, "CODE.CONTAINS");
 
 	/*
 	 * First:	( A )
@@ -280,10 +280,10 @@ TEST_CASE("Instruction: CODE.CONTAINS") {
 
 TEST_CASE("Instruction: CODE.DO") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_do, "CODE.DO", 0);
+	cppush::Instruction op(cppush::code_do, "CODE.DO");
 
 	std::shared_ptr<cppush::Instruction> pop_insn = std::make_shared<cppush::Instruction>(
-			cppush::protected_pop<cppush::Code_ptr>, "CODE.POP", cppush::CODE);
+			cppush::protected_pop<cppush::Code_ptr>, "CODE.POP");
 	std::shared_ptr<cppush::CodeList> code_list = std::make_shared<cppush::CodeList>();
 
 	env.code_stack.push_back(code_list);
@@ -296,7 +296,7 @@ TEST_CASE("Instruction: CODE.DO") {
 
 TEST_CASE("Instruction: CODE.DO*") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_do_star, "CODE.DO*", 0);
+	cppush::Instruction op(cppush::code_do_star, "CODE.DO*");
 
 	std::shared_ptr<cppush::CodeList> code_list = std::make_shared<cppush::CodeList>();
 
@@ -309,7 +309,7 @@ TEST_CASE("Instruction: CODE.DO*") {
 
 TEST_CASE("Instruction: CODE.QUOTE") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_quote, "CODE.QUOTE", 0);
+	cppush::Instruction op(cppush::code_quote, "CODE.QUOTE");
 
 	std::shared_ptr<cppush::CodeList> code_list = std::make_shared<cppush::CodeList>();
 
@@ -321,8 +321,8 @@ TEST_CASE("Instruction: CODE.QUOTE") {
 
 TEST_CASE("Instruction: CODE.DO*RANGE") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_do_range, "CODE.DO*RANGE", 0);
-	cppush::Instruction quote_op(cppush::code_quote, "CODE.QUOTE", 0);
+	cppush::Instruction op(cppush::code_do_range, "CODE.DO*RANGE");
+	cppush::Instruction quote_op(cppush::code_quote, "CODE.QUOTE");
 
 	cppush::CodeList body;
 	env.code_stack.push_back(std::make_shared<cppush::CodeList>(body));
@@ -368,9 +368,9 @@ TEST_CASE("Instruction: CODE.DO*RANGE") {
 
 TEST_CASE("Instruction: CODE.DO*COUNT") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_do_count, "CODE.DO*COUNT", 0);
-	cppush::Instruction do_range(cppush::code_do_range, "CODE.DO*RANGE", 0);
-	cppush::Instruction quote_op(cppush::code_quote, "CODE.QUOTE", 0);
+	cppush::Instruction op(cppush::code_do_count, "CODE.DO*COUNT");
+	cppush::Instruction do_range(cppush::code_do_range, "CODE.DO*RANGE");
+	cppush::Instruction quote_op(cppush::code_quote, "CODE.QUOTE");
 
 	cppush::CodeList body;
 	env.code_stack.push_back(std::make_shared<cppush::CodeList>(body));
@@ -405,10 +405,10 @@ TEST_CASE("Instruction: CODE.DO*COUNT") {
 
 TEST_CASE("Instruction: CODE.DO*TIMES") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_do_times, "CODE.DO*TIMES", 0);
-	cppush::Instruction quote_op(cppush::code_quote, "CODE.QUOTE", 0);
-	cppush::Instruction pop_insn(cppush::protected_pop<int>, "INTEGER.POP", 0);
-	cppush::Instruction do_range(cppush::code_do_range, "CODE.DO*RANGE", 0);
+	cppush::Instruction op(cppush::code_do_times, "CODE.DO*TIMES");
+	cppush::Instruction quote_op(cppush::code_quote, "CODE.QUOTE");
+	cppush::Instruction pop_insn(cppush::protected_pop<int>, "INTEGER.POP");
+	cppush::Instruction do_range(cppush::code_do_range, "CODE.DO*RANGE");
 
 	cppush::CodeList body;
 	env.code_stack.push_back(std::make_shared<cppush::CodeList>(body));
@@ -446,7 +446,7 @@ TEST_CASE("Instruction: CODE.DO*TIMES") {
 
 TEST_CASE("Instruction: CODE.EXTRACT") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_extract, "CODE.EXTRACT", 0);
+	cppush::Instruction op(cppush::code_extract, "CODE.EXTRACT");
 
 	/*
 	 * 0: ( B C ( A ) ( D ( A ) ) )
@@ -546,7 +546,7 @@ TEST_CASE("Instruction: CODE.EXTRACT") {
 
 TEST_CASE("Instruction: CODE.FROM_BOOL") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_from_bool, "CODE.FROM_BOOL", 0);
+	cppush::Instruction op(cppush::code_from_bool, "CODE.FROM_BOOL");
 
 	auto bool_literal = std::make_shared<cppush::Literal<bool>>(true);
 	env.bool_stack.push_back(true);
@@ -557,7 +557,7 @@ TEST_CASE("Instruction: CODE.FROM_BOOL") {
 
 TEST_CASE("Instruction: CODE.FROM_FLOAT") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_from_float, "CODE.FROM_FLOAT", 0);
+	cppush::Instruction op(cppush::code_from_float, "CODE.FROM_FLOAT");
 
 	const double val = 6.9; // nice
 
@@ -570,7 +570,7 @@ TEST_CASE("Instruction: CODE.FROM_FLOAT") {
 
 TEST_CASE("Instruction: CODE.FROM_INT") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_from_int, "CODE.FROM_INT", 0);
+	cppush::Instruction op(cppush::code_from_int, "CODE.FROM_INT");
 
 	const int val = 69; // nice
 
@@ -583,7 +583,7 @@ TEST_CASE("Instruction: CODE.FROM_INT") {
 
 TEST_CASE("Instruction: CODE.IF") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_if, "CODE.IF", 0);
+	cppush::Instruction op(cppush::code_if, "CODE.IF");
 	cppush::CodeList branchA;
 	cppush::CodeList branchB({std::make_shared<cppush::CodeList>(branchA)});
 
@@ -613,7 +613,7 @@ TEST_CASE("Instruction: CODE.IF") {
 
 TEST_CASE("Instruction: CODE.INSERT") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_insert, "CODE.INSERT", 0);
+	cppush::Instruction op(cppush::code_insert, "CODE.INSERT");
 
 	/*
 	 * 0: ( B C ( A ) )
@@ -686,7 +686,7 @@ TEST_CASE("Instruction: CODE.INSERT") {
 
 TEST_CASE("Instruction: CODE.LENGTH") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_length, "CODE.LENGTH", 0);
+	cppush::Instruction op(cppush::code_length, "CODE.LENGTH");
 
 	/*
 	 * ( B C ( A ) )
@@ -716,7 +716,7 @@ TEST_CASE("Instruction: CODE.LENGTH") {
 
 TEST_CASE("Instruction: CODE.LIST") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_list, "CODE.LIST", 0);
+	cppush::Instruction op(cppush::code_list, "CODE.LIST");
 
 	/*
 	 * A B -> ( B A )
@@ -736,7 +736,7 @@ TEST_CASE("Instruction: CODE.LIST") {
 
 TEST_CASE("Instruction: CODE.MEMBER") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_member, "CODE.MEMBER", 0);
+	cppush::Instruction op(cppush::code_member, "CODE.MEMBER");
 
 	/*
 	 * ( A B )
@@ -767,7 +767,7 @@ TEST_CASE("Instruction: CODE.MEMBER") {
 
 TEST_CASE("Instruction: CODE.NOOP") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_noop, "CODE.NOOP", 0);
+	cppush::Instruction op(cppush::code_noop, "CODE.NOOP");
 
 	env.exec_stack.push_back(std::make_shared<cppush::Instruction>(op));
 	auto exec_stack_copy = env.exec_stack;
@@ -777,7 +777,7 @@ TEST_CASE("Instruction: CODE.NOOP") {
 
 TEST_CASE("Instruction: CODE.NTH") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_nth, "CODE.NTH", 0);
+	cppush::Instruction op(cppush::code_nth, "CODE.NTH");
 
 	/*
 	 * ( B C ( A ) )
@@ -862,7 +862,7 @@ TEST_CASE("Instruction: CODE.NTH") {
 
 TEST_CASE("Instruction: CODE.NTHCDR") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_nthcdr, "CODE.NTHCDR", 0);
+	cppush::Instruction op(cppush::code_nthcdr, "CODE.NTHCDR");
 
 	/*
 	 * ( B C ( A ) )
@@ -959,7 +959,7 @@ TEST_CASE("Instruction: CODE.NTHCDR") {
 
 TEST_CASE("Instruction: CODE.NULL") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_null, "CODE.NULL", 0);
+	cppush::Instruction op(cppush::code_null, "CODE.NULL");
 
 	auto nil = std::make_shared<cppush::CodeList>();
 	auto a = std::make_shared<cppush::Literal<int>>(1);
@@ -981,7 +981,7 @@ TEST_CASE("Instruction: CODE.NULL") {
 
 TEST_CASE("Instruction: CODE.POSITION") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_position, "CODE.POSITION", 0);
+	cppush::Instruction op(cppush::code_position, "CODE.POSITION");
 
 	auto a = std::make_shared<cppush::Literal<int>>(1);
 	auto b = std::make_shared<cppush::Literal<int>>(2);
@@ -1015,7 +1015,7 @@ TEST_CASE("Instruction: CODE.POSITION") {
 
 TEST_CASE("Instruction: CODE.SIZE") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_size, "CODE.SIZE", 0);
+	cppush::Instruction op(cppush::code_size, "CODE.SIZE");
 
 	/*
 	 * () = 1
@@ -1060,7 +1060,7 @@ TEST_CASE("Instruction: CODE.SIZE") {
 
 TEST_CASE("Instruction: CODE.SUBST") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_subst, "CODE.SUBST", 0);
+	cppush::Instruction op(cppush::code_subst, "CODE.SUBST");
 
 	/*
 	 * A B B = A
