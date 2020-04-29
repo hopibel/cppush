@@ -40,11 +40,12 @@ class Env {
 
 		// needed for generic stack manipulation functions
 		template <typename T> std::vector<T>& get_stack() = delete;
-		// exec is just another Code_ptr stack. can't template it
-		std::vector<Code_ptr>& get_exec_stack() {return exec_stack;};
+		std::vector<Code_ptr>& get_exec_stack() { return exec_stack; }
 
 		template <typename T> T pop();
-		Code_ptr pop_exec() {return pop_impl_(get_exec_stack());};
+		Code_ptr pop_exec() { return pop_impl_(get_exec_stack()); }
+		template <typename T> inline void push(T item);
+		inline void push_exec(Code_ptr item) { get_exec_stack().push_back(item); }
 	
 	private:
 		std::vector<std::shared_ptr<Code>> instruction_set_;
@@ -60,12 +61,17 @@ template <> inline std::vector<Code_ptr>& Env::get_stack() {return code_stack;}
 
 // pop from a stack and return element popped
 template <typename T>
-T Env::pop_impl_(std::vector<T>& stack) {
+inline T Env::pop_impl_(std::vector<T>& stack) {
 	T top = stack.back();
 	stack.pop_back();
 	return top;
 }
-template <typename T> T Env::pop() {return pop_impl_(get_stack<T>());}
+template <typename T>
+inline T Env::pop() { return pop_impl_(get_stack<T>()); }
+
+// push to a stack
+template <typename T>
+inline void Env::push(T item) { get_stack<T>().push_back(item); }
 
 } // namespace cppush
 

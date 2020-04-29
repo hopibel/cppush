@@ -73,7 +73,7 @@ unsigned exec_shove(Env& env) {
 }
 
 unsigned exec_stackdepth(Env& env) {
-	env.get_stack<int>().push_back(env.get_exec_stack().size());
+	env.push<int>(env.get_exec_stack().size());
 	return 1;
 }
 
@@ -88,20 +88,14 @@ unsigned exec_swap(Env& env) {
 	return 1;
 }
 
-unsigned exec_yank(Env& env) {
-	auto& stack = env.get_exec_stack();
-	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
-		int index = env.pop<int>();
-		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) <= index ? stack.size()-1 : index);
-		index = stack.size()-1 - index;
-
-		auto value = stack[index];
-		stack.erase(stack.begin() + index);
-		stack.push_back(value);
-
-		return stack.size() - index + 1;
+template <> unsigned yank<int>(Env& env) {
+	if (env.get_stack<int>().size() >= 2) {
+		return detail::yank_impl<int>(env, env.get_stack<int>());
 	}
 	return 1;
+}
+unsigned exec_yank(Env& env) {
+	return detail::yank_impl<Code_ptr>(env, env.get_exec_stack());
 }
 
 unsigned exec_yankdup(Env& env) {

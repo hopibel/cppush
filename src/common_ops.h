@@ -4,6 +4,8 @@
 #include "code.h"
 #include "env.h"
 
+#include <algorithm>
+
 namespace cppush {
 
 template <typename T>
@@ -97,22 +99,29 @@ unsigned swap(Env& env) {
 }
 unsigned exec_swap(Env& env);
 
+namespace detail {
+
 template <typename T>
-unsigned yank(Env& env) {
-	auto& stack = env.get_stack<T>();
+unsigned yank_impl(Env& env, std::vector<T>& stack) {
 	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
 		int index = env.pop<int>();
 		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
 
-		auto value = stack[index];
-		stack.erase(stack.begin() + index);
-		stack.push_back(value);
+		std::rotate(stack.begin() + index, stack.begin() + index + 1, stack.end());
 
-		return stack.size() - index + 1;
+		return stack.size() - index;
 	}
 	return 1;
 }
+
+} // namespace detail
+
+template <typename T>
+unsigned yank(Env& env) {
+	return detail::yank_impl<T>(env, env.get_stack<T>());
+}
+template <> unsigned yank<int>(Env& env);
 unsigned exec_yank(Env& env);
 
 template <typename T>

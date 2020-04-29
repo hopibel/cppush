@@ -16,7 +16,7 @@ bool Code::operator==(const Code& rhs) const {
 	auto rstack = rhs.get_stack();
 
 	if (lstack.size() != rstack.size()) {return false;}
-	for (int i = 0; i < lstack.size(); ++i) {
+	for (unsigned i = 0; i < lstack.size(); ++i) {
 		if (!(*lstack[i] == *rstack[i])) {return false;}
 	}
 
