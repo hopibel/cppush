@@ -4,8 +4,8 @@ add_library(cppush
 	env.cpp
 	env.h
 	instruction.h
-	instruction_manager.h
-	instruction_manager.cpp
+	instruction_set.h
+	instruction_set.cpp
 	literal.h
 	bool_ops.h
 	bool_ops.cpp
@@ -17,7 +17,9 @@ add_library(cppush
 	exec_ops.cpp
 	numeric_ops.h
 	numeric_ops.cpp
+	types.h
 )
 target_include_directories(cppush PUBLIC
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
 )
+target_compile_features(cppush PUBLIC cxx_std_17)
