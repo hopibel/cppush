@@ -1,5 +1,6 @@
-#include "instruction_manager.h"
+#include "instruction_set.h"
 
+#include "code.h"
 #include "instruction.h"
 #include "bool_ops.h"
 #include "code_ops.h"
@@ -14,7 +15,9 @@
 
 namespace cppush {
 
-const std::unordered_map<std::string, std::pair<unsigned (*)(Env&), Types>> core_instructions{
+namespace detail {
+
+const std::map<std::string, std::pair<unsigned (*)(Env&), Types>> core_instructions{
 	// exec
 	{"EXEC.DO*RANGE", {exec_do_range, Type::EXEC | Type::INT}},
 	{"EXEC.DO*COUNT", {exec_do_count, Type::EXEC | Type::INT}},
@@ -149,13 +152,30 @@ const std::unordered_map<std::string, std::pair<unsigned (*)(Env&), Types>> core
 	{"EXEC.YANKDUP", {exec_yankdup, Type::EXEC | Type::INT}},
 };
 
-InstructionManager& InstructionManager::register_core() {
-	for (const auto& el : core_instructions) {
-		register_op(std::get<0>(el.second), el.first);
-	}
-
-	return *this;
+void load_instruction(std::vector<Code_ptr>& instruction_set, std::string name) {
+	auto insn = core_instructions.at(name);
+	instruction_set.push_back(std::make_shared<Instruction>(std::get<0>(insn), name));
 }
+
+} // namespace detail
+
+void register_core(std::vector<Code_ptr>& instruction_set) {
+	for (const auto& el : detail::core_instructions) {
+		detail::load_instruction(instruction_set, el.first);
+	}
+}
+
+// TODO(hopibel): include if (insn.types | filter) == filter
+// rename to register_core_by_stack()
+//std::vector<std::shared_ptr<Instruction>> InstructionSet::get_by_stack(Types supported, Types excluded) {
+//	std::vector<std::shared_ptr<Instruction>> ops;
+//	for (auto const& el : insns_) {
+//		if ((el.second->types & vbitmask) > 0 && (el.second->types & exclude_mask) == 0) {
+//			ops.push_back(el.second);
+//		}
+//	}
+//	return ops;
+//}
 
 // Parentheses required
 //	// exec
@@ -176,21 +196,5 @@ InstructionManager& InstructionManager::register_core() {
 //	EXEC.ROT		3
 //	EXEC.SHOVE		1
 //	EXEC.SWAP		2
-
-InstructionManager& InstructionManager::register_op(unsigned (*op)(Env&), std::string name) {
-	insns_[name] = std::make_shared<Instruction>(op, name);
-
-	return *this;
-}
-
-//std::vector<std::shared_ptr<Instruction>> InstructionManager::get_by_stack(Types supported, Types excluded) {
-//	std::vector<std::shared_ptr<Instruction>> ops;
-//	for (auto const& el : insns_) {
-//		if ((el.second->types & vbitmask) > 0 && (el.second->types & exclude_mask) == 0) {
-//			ops.push_back(el.second);
-//		}
-//	}
-//	return ops;
-//}
 
 } // namespace cppush

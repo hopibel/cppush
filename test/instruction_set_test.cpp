@@ -1,12 +1,20 @@
 #include <catch2/catch.hpp>
 
-#include "bool_ops.h"
-#include "instruction_manager.h"
+#include "code_ops.h"
+#include "instruction_set.h"
 #include "instruction.h"
 #include "types.h"
 
-//TEST_CASE("InstructionManager.get_by_stack") {
-//	cppush::InstructionManager im;
+TEST_CASE("InstructionSet.register_core_by_name()") {
+	std::vector<cppush::Code_ptr> iset;
+	cppush::register_core_by_name(iset, "CODE.NOOP", "CODE.ATOM");
+	REQUIRE(iset.size() == 2);
+	REQUIRE(*iset[0] == cppush::Instruction(cppush::code_noop, "CODE.NOOP"));
+	REQUIRE(*iset[1] == cppush::Instruction(cppush::code_atom, "CODE.ATOM"));
+}
+
+//TEST_CASE("InstructionSet.get_by_stack") {
+//	cppush::InstructionSet im;
 //	im.register_op(cppush::bool_and, "BOOL.AND", cppush::Type::BOOL);
 //	im.register_op(cppush::bool_or, "BOOL.OR", cppush::Type::BOOL | cppush::Type::INT);
 //

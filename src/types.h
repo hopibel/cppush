@@ -18,19 +18,22 @@ class Types {
 	struct Private;
 	using Zero = int (Private::*);
 
-	public:
+public:
 	Types(Type t) : i(static_cast<int>(t)) {}
 	Types(Zero = nullptr) : i(0) {} // no bits set
 
 	Types operator|(Types other) { return Types(Type(i | other.i)); }
 	Types operator|(Type other) { return Types(Type(i | static_cast<int>(other))); }
+	bool operator==(Types other) { return i == other.i; }
+	bool operator==(Type other) { return i == static_cast<int>(other); }
 
-	private:
+private:
 	int i;
 };
 
 inline Types operator|(Type lhs, Types rhs) { return rhs | lhs; }
 inline Types operator|(Type lhs, Type rhs) { return Types(lhs) | rhs; }
+inline bool operator==(Type lhs, Types rhs) { return rhs == lhs; }
 
 } // namespace cppush
 
