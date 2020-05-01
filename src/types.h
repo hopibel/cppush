@@ -22,18 +22,18 @@ public:
 	Types(Type t) : i(static_cast<int>(t)) {}
 	Types(Zero = nullptr) : i(0) {} // no bits set
 
-	Types operator|(Types other) { return Types(Type(i | other.i)); }
-	Types operator|(Type other) { return Types(Type(i | static_cast<int>(other))); }
-	bool operator==(Types other) { return i == other.i; }
-	bool operator==(Type other) { return i == static_cast<int>(other); }
+	Types operator|(const Types& other) const { return Types(Type(i | other.i)); }
+	Types operator|(const Type& other) const { return Types(Type(i | static_cast<int>(other))); }
+	bool operator==(const Types& other) const { return i == other.i; }
+	bool operator==(const Type& other) const { return i == static_cast<int>(other); }
 
 private:
 	int i;
 };
 
-inline Types operator|(Type lhs, Types rhs) { return rhs | lhs; }
-inline Types operator|(Type lhs, Type rhs) { return Types(lhs) | rhs; }
-inline bool operator==(Type lhs, Types rhs) { return rhs == lhs; }
+inline Types operator|(const Type& lhs, const Types& rhs) { return rhs | lhs; }
+inline Types operator|(const Type& lhs, const Type& rhs) { return Types(lhs) | rhs; }
+inline bool operator==(const Type& lhs, const Types& rhs) { return rhs == lhs; }
 
 } // namespace cppush
 

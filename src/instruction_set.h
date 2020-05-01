@@ -15,19 +15,19 @@ namespace cppush {
 namespace detail {
 
 extern const std::map<std::string, std::pair<unsigned (*)(Env&), Types>> core_instructions;
-void load_instruction(std::vector<Code_ptr>& instruction_set, std::string name);
+void load_instruction(std::vector<Instruction_ptr>& instruction_set, std::string name);
 
 } // namespace detail
 
-void register_core(std::vector<Code_ptr>& instruction_set);
+void register_core(std::vector<Instruction_ptr>& instruction_set);
 
 template <typename... Args>
-void register_core_by_name(std::vector<Code_ptr>& instruction_set, Args... args) {
+void register_core_by_name(std::vector<Instruction_ptr>& instruction_set, Args... args) {
 	(detail::load_instruction(instruction_set, args), ...);
 }
 
-// TODO(hopibel): pass shared_ptrs by reference when possible
-// check existing code for this
+// Append instructions for the enabled stacks
+void register_core_by_stack(std::vector<Instruction_ptr>& instruction_set, const Types& types);
 
 } // namespace cppush
 

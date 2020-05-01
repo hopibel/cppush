@@ -152,30 +152,26 @@ const std::map<std::string, std::pair<unsigned (*)(Env&), Types>> core_instructi
 	{"EXEC.YANKDUP", {exec_yankdup, Type::EXEC | Type::INT}},
 };
 
-void load_instruction(std::vector<Code_ptr>& instruction_set, std::string name) {
+void load_instruction(std::vector<Instruction_ptr>& instruction_set, std::string name) {
 	auto insn = core_instructions.at(name);
 	instruction_set.push_back(std::make_shared<Instruction>(std::get<0>(insn), name));
 }
 
 } // namespace detail
 
-void register_core(std::vector<Code_ptr>& instruction_set) {
+void register_core(std::vector<Instruction_ptr>& instruction_set) {
 	for (const auto& el : detail::core_instructions) {
 		detail::load_instruction(instruction_set, el.first);
 	}
 }
 
-// TODO(hopibel): include if (insn.types | filter) == filter
-// rename to register_core_by_stack()
-//std::vector<std::shared_ptr<Instruction>> InstructionSet::get_by_stack(Types supported, Types excluded) {
-//	std::vector<std::shared_ptr<Instruction>> ops;
-//	for (auto const& el : insns_) {
-//		if ((el.second->types & vbitmask) > 0 && (el.second->types & exclude_mask) == 0) {
-//			ops.push_back(el.second);
-//		}
-//	}
-//	return ops;
-//}
+void register_core_by_stack(std::vector<Instruction_ptr>& instruction_set, const Types& types) {
+	for (const auto& el : detail::core_instructions) {
+		if ((std::get<Types>(el.second) | types) == types) {
+			detail::load_instruction(instruction_set, el.first);
+		}
+	}
+}
 
 // Parentheses required
 //	// exec
