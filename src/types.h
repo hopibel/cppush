@@ -4,11 +4,11 @@
 namespace cppush {
 
 enum class Type {
-	EXEC =	0b0000'0001,
-	CODE =	0b0000'0010,
-	BOOL =	0b0000'0100,
-	INT =	0b0000'1000,
-	FLOAT =	0b0001'0000,
+	Exec  = 0b0000'0001,
+	Code  = 0b0000'0010,
+	Bool  = 0b0000'0100,
+	Int   = 0b0000'1000,
+	Float = 0b0001'0000,
 };
 
 class Types {

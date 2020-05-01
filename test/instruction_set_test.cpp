@@ -9,13 +9,13 @@
 
 TEST_CASE("register_core_by_name()") {
 	std::vector<cppush::Instruction_ptr> iset;
-	cppush::register_core_by_name(iset, "CODE.NOOP");
+	cppush::register_core_by_name(iset, "code_noop");
 	REQUIRE(iset.size() == 1);
-	REQUIRE(iset[0]->name == "CODE.NOOP");
+	REQUIRE(iset[0]->name == "code_noop");
 }
 
 TEST_CASE("register_core_by_stack()") {
 	std::vector<cppush::Instruction_ptr> iset;
-	cppush::register_core_by_stack(iset, cppush::Type::BOOL);
-	REQUIRE(iset.size() == 15); // 14 BOOL-only + CODE.NOOP
+	cppush::register_core_by_stack(iset, cppush::Type::Bool);
+	REQUIRE(iset.size() == 15); // 14 Bool-only + code_noop
 }
