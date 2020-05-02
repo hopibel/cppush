@@ -8,8 +8,8 @@
 #include "memory"
 #include "vector"
 
-// bool, int, double
-// exec, code
+// TODO(hopibel): test helper function for generating test data
+// generate_test_values<type>(int len)
 
 TEMPLATE_TEST_CASE("Instruction: *.=", "" , bool, int, double) {
 	cppush::Env env;
@@ -37,55 +37,29 @@ TEMPLATE_TEST_CASE("Instruction: *.=", "" , bool, int, double) {
 	}
 }
 
-TEST_CASE("Instruction: CODE.=") {
+TEMPLATE_TEST_CASE("Instruction: *.=", "", cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::equal<cppush::Code_ptr>, "CODE.=");
+	cppush::Instruction op(cppush::equal<TestType>, "=");
 
 	auto a = std::make_shared<cppush::CodeList>();
 	auto b = std::make_shared<cppush::CodeList>(std::vector<cppush::Code_ptr>{a});
 
 	SECTION("Equal") {
-		env.push<cppush::Code_ptr>(a);
-		env.push<cppush::Code_ptr>(a);
+		env.push<TestType>(a);
+		env.push<TestType>(a);
 		op(env);
 
 		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
-		REQUIRE(env.get_stack<cppush::Code_ptr>().empty());
+		REQUIRE(env.get_stack<TestType>().empty());
 	}
 
 	SECTION("Not equal") {
-		env.push<cppush::Code_ptr>(a);
-		env.push<cppush::Code_ptr>(b);
+		env.push<TestType>(a);
+		env.push<TestType>(b);
 		op(env);
 
 		REQUIRE(env.get_stack<bool>() == std::vector<bool>{false});
-		REQUIRE(env.get_stack<cppush::Code_ptr>().empty());
-	}
-}
-
-TEST_CASE("Instruction: EXEC.=") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_equal, "EXEC.=");
-
-	auto a = std::make_shared<cppush::CodeList>();
-	auto b = std::make_shared<cppush::CodeList>(std::vector<cppush::Code_ptr>{a});
-
-	SECTION("Equal") {
-		env.push_exec(a);
-		env.push_exec(a);
-		op(env);
-
-		REQUIRE(env.get_exec_stack().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
-	}
-
-	SECTION("Not equal") {
-		env.push_exec(a);
-		env.push_exec(b);
-		op(env);
-
-		REQUIRE(env.get_exec_stack().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{false});
+		REQUIRE(env.get_stack<TestType>().empty());
 	}
 }
 
@@ -100,26 +74,15 @@ TEMPLATE_TEST_CASE("Instruction: *.POP", "", bool, int, double) {
 	REQUIRE(env.get_stack<TestType>().empty());
 }
 
-TEST_CASE("Instruction: CODE.POP") {
+TEMPLATE_TEST_CASE("Instruction: *.POP", "", cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::protected_pop<cppush::Code_ptr>, "CODE.POP");
+	cppush::Instruction op(cppush::protected_pop<TestType>, "POP");
 
 	auto a = std::make_shared<cppush::CodeList>();
 
-	env.push<cppush::Code_ptr>(a);
+	env.push<TestType>(a);
 	op(env);
-	REQUIRE(env.get_stack<cppush::Code_ptr>().empty());
-}
-
-TEST_CASE("Instruction: EXEC.POP") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::protected_exec_pop, "EXEC.POP");
-
-	auto a = std::make_shared<cppush::CodeList>();
-
-	env.push_exec(a);
-	op(env);
-	REQUIRE(env.get_exec_stack().empty());
+	REQUIRE(env.get_stack<TestType>().empty());
 }
 
 TEMPLATE_TEST_CASE("Instruction: *.DUP", "", bool, int, double) {
@@ -133,26 +96,15 @@ TEMPLATE_TEST_CASE("Instruction: *.DUP", "", bool, int, double) {
 	REQUIRE(env.get_stack<TestType>() == std::vector<TestType>{a, a});
 }
 
-TEST_CASE("Instruction: CODE.DUP") {
+TEMPLATE_TEST_CASE("Instruction: *.DUP", "", cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::dup<cppush::Code_ptr>, "CODE.DUP");
+	cppush::Instruction op(cppush::dup<TestType>, "DUP");
 
 	auto a = std::make_shared<cppush::CodeList>();
 
-	env.push<cppush::Code_ptr>(a);
+	env.push<TestType>(a);
 	op(env);
-	REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{a, a});
-}
-
-TEST_CASE("Instruction: EXEC.DUP") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_dup, "EXEC.DUP");
-
-	auto a = std::make_shared<cppush::CodeList>();
-
-	env.push_exec(a);
-	op(env);
-	REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{a, a});
+	REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{a, a});
 }
 
 TEMPLATE_TEST_CASE("Instruction: *.FLUSH", "", bool, int, double) {
@@ -167,28 +119,16 @@ TEMPLATE_TEST_CASE("Instruction: *.FLUSH", "", bool, int, double) {
 	REQUIRE(env.get_stack<TestType>().empty());
 }
 
-TEST_CASE("Instruction: CODE.FLUSH") {
+TEMPLATE_TEST_CASE("Instruction: *.FLUSH", "", cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::flush<cppush::Code_ptr>, "CODE.FLUSH");
+	cppush::Instruction op(cppush::flush<TestType>, "FLUSH");
 
 	auto a = std::make_shared<cppush::CodeList>();
 
-	env.push<cppush::Code_ptr>(a);
-	env.push<cppush::Code_ptr>(a);
+	env.push<TestType>(a);
+	env.push<TestType>(a);
 	op(env);
-	REQUIRE(env.get_stack<cppush::Code_ptr>().empty());
-}
-
-TEST_CASE("Instruction: EXEC.FLUSH") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_flush, "EXEC.FLUSH");
-
-	auto a = std::make_shared<cppush::CodeList>();
-
-	env.push_exec(a);
-	env.push_exec(a);
-	op(env);
-	REQUIRE(env.get_exec_stack().empty());
+	REQUIRE(env.get_stack<TestType>().empty());
 }
 
 TEMPLATE_TEST_CASE("Instruction: *.ROT", "", bool, int, double) {
@@ -206,35 +146,20 @@ TEMPLATE_TEST_CASE("Instruction: *.ROT", "", bool, int, double) {
 	REQUIRE(env.get_stack<TestType>() == std::vector<TestType>{b, a, c});
 }
 
-TEST_CASE("Instruction: CODE.ROT") {
+TEMPLATE_TEST_CASE("Instruction: *.ROT", "", cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::rot<cppush::Code_ptr>, "CODE.ROT");
+	cppush::Instruction op(cppush::rot<TestType>, "CODE.ROT");
 
 	auto a = std::make_shared<cppush::CodeList>();
 	auto b = std::make_shared<cppush::CodeList>();
 	auto c = std::make_shared<cppush::CodeList>();
 
-	env.push<cppush::Code_ptr>(c);
-	env.push<cppush::Code_ptr>(b);
-	env.push<cppush::Code_ptr>(a);
+	env.push<TestType>(c);
+	env.push<TestType>(b);
+	env.push<TestType>(a);
 	op(env);
-	REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{
+	REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{
 			b, a, c});
-}
-
-TEST_CASE("Instruction: EXEC.ROT") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_rot, "EXEC.ROT");
-
-	auto a = std::make_shared<cppush::CodeList>();
-	auto b = std::make_shared<cppush::CodeList>();
-	auto c = std::make_shared<cppush::CodeList>();
-
-	env.push_exec(c);
-	env.push_exec(b);
-	env.push_exec(a);
-	op(env);
-	REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{b, a, c});
 }
 
 TEMPLATE_TEST_CASE("Instruction: *.SHOVE", "", bool, int, double) {
@@ -280,17 +205,17 @@ TEMPLATE_TEST_CASE("Instruction: *.SHOVE", "", bool, int, double) {
 	}
 }
 
-TEST_CASE("Instruction: CODE.SHOVE") {
+TEMPLATE_TEST_CASE("Instruction: *.SHOVE", "", cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::shove<cppush::Code_ptr>, "CODE.SHOVE");
+	cppush::Instruction op(cppush::shove<TestType>, "SHOVE");
 
 	auto a = std::make_shared<cppush::CodeList>();
 	auto b = std::make_shared<cppush::CodeList>();
 	auto c = std::make_shared<cppush::CodeList>();
 
-	env.push<cppush::Code_ptr>(c);
-	env.push<cppush::Code_ptr>(b);
-	env.push<cppush::Code_ptr>(a);
+	env.push<TestType>(c);
+	env.push<TestType>(b);
+	env.push<TestType>(a);
 
 	auto int_stack_size = env.get_stack<int>().size();
 
@@ -298,72 +223,28 @@ TEST_CASE("Instruction: CODE.SHOVE") {
 		env.push<int>(0);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{c, b, a});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{c, b, a});
 	}
 
 	SECTION("Negative index") {
 		env.push<int>(-1);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{c, b, a});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{c, b, a});
 	}
 
 	SECTION("Positive index") {
 		env.push<int>(2);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{a, c, b});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{a, c, b});
 	}
 
 	SECTION("Positive out of bounds index") {
 		env.push<int>(4);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{a, c, b});
-	}
-}
-
-// TODO(hopibel): should be able to refactor
-TEST_CASE("Instruction: EXEC.SHOVE") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_shove, "EXEC.SHOVE");
-
-	auto a = std::make_shared<cppush::CodeList>();
-	auto b = std::make_shared<cppush::CodeList>();
-	auto c = std::make_shared<cppush::CodeList>();
-
-	env.push_exec(c);
-	env.push_exec(b);
-	env.push_exec(a);
-
-	auto int_stack_size = env.get_stack<int>().size();
-
-	SECTION("Zero index") {
-		env.push<int>(0);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{c, b, a});
-	}
-
-	SECTION("Negative index") {
-		env.push<int>(-1);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{c, b, a});
-	}
-
-	SECTION("Positive index") {
-		env.push<int>(2);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{a, c, b});
-	}
-
-	SECTION("Positive out of bounds index") {
-		env.push<int>(4);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{a, c, b});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{a, c, b});
 	}
 }
 
@@ -387,9 +268,9 @@ TEMPLATE_TEST_CASE("Instruction: *.STACKDEPTH", "", bool, int, double) {
 	}
 }
 
-TEST_CASE("Instruction: CODE.STACKDEPTH") {
+TEMPLATE_TEST_CASE("Instruction: *.STACKDEPTH", "", cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::stackdepth<cppush::Code_ptr>, "CODE.STACKDEPTH");
+	cppush::Instruction op(cppush::stackdepth<TestType>, "STACKDEPTH");
 
 	auto a = std::make_shared<cppush::CodeList>();
 
@@ -399,29 +280,9 @@ TEST_CASE("Instruction: CODE.STACKDEPTH") {
 	}
 
 	SECTION("3 items") {
-		env.push<cppush::Code_ptr>(a);
-		env.push<cppush::Code_ptr>(a);
-		env.push<cppush::Code_ptr>(a);
-		op(env);
-		REQUIRE(env.get_stack<int>().back() == 3);
-	}
-}
-
-TEST_CASE("Instruction: EXEC.STACKDEPTH") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_stackdepth, "EXEC.STACKDEPTH");
-
-	auto a = std::make_shared<cppush::CodeList>();
-
-	SECTION("Empty") {
-		op(env);
-		REQUIRE(env.get_stack<int>().back() == 0);
-	}
-
-	SECTION("3 items") {
-		env.push_exec(a);
-		env.push_exec(a);
-		env.push_exec(a);
+		env.push<TestType>(a);
+		env.push<TestType>(a);
+		env.push<TestType>(a);
 		op(env);
 		REQUIRE(env.get_stack<int>().back() == 3);
 	}
@@ -440,30 +301,17 @@ TEMPLATE_TEST_CASE("Instruction: *.SWAP", "", bool, int, double) {
 	REQUIRE(env.get_stack<TestType>() == std::vector<TestType>{a, b});
 }
 
-TEST_CASE("Instruction: CODE.SWAP") {
+TEMPLATE_TEST_CASE("Instruction: *.SWAP", "", cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::swap<cppush::Code_ptr>, "CODE.SWAP");
+	cppush::Instruction op(cppush::swap<TestType>, "SWAP");
 
 	auto a = std::make_shared<cppush::CodeList>();
 	auto b = std::make_shared<cppush::CodeList>();
 
-	env.push<cppush::Code_ptr>(b);
-	env.push<cppush::Code_ptr>(a);
+	env.push<TestType>(b);
+	env.push<TestType>(a);
 	op(env);
-	REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{a, b});
-}
-
-TEST_CASE("Instruction: EXEC.SWAP") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_swap, "EXEC.SWAP");
-
-	auto a = std::make_shared<cppush::CodeList>();
-	auto b = std::make_shared<cppush::CodeList>();
-
-	env.push_exec(b);
-	env.push_exec(a);
-	op(env);
-	REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{a, b});
+	REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{a, b});
 }
 
 TEMPLATE_TEST_CASE("Instruction: *.YANK", "", bool, int, double) {
@@ -515,17 +363,23 @@ TEMPLATE_TEST_CASE("Instruction: *.YANK", "", bool, int, double) {
 	}
 }
 
-TEST_CASE("Instruction: CODE.YANK") {
+TEMPLATE_TEST_CASE("Instruction: *.YANK", "", cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::yank<cppush::Code_ptr>, "CODE.YANK");
+	cppush::Instruction op(cppush::yank<TestType>, "YANK");
 
 	auto a = std::make_shared<cppush::CodeList>();
 	auto b = std::make_shared<cppush::CodeList>();
 	auto c = std::make_shared<cppush::CodeList>();
 
-	env.push<cppush::Code_ptr>(c);
-	env.push<cppush::Code_ptr>(b);
-	env.push<cppush::Code_ptr>(a);
+	SECTION("Insufficient items on stack should be NOOP") {
+		env.push<int>(0);
+		op(env);
+		REQUIRE(env.get_stack<int>() == std::vector<int>{0});
+	}
+
+	env.push<TestType>(c);
+	env.push<TestType>(b);
+	env.push<TestType>(a);
 
 	auto int_stack_size = env.get_stack<int>().size();
 
@@ -533,72 +387,28 @@ TEST_CASE("Instruction: CODE.YANK") {
 		env.push<int>(0);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{c, b, a});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{c, b, a});
 	}
 
 	SECTION("Negative index") {
 		env.push<int>(-1);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{c, b, a});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{c, b, a});
 	}
 
 	SECTION("Positive index") {
 		env.push<int>(2);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{b, a, c});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{b, a, c});
 	}
 
 	SECTION("Positive out of bounds index") {
 		env.push<int>(4);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{b, a, c});
-	}
-}
-
-// TODO(hopibel): should be able to refactor
-TEST_CASE("Instruction: EXEC.YANK") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_yank, "EXEC.YANK");
-
-	auto a = std::make_shared<cppush::CodeList>();
-	auto b = std::make_shared<cppush::CodeList>();
-	auto c = std::make_shared<cppush::CodeList>();
-
-	env.push_exec(c);
-	env.push_exec(b);
-	env.push_exec(a);
-
-	auto int_stack_size = env.get_stack<int>().size();
-
-	SECTION("Zero index") {
-		env.push<int>(0);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{c, b, a});
-	}
-
-	SECTION("Negative index") {
-		env.push<int>(-1);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{c, b, a});
-	}
-
-	SECTION("Positive index") {
-		env.push<int>(2);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{b, a, c});
-	}
-
-	SECTION("Positive out of bounds index") {
-		env.push<int>(4);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{b, a, c});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{b, a, c});
 	}
 }
 
@@ -609,6 +419,12 @@ TEMPLATE_TEST_CASE("Instruction: *.YANKDUP", "", bool, int, double) {
 	TestType a = static_cast<TestType>(4.20);
 	TestType b = static_cast<TestType>(0.0);
 	TestType c = static_cast<TestType>(3.4);
+
+	SECTION("Insufficient items on stack should be NOOP") {
+		env.push<int>(0);
+		op(env);
+		REQUIRE(env.get_stack<int>() == std::vector<int>{0});
+	}
 
 	env.push<TestType>(c);
 	env.push<TestType>(b);
@@ -643,17 +459,23 @@ TEMPLATE_TEST_CASE("Instruction: *.YANKDUP", "", bool, int, double) {
 	}
 }
 
-TEST_CASE("Instruction: CODE.YANKDUP") {
+TEMPLATE_TEST_CASE("Instruction: *.YANKDUP", "", cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
-	cppush::Instruction op(cppush::yankdup<cppush::Code_ptr>, "CODE.YANKDUP");
+	cppush::Instruction op(cppush::yankdup<TestType>, "YANKDUP");
 
 	auto a = std::make_shared<cppush::CodeList>();
 	auto b = std::make_shared<cppush::CodeList>();
 	auto c = std::make_shared<cppush::CodeList>();
 
-	env.push<cppush::Code_ptr>(c);
-	env.push<cppush::Code_ptr>(b);
-	env.push<cppush::Code_ptr>(a);
+	SECTION("Insufficient items on stack should be NOOP") {
+		env.push<int>(0);
+		op(env);
+		REQUIRE(env.get_stack<int>() == std::vector<int>{0});
+	}
+
+	env.push<TestType>(c);
+	env.push<TestType>(b);
+	env.push<TestType>(a);
 
 	auto int_stack_size = env.get_stack<int>().size();
 
@@ -661,71 +483,27 @@ TEST_CASE("Instruction: CODE.YANKDUP") {
 		env.push<int>(0);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{c, b, a, a});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{c, b, a, a});
 	}
 
 	SECTION("Negative index") {
 		env.push<int>(-1);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{c, b, a, a});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{c, b, a, a});
 	}
 
 	SECTION("Positive index") {
 		env.push<int>(2);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{c, b, a, c});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{c, b, a, c});
 	}
 
 	SECTION("Positive out of bounds index") {
 		env.push<int>(4);
 		op(env);
 		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_stack<cppush::Code_ptr>() == std::vector<cppush::Code_ptr>{c, b, a, c});
-	}
-}
-
-// TODO(hopibel): should be able to refactor
-TEST_CASE("Instruction: EXEC.YANKDUP") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_yankdup, "EXEC.YANKDUP");
-
-	auto a = std::make_shared<cppush::CodeList>();
-	auto b = std::make_shared<cppush::CodeList>();
-	auto c = std::make_shared<cppush::CodeList>();
-
-	env.push_exec(c);
-	env.push_exec(b);
-	env.push_exec(a);
-
-	auto int_stack_size = env.get_stack<int>().size();
-
-	SECTION("Zero index") {
-		env.push<int>(0);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{c, b, a, a});
-	}
-
-	SECTION("Negative index") {
-		env.push<int>(-1);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{c, b, a, a});
-	}
-
-	SECTION("Positive index") {
-		env.push<int>(2);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{c, b, a, c});
-	}
-
-	SECTION("Positive out of bounds index") {
-		env.push<int>(4);
-		op(env);
-		REQUIRE(env.get_stack<int>().size() == int_stack_size);
-		REQUIRE(env.get_exec_stack() == std::vector<cppush::Code_ptr>{c, b, a, c});
+		REQUIRE(env.get_stack<TestType>() == std::vector<cppush::Code_ptr>{c, b, a, c});
 	}
 }

@@ -199,9 +199,9 @@ unsigned code_do_range(Env& env) {
 					quote_insn, code, do_range_insn
 			};
 
-			env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));
+			env.get_stack<Exec>().push_back(std::make_shared<CodeList>(rcall));
 		}
-		env.get_exec_stack().push_back(code);
+		env.get_stack<Exec>().push_back(code);
 	}
 	return 1;
 }
@@ -225,7 +225,7 @@ unsigned code_do_count(Env& env) {
 			quote_insn, code, do_range_insn
 		};
 
-		env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));
+		env.get_stack<Exec>().push_back(std::make_shared<CodeList>(rcall));
 	}
 	return 1;
 }
@@ -253,7 +253,7 @@ unsigned code_do_times(Env& env) {
 			quote_insn, std::make_shared<CodeList>(pop_code), do_range_insn
 		};
 
-		env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));
+		env.get_stack<Exec>().push_back(std::make_shared<CodeList>(rcall));
 	}
 	return 1;
 }
@@ -327,9 +327,9 @@ unsigned code_if(Env& env) {
 		auto first = env.pop<Code_ptr>();
 		auto second = env.pop<Code_ptr>();
 		if (env.pop<bool>()) {
-			env.get_exec_stack().push_back(second);
+			env.get_stack<Exec>().push_back(second);
 		} else {
-			env.get_exec_stack().push_back(first);
+			env.get_stack<Exec>().push_back(first);
 		}
 	}
 	return 1;

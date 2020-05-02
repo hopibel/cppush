@@ -5,6 +5,7 @@
 #include "env.h"
 
 #include <algorithm>
+#include <type_traits>
 
 namespace cppush {
 
@@ -17,9 +18,8 @@ unsigned equal(Env& env) {
 	}
 	return 1;
 }
-template <>
-unsigned equal<Code_ptr>(Env& env);
-unsigned exec_equal(Env& env);
+template <> unsigned equal<Code_ptr>(Env& env);
+template <> unsigned equal<Exec>(Env& env);
 
 template <typename T>
 unsigned protected_pop(Env& env) {
@@ -28,8 +28,6 @@ unsigned protected_pop(Env& env) {
 	}
 	return 1;
 }
-// can't template because exec_stack is same type as code_stack
-unsigned protected_exec_pop(Env& env);
 
 template <typename T>
 unsigned dup(Env& env) {
@@ -39,30 +37,22 @@ unsigned dup(Env& env) {
 	}
 	return 1;
 }
-unsigned exec_dup(Env& env);
 
 template <typename T>
 unsigned flush(Env& env) {
 	env.get_stack<T>().clear();
 	return 1;
 }
-unsigned exec_flush(Env& env);
 
 template <typename T>
 unsigned rot(Env& env) {
 	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 3) {
-		auto first = env.pop<T>();
-		auto second = env.pop<T>();
-		auto third = env.pop<T>();
-
-		stack.push_back(second);
-		stack.push_back(first);
-		stack.push_back(third);
+		int index = stack.size() - 3;
+		std::rotate(stack.begin() + index, stack.begin() + index + 1, stack.end());
 	}
 	return 1;
 }
-unsigned exec_rot(Env& env);
 
 template <typename T>
 unsigned shove(Env& env) {
@@ -77,33 +67,32 @@ unsigned shove(Env& env) {
 	}
 	return 1;
 }
-unsigned exec_shove(Env& env);
 
 template <typename T>
 unsigned stackdepth(Env& env) {
 	env.get_stack<int>().push_back(env.get_stack<T>().size());
 	return 1;
 }
-unsigned exec_stackdepth(Env& env);
 
 template <typename T>
 unsigned swap(Env& env) {
 	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2) {
-		auto first = env.pop<T>();
-		auto second = env.pop<T>();
-		stack.push_back(first);
-		stack.push_back(second);
+		int index = stack.size() - 2;
+		std::rotate(stack.begin() + index, stack.begin() + index + 1, stack.end());
 	}
 	return 1;
 }
-unsigned exec_swap(Env& env);
-
-namespace detail {
 
 template <typename T>
-unsigned yank_impl(Env& env, std::vector<T>& stack) {
+unsigned yank(Env& env) {
+	auto& stack = env.get_stack<T>();
 	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
+		// yank<int> requires 2 items on the stack
+		if (std::is_same<T, int>::value && env.get_stack<int>().size() < 2) {
+			return 1;
+		}
+
 		int index = env.pop<int>();
 		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
@@ -115,19 +104,15 @@ unsigned yank_impl(Env& env, std::vector<T>& stack) {
 	return 1;
 }
 
-} // namespace detail
-
-template <typename T>
-unsigned yank(Env& env) {
-	return detail::yank_impl<T>(env, env.get_stack<T>());
-}
-template <> unsigned yank<int>(Env& env);
-unsigned exec_yank(Env& env);
-
 template <typename T>
 unsigned yankdup(Env& env) {
 	auto& stack = env.get_stack<T>();
-	if (stack.size() >= 0 && env.get_stack<int>().size() > 0) {
+	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
+		// yankdup<int> requires 2 items on the stack
+		if (std::is_same<T, int>::value && env.get_stack<int>().size() < 2) {
+			return 1;
+		}
+
 		int index = env.pop<int>();
 		index = index < 0 ? 0 : (index >= static_cast<int>(stack.size()) ? stack.size()-1 : index);
 		index = stack.size()-1 - index;
@@ -136,7 +121,6 @@ unsigned yankdup(Env& env) {
 	}
 	return 1;
 }
-unsigned exec_yankdup(Env& env);
 
 } // namespace cppush
 

@@ -11,7 +11,7 @@
 namespace cppush {
 
 unsigned exec_do_range(Env& env) {
-	auto exec_stack_size = env.get_exec_stack().size();
+	auto exec_stack_size = env.get_stack<Exec>().size();
 	auto int_stack_size = env.get_stack<int>().size();
 
 	if (exec_stack_size > 0 && int_stack_size >= 2) {
@@ -31,16 +31,16 @@ unsigned exec_do_range(Env& env) {
 					do_range_insn, code
 			};
 
-			env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));
+			env.get_stack<Exec>().push_back(std::make_shared<CodeList>(rcall));
 		}
-		env.get_exec_stack().push_back(code);
+		env.get_stack<Exec>().push_back(code);
 	}
 
 	return 1;
 }
 
 unsigned exec_do_count(Env& env) {
-	auto exec_stack_size = env.get_exec_stack().size();
+	auto exec_stack_size = env.get_stack<Exec>().size();
 	auto int_stack_size = env.get_stack<int>().size();
 
 	if (exec_stack_size > 0 && int_stack_size > 0 && env.get_stack<int>().back() > 0) {
@@ -56,13 +56,13 @@ unsigned exec_do_count(Env& env) {
 				do_range_insn, code
 		};
 
-		env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));
+		env.get_stack<Exec>().push_back(std::make_shared<CodeList>(rcall));
 	}
 	return 1;
 }
 
 unsigned exec_do_times(Env& env) {
-	auto exec_stack_size = env.get_exec_stack().size();
+	auto exec_stack_size = env.get_stack<Exec>().size();
 	auto int_stack_size = env.get_stack<int>().size();
 
 	if (exec_stack_size > 0 && int_stack_size > 0 && env.get_stack<int>().back() > 0) {
@@ -82,35 +82,35 @@ unsigned exec_do_times(Env& env) {
 				do_range_insn, std::make_shared<CodeList>(pop_code)
 		};
 
-		env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));
+		env.get_stack<Exec>().push_back(std::make_shared<CodeList>(rcall));
 	}
 	return 1;
 }
 
 unsigned exec_if(Env& env) {
-	if (env.get_exec_stack().size() >= 2 && env.get_stack<bool>().size() > 0) {
+	if (env.get_stack<Exec>().size() >= 2 && env.get_stack<bool>().size() > 0) {
 		auto first = env.pop_exec();
 		auto second = env.pop_exec();
 		if (env.pop<bool>()) {
-			env.get_exec_stack().push_back(first);
+			env.get_stack<Exec>().push_back(first);
 		} else {
-			env.get_exec_stack().push_back(second);
+			env.get_stack<Exec>().push_back(second);
 		}
 	}
 	return 1;
 }
 
 unsigned exec_k(Env& env) {
-	if (env.get_exec_stack().size() >= 2) {
+	if (env.get_stack<Exec>().size() >= 2) {
 		auto first = env.pop_exec();
 		auto second = env.pop_exec();
-		env.get_exec_stack().push_back(first);
+		env.get_stack<Exec>().push_back(first);
 	}
 	return 1;
 }
 
 unsigned exec_s(Env& env) {
-	auto& stack = env.get_exec_stack();
+	auto& stack = env.get_stack<Exec>();
 	if (stack.size() >= 3) {
 		auto a = env.pop_exec();
 		auto b = env.pop_exec();
@@ -126,14 +126,14 @@ unsigned exec_s(Env& env) {
 }
 
 unsigned exec_y(Env& env) {
-	if (env.get_exec_stack().size() > 0) {
+	if (env.get_stack<Exec>().size() > 0) {
 		auto first = env.pop_exec();
 		static auto y_insn = std::make_shared<Instruction>(
 				exec_y, "EXEC.Y");
 
 		std::vector<std::shared_ptr<Code>> rcall{y_insn, first};
-		env.get_exec_stack().push_back(std::make_shared<CodeList>(rcall));
-		env.get_exec_stack().push_back(first);
+		env.get_stack<Exec>().push_back(std::make_shared<CodeList>(rcall));
+		env.get_stack<Exec>().push_back(first);
 	}
 	return 1;
 }
