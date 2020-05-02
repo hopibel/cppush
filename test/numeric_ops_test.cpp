@@ -7,10 +7,10 @@
 #include <cmath>
 #include <vector>
 
-TEMPLATE_TEST_CASE("Instruction: ADD", "", int, double) {
+TEMPLATE_TEST_CASE("Instruction: *_add", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
-	cppush::Instruction op(cppush::add<TestType>, "+");
+	cppush::Instruction op(cppush::add<TestType>, "add");
 
 	for (int i = -2; i <= 2; ++i) {
 		for (int j = -2; j <= 2; ++j) {
@@ -24,10 +24,10 @@ TEMPLATE_TEST_CASE("Instruction: ADD", "", int, double) {
 	}
 }
 
-TEMPLATE_TEST_CASE("Instruction: SUB", "", int, double) {
+TEMPLATE_TEST_CASE("Instruction: *_sub", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
-	cppush::Instruction op(cppush::sub<TestType>, "-");
+	cppush::Instruction op(cppush::sub<TestType>, "sub");
 
 	for (int i = -2; i <= 2; ++i) {
 		for (int j = -2; j <= 2; ++j) {
@@ -41,10 +41,10 @@ TEMPLATE_TEST_CASE("Instruction: SUB", "", int, double) {
 	}
 }
 
-TEMPLATE_TEST_CASE("Instruction: MUL", "", int, double) {
+TEMPLATE_TEST_CASE("Instruction: *_mult", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
-	cppush::Instruction op(cppush::mul<TestType>, "*");
+	cppush::Instruction op(cppush::mul<TestType>, "mult");
 
 	for (int i = -2; i <= 2; ++i) {
 		for (int j = -2; j <= 2; ++j) {
@@ -58,10 +58,10 @@ TEMPLATE_TEST_CASE("Instruction: MUL", "", int, double) {
 	}
 }
 
-TEMPLATE_TEST_CASE("Instruction: DIV", "", int, double) {
+TEMPLATE_TEST_CASE("Instruction: *_div", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
-	cppush::Instruction op(cppush::div<TestType>, "/");
+	cppush::Instruction op(cppush::div<TestType>, "div");
 
 	SECTION("Division by zero is noop") {
 		stack.push_back(1);
@@ -87,9 +87,9 @@ TEMPLATE_TEST_CASE("Instruction: DIV", "", int, double) {
 	}
 }
 
-TEST_CASE("Instruction: INT.%") {
+TEST_CASE("Instruction: integer_mod") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::int_mod, "INT.%");
+	cppush::Instruction op(cppush::int_mod, "integer_mod");
 
 	SECTION("Int modulo 0 is noop") {
 		env.int_stack.push_back(1);
@@ -115,9 +115,9 @@ TEST_CASE("Instruction: INT.%") {
 	}
 }
 
-TEST_CASE("Instruction: FLOAT.%") {
+TEST_CASE("Instruction: float_mod") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::float_mod, "FLOAT.%");
+	cppush::Instruction op(cppush::float_mod, "float_mod");
 
 	SECTION("Float modulo 0 is noop") {
 		env.float_stack.push_back(1.0);
@@ -143,11 +143,11 @@ TEST_CASE("Instruction: FLOAT.%") {
 	}
 }
 
-TEMPLATE_TEST_CASE("Instruction: LT", "", int, double) {
+TEMPLATE_TEST_CASE("Instruction: *_lt", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
 	auto& bool_stack = env.get_stack<bool>();
-	cppush::Instruction op(cppush::less_than<TestType>, "<");
+	cppush::Instruction op(cppush::lt<TestType>, "lt");
 
 	for (int i = -2; i <= 2; ++i) {
 		for (int j = -2; j <= 2; ++j) {
@@ -162,11 +162,11 @@ TEMPLATE_TEST_CASE("Instruction: LT", "", int, double) {
 	}
 }
 
-TEMPLATE_TEST_CASE("Instruction: GT", "", int, double) {
+TEMPLATE_TEST_CASE("Instruction: *_gt", "", int, double) {
 	cppush::Env env;
 	auto& stack = env.get_stack<TestType>();
 	auto& bool_stack = env.get_stack<bool>();
-	cppush::Instruction op(cppush::greater_than<TestType>, ">");
+	cppush::Instruction op(cppush::gt<TestType>, "gt");
 
 	for (int i = -2; i <= 2; ++i) {
 		for (int j = -2; j <= 2; ++j) {

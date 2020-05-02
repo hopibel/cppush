@@ -52,7 +52,7 @@ unsigned int_mod(Env& env);
 unsigned float_mod(Env& env);
 
 template <typename T>
-unsigned less_than(Env& env) {
+unsigned lt(Env& env) {
 	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2) {
 		T top = env.pop<T>();
@@ -64,7 +64,7 @@ unsigned less_than(Env& env) {
 }
 
 template <typename T>
-unsigned greater_than(Env& env) {
+unsigned gt(Env& env) {
 	auto& stack = env.get_stack<T>();
 	if (stack.size() >= 2) {
 		T top = env.pop<T>();
