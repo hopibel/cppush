@@ -2,6 +2,7 @@ find_package(Catch2 REQUIRED)
 
 add_executable(cppush_test
 	test_main.cpp
+	test_utils.h
 	bool_ops_test.cpp
 	code_ops_test.cpp
 	common_ops_test.cpp
