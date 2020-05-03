@@ -14,11 +14,11 @@ unsigned equal(Env& env) {
 	if (env.get_stack<T>().size() >= 2) {
 		auto first = env.pop<T>();
 		auto second = env.pop<T>();
-		env.get_stack<bool>().push_back(first == second);
+		env.push<bool>(first == second);
 	}
 	return 1;
 }
-template <> unsigned equal<Code_ptr>(Env& env);
+template <> unsigned equal<Code>(Env& env);
 template <> unsigned equal<Exec>(Env& env);
 
 template <typename T>

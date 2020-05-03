@@ -24,51 +24,40 @@ struct Parameters {
 	bool top_level_pop_code{false};
 };
 
-// TODO(hopibel): move to code.h ?
+// dummy type for templating functions for Exec stack
 struct Exec {};
 
 class Env {
 	public:
 		// Stacks
-		std::vector<std::shared_ptr<Code>> exec_stack;
-		std::vector<std::shared_ptr<Code>> code_stack;
+		std::vector<Code> exec_stack;
+		std::vector<Code> code_stack;
 		std::vector<int> int_stack;
 		std::vector<double> float_stack;
 		std::vector<bool> bool_stack;
 		// use inexact module tagging instead of names
 		// TODO(hopibel): add a vector type for basic data types
 
-		void load_program(const std::shared_ptr<Code>& program); // TODO(hopibel): Program struct with config
+		void load_program(const Code& program); // TODO(hopibel): Program struct with config
 		void run();
 
 		// needed for generic stack manipulation functions
 		template <typename T> auto& get_stack() = delete;
 
 		template <typename T> auto pop();
-		Code_ptr pop_exec() { return pop_impl_(exec_stack); }
 		template <typename T, typename U> inline void push(U item);
-		inline void push_exec(Code_ptr item) { exec_stack.push_back(item); }
 	
 	private:
-		std::vector<std::shared_ptr<Code>> instruction_set_;
-
-		// avoid duplicating code for exec functions
-		template <typename T> T pop_impl_(std::vector<T>& stack);
+		std::vector<Code> instruction_set_;
 };
 
 template <> inline auto& Env::get_stack<int>() {return int_stack;}
 template <> inline auto& Env::get_stack<double>() {return float_stack;}
 template <> inline auto& Env::get_stack<bool>() {return bool_stack;}
-template <> inline auto& Env::get_stack<Code_ptr>() {return code_stack;}
+template <> inline auto& Env::get_stack<Code>() {return code_stack;}
 template <> inline auto& Env::get_stack<Exec>() {return exec_stack;}
 
 // pop from a stack and return element popped
-template <typename T>
-inline T Env::pop_impl_(std::vector<T>& stack) {
-	T top = stack.back();
-	stack.pop_back();
-	return top;
-}
 template <typename T>
 inline auto Env::pop() {
 	auto& stack = get_stack<T>();
@@ -76,13 +65,12 @@ inline auto Env::pop() {
 	stack.pop_back();
 	return top;
 }
-//inline T Env::pop() { return pop_impl_(get_stack<T>()); }
 
 // push to a stack
 template <typename T, typename U>
 inline void Env::push(U item) { get_stack<T>().push_back(item); }
 template <>
-inline void Env::push<Exec>(Code_ptr item) { get_stack<Exec>().push_back(item); }
+inline void Env::push<Exec>(Code item) { get_stack<Exec>().push_back(item); }
 
 } // namespace cppush
 

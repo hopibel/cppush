@@ -5,16 +5,14 @@
 
 namespace cppush {
 
-void Env::load_program(const std::shared_ptr<Code>& program) {
-	exec_stack.push_back(program);
+void Env::load_program(const Code& program) {
+	push<Exec>(program);
 }
 
 void Env::run() {
 	// pop-execute loop
 	while (exec_stack.size() > 0) {
-		std::shared_ptr<Code> top = exec_stack.back();
-		exec_stack.pop_back();
-
+		auto top = pop<Exec>();
 		(*top)(*this);
 	}
 }

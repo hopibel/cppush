@@ -17,7 +17,7 @@ class Literal : public CodeAtom {
 		}
 
 	protected:
-		bool equal_to(const Code& rhs) const override {
+		bool equal_to(const CodeBase& rhs) const override {
 			return value_ == static_cast<const Literal<T>&>(rhs).value_;
 		}
 

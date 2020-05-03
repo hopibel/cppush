@@ -8,21 +8,21 @@
 
 namespace cppush {
 
-class Code;
+class CodeBase;
 class Env;
 
-using Code_ptr = std::shared_ptr<Code>;
+using Code = std::shared_ptr<CodeBase>;
 
-class Code {
+class CodeBase {
 	public:
-		Code() {}
-		Code(const std::vector<std::shared_ptr<Code>>& stack) : stack_(stack) {}
+		CodeBase() {}
+		CodeBase(const std::vector<Code>& stack) : stack_(stack) {}
 
-		virtual ~Code() {}
+		virtual ~CodeBase() {}
 
-		bool operator==(const Code& rhs) const;
+		bool operator==(const CodeBase& rhs) const;
 
-		const std::vector<std::shared_ptr<Code>>& get_stack() const {return stack_;}
+		const std::vector<Code>& get_stack() const {return stack_;}
 
 		virtual bool is_atom() const = 0;
 		bool is_list() const {return !is_atom();}
@@ -32,17 +32,17 @@ class Code {
 
 	protected:
 		// operator== already checked CodeList stacks at this point, so they must be equal
-		virtual bool equal_to(const Code&) const {return true;}
+		virtual bool equal_to(const CodeBase&) const {return true;}
 
 	private:
 		friend class CodeList;
-		const std::vector<std::shared_ptr<Code>> stack_;
+		const std::vector<Code> stack_;
 };
 
-class CodeList : public Code {
+class CodeList : public CodeBase {
 	public:
 		CodeList() : size_(1) {}
-		CodeList(const std::vector<std::shared_ptr<Code>>& stack) : Code(stack) {calc_size_();}
+		CodeList(const std::vector<Code>& stack) : CodeBase(stack) {calc_size_();}
 
 		bool is_atom() const {return false;}
 		unsigned operator()(Env& env) const override;
@@ -53,7 +53,7 @@ class CodeList : public Code {
 		void calc_size_();
 };
 
-class CodeAtom : public Code {
+class CodeAtom : public CodeBase {
 	public:
 		bool is_atom() const {return true;}
 		unsigned size() const override {return 1;}

@@ -189,7 +189,7 @@ TEST_CASE("Instruction: EXEC.S") {
 	REQUIRE(env.exec_stack.size() == 3);
 	REQUIRE(env.exec_stack[0]->get_stack().size() == 2);
 
-	auto bc = cppush::CodeList(std::vector<std::shared_ptr<cppush::Code>>{
+	auto bc = cppush::CodeList(std::vector<cppush::Code>{
 			std::make_shared<cppush::CodeList>(b),
 			std::make_shared<cppush::CodeList>(c)
 			});

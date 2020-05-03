@@ -37,8 +37,8 @@ auto generate_test_values<bool>(int len) {
 }
 
 template <>
-auto generate_test_values<cppush::Code_ptr>(int len) {
-	std::vector<cppush::Code_ptr> vec;
+auto generate_test_values<cppush::Code>(int len) {
+	std::vector<cppush::Code> vec;
 	for (int i = 0; i < len; ++i) {
 		vec.push_back(std::make_shared<cppush::Literal<int>>(i));
 	}
@@ -47,7 +47,7 @@ auto generate_test_values<cppush::Code_ptr>(int len) {
 
 template <>
 auto generate_test_values<cppush::Exec>(int len) {
-	return generate_test_values<cppush::Code_ptr>(len);
+	return generate_test_values<cppush::Code>(len);
 }
 
 #endif // TEST_UTILS_H

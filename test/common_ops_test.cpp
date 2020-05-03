@@ -11,12 +11,12 @@
 #include <memory>
 #include <vector>
 
-TEMPLATE_TEST_CASE("Instruction: *.=", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.=", "", bool, int, double, cppush::Code, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::equal<TestType>, "=");
 
 	auto vals = generate_test_values<TestType>(2);
-	bool expect;
+	bool expected;
 
 	SECTION("Equal") {
 		env.push<TestType>(vals[0]);
@@ -31,11 +31,11 @@ TEMPLATE_TEST_CASE("Instruction: *.=", "", bool, int, double, cppush::Code_ptr, 
 	}
 
 	op(env);
-	REQUIRE(env.pop<bool>() == expect);
+	REQUIRE(env.pop<bool>() == expected);
 	REQUIRE(env.get_stack<TestType>().empty());
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.POP", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.POP", "", bool, int, double, cppush::Code, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::protected_pop<TestType>, "POP");
 
@@ -46,7 +46,7 @@ TEMPLATE_TEST_CASE("Instruction: *.POP", "", bool, int, double, cppush::Code_ptr
 	REQUIRE(env.get_stack<TestType>().empty());
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.DUP", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.DUP", "", bool, int, double, cppush::Code, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::dup<TestType>, "DUP");
 
@@ -59,7 +59,7 @@ TEMPLATE_TEST_CASE("Instruction: *.DUP", "", bool, int, double, cppush::Code_ptr
 	REQUIRE(env.get_stack<TestType>() == duped);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.FLUSH", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.FLUSH", "", bool, int, double, cppush::Code, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::flush<TestType>, "FLUSH");
 
@@ -71,7 +71,7 @@ TEMPLATE_TEST_CASE("Instruction: *.FLUSH", "", bool, int, double, cppush::Code_p
 	REQUIRE(env.get_stack<TestType>().empty());
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.ROT", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.ROT", "", bool, int, double, cppush::Code, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::rot<TestType>, "ROT");
 
@@ -86,7 +86,7 @@ TEMPLATE_TEST_CASE("Instruction: *.ROT", "", bool, int, double, cppush::Code_ptr
 	REQUIRE(env.get_stack<TestType>() == vals);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.SHOVE", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.SHOVE", "", bool, int, double, cppush::Code, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::shove<TestType>, "SHOVE");
 
@@ -114,7 +114,7 @@ TEMPLATE_TEST_CASE("Instruction: *.SHOVE", "", bool, int, double, cppush::Code_p
 	REQUIRE(env.get_stack<TestType>() == vals);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.STACKDEPTH", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.STACKDEPTH", "", bool, int, double, cppush::Code, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::stackdepth<TestType>, "STACKDEPTH");
 
@@ -132,7 +132,7 @@ TEMPLATE_TEST_CASE("Instruction: *.STACKDEPTH", "", bool, int, double, cppush::C
 	REQUIRE(env.pop<int>() == expected);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.SWAP", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.SWAP", "", bool, int, double, cppush::Code, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::swap<TestType>, "SWAP");
 
@@ -145,7 +145,7 @@ TEMPLATE_TEST_CASE("Instruction: *.SWAP", "", bool, int, double, cppush::Code_pt
 	REQUIRE(env.get_stack<TestType>() == vals);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.YANK", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.YANK", "", bool, int, double, cppush::Code, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::yank<TestType>, "YANK");
 
@@ -177,7 +177,7 @@ TEMPLATE_TEST_CASE("Instruction: *.YANK", "", bool, int, double, cppush::Code_pt
 	REQUIRE(env.get_stack<TestType>() == vals);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.YANKDUP", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.YANKDUP", "", bool, int, double, cppush::Code, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::yankdup<TestType>, "YANKDUP");
 

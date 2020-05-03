@@ -6,8 +6,8 @@
 
 namespace cppush {
 
-bool Code::operator==(const Code& rhs) const {
-	const Code& lhs = *this;
+bool CodeBase::operator==(const CodeBase& rhs) const {
+	const CodeBase& lhs = *this;
 
 	if (&lhs == &rhs) {return true;}
 	if (typeid(lhs) != typeid(rhs)) {return false;}

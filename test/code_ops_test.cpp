@@ -30,11 +30,11 @@ TEST_CASE("Instruction: CODE.APPEND") {
 
 	SECTION("Both lists"){
 		auto first = std::make_shared<cppush::CodeList>(
-				std::vector<std::shared_ptr<cppush::Code>>{
+				std::vector<cppush::Code>{
 					std::make_shared<cppush::Literal<int>>(1)
 				});
 		auto second = std::make_shared<cppush::CodeList>(
-				std::vector<std::shared_ptr<cppush::Code>>{
+				std::vector<cppush::Code>{
 					std::make_shared<cppush::Literal<int>>(2)
 				});
 
@@ -49,7 +49,7 @@ TEST_CASE("Instruction: CODE.APPEND") {
 
 	SECTION("Atom and list"){
 		auto code_list = std::make_shared<cppush::CodeList>(
-				std::vector<std::shared_ptr<cppush::Code>>{
+				std::vector<cppush::Code>{
 					std::make_shared<cppush::Literal<int>>(1)
 				});
 		auto atom = std::make_shared<cppush::Literal<int>>(2);
@@ -105,17 +105,17 @@ TEST_CASE("Instruction: CODE.CAR") {
 		auto atom = std::make_shared<cppush::Literal<int>>(0);
 		env.code_stack.push_back(atom);
 		op(env);
-		REQUIRE(env.code_stack == std::vector<std::shared_ptr<cppush::Code>>{atom});
+		REQUIRE(env.code_stack == std::vector<cppush::Code>{atom});
 	}
 
 	SECTION("List") {
 		auto atom_a = std::make_shared<cppush::Literal<int>>(0);
 		auto atom_b = std::make_shared<cppush::Literal<int>>(1);
-		auto list_ab = std::vector<std::shared_ptr<cppush::Code>>{atom_a, atom_b};
+		auto list_ab = std::vector<cppush::Code>{atom_a, atom_b};
 		auto code_list = std::make_shared<cppush::CodeList>(list_ab);
 		env.code_stack.push_back(code_list);
 		op(env);
-		REQUIRE(env.code_stack == std::vector<std::shared_ptr<cppush::Code>>{atom_a});
+		REQUIRE(env.code_stack == std::vector<cppush::Code>{atom_a});
 	}
 }
 
@@ -135,8 +135,8 @@ TEST_CASE("Instruction: CODE.CDR") {
 	SECTION("List") {
 		auto atom_a = std::make_shared<cppush::Literal<int>>(0);
 		auto atom_b = std::make_shared<cppush::Literal<int>>(1);
-		auto list_ab = std::vector<std::shared_ptr<cppush::Code>>{atom_a, atom_b};
-		auto list_b = std::vector<std::shared_ptr<cppush::Code>>{atom_b};
+		auto list_ab = std::vector<cppush::Code>{atom_a, atom_b};
+		auto list_b = std::vector<cppush::Code>{atom_b};
 		auto code_list = std::make_shared<cppush::CodeList>(list_ab);
 		env.code_stack.push_back(code_list);
 		op(env);
@@ -165,7 +165,7 @@ TEST_CASE("Instruction: CODE.CONS") {
 
 	SECTION("First item is a list") {
 		auto first = std::make_shared<cppush::CodeList>(
-				std::vector<std::shared_ptr<cppush::Code>>{std::make_shared<cppush::Literal<int>>(0)}
+				std::vector<cppush::Code>{std::make_shared<cppush::Literal<int>>(0)}
 				);
 		env.code_stack.push_back(second);
 		env.code_stack.push_back(first);
@@ -192,12 +192,12 @@ TEST_CASE("Instruction: CODE.CONTAINER") {
 	auto c = std::make_shared<cppush::Literal<int>>(2);
 	auto d = std::make_shared<cppush::Literal<int>>(3);
 
-	std::vector<std::shared_ptr<cppush::Code>> list_a{a};
-	std::vector<std::shared_ptr<cppush::Code>> list_ca{c, std::make_shared<cppush::CodeList>(list_a)};
-	std::vector<std::shared_ptr<cppush::Code>> list_bca{b, std::make_shared<cppush::CodeList>(list_ca)};
-	std::vector<std::shared_ptr<cppush::Code>> list_da{d, std::make_shared<cppush::CodeList>(list_a)};
+	std::vector<cppush::Code> list_a{a};
+	std::vector<cppush::Code> list_ca{c, std::make_shared<cppush::CodeList>(list_a)};
+	std::vector<cppush::Code> list_bca{b, std::make_shared<cppush::CodeList>(list_ca)};
+	std::vector<cppush::Code> list_da{d, std::make_shared<cppush::CodeList>(list_a)};
 
-	std::vector<std::shared_ptr<cppush::Code>> list_full{
+	std::vector<cppush::Code> list_full{
 			std::make_shared<cppush::CodeList>(list_bca),
 			std::make_shared<cppush::CodeList>(list_da)
 	};
@@ -237,12 +237,12 @@ TEST_CASE("Instruction: CODE.CONTAINS") {
 	auto c = std::make_shared<cppush::Literal<int>>(2);
 	auto d = std::make_shared<cppush::Literal<int>>(3);
 
-	std::vector<std::shared_ptr<cppush::Code>> list_a{a};
-	std::vector<std::shared_ptr<cppush::Code>> list_ca{c, std::make_shared<cppush::CodeList>(list_a)};
-	std::vector<std::shared_ptr<cppush::Code>> list_bca{b, std::make_shared<cppush::CodeList>(list_ca)};
-	std::vector<std::shared_ptr<cppush::Code>> list_da{d, std::make_shared<cppush::CodeList>(list_a)};
+	std::vector<cppush::Code> list_a{a};
+	std::vector<cppush::Code> list_ca{c, std::make_shared<cppush::CodeList>(list_a)};
+	std::vector<cppush::Code> list_bca{b, std::make_shared<cppush::CodeList>(list_ca)};
+	std::vector<cppush::Code> list_da{d, std::make_shared<cppush::CodeList>(list_a)};
 
-	std::vector<std::shared_ptr<cppush::Code>> list_full{
+	std::vector<cppush::Code> list_full{
 			std::make_shared<cppush::CodeList>(list_bca),
 			std::make_shared<cppush::CodeList>(list_da)
 	};
@@ -283,12 +283,12 @@ TEST_CASE("Instruction: CODE.DO") {
 	cppush::Instruction op(cppush::code_do, "CODE.DO");
 
 	std::shared_ptr<cppush::Instruction> pop_insn = std::make_shared<cppush::Instruction>(
-			cppush::protected_pop<cppush::Code_ptr>, "CODE.POP");
+			cppush::protected_pop<cppush::Code>, "CODE.POP");
 	std::shared_ptr<cppush::CodeList> code_list = std::make_shared<cppush::CodeList>();
 
 	env.code_stack.push_back(code_list);
 	op(env);
-	REQUIRE(env.code_stack == std::vector<std::shared_ptr<cppush::Code>>{code_list});
+	REQUIRE(env.code_stack == std::vector<cppush::Code>{code_list});
 	REQUIRE(env.exec_stack.size() == 2);
 	REQUIRE(*env.exec_stack[0] == *pop_insn);
 	REQUIRE(*env.exec_stack[1] == *code_list);
@@ -316,7 +316,7 @@ TEST_CASE("Instruction: CODE.QUOTE") {
 	env.exec_stack.push_back(code_list);
 	op(env);
 	REQUIRE(env.exec_stack.empty());
-	REQUIRE(env.code_stack == std::vector<std::shared_ptr<cppush::Code>>{code_list});
+	REQUIRE(env.code_stack == std::vector<cppush::Code>{code_list});
 }
 
 TEST_CASE("Instruction: CODE.DO*RANGE") {
@@ -465,17 +465,17 @@ TEST_CASE("Instruction: CODE.EXTRACT") {
 	auto c = std::make_shared<cppush::Literal<int>>(2);
 	auto d = std::make_shared<cppush::Literal<int>>(3);
 
-	std::vector<std::shared_ptr<cppush::Code>> list_a{a};
-	std::vector<std::shared_ptr<cppush::Code>> list_da{d, std::make_shared<cppush::CodeList>(list_a)};
+	std::vector<cppush::Code> list_a{a};
+	std::vector<cppush::Code> list_da{d, std::make_shared<cppush::CodeList>(list_a)};
 
-	std::vector<std::shared_ptr<cppush::Code>> list_full{
+	std::vector<cppush::Code> list_full{
 		b,
 		c,
 		std::make_shared<cppush::CodeList>(list_a),
 		std::make_shared<cppush::CodeList>(list_da)
 	};
 
-	std::vector<std::shared_ptr<cppush::Code>> indexed_list{
+	std::vector<cppush::Code> indexed_list{
 		std::make_shared<cppush::CodeList>(list_full),
 		b,
 		c,
@@ -628,10 +628,10 @@ TEST_CASE("Instruction: CODE.INSERT") {
 	auto c = std::make_shared<cppush::Literal<int>>(2);
 	auto d = std::make_shared<cppush::Literal<int>>(3);
 
-	std::vector<std::shared_ptr<cppush::Code>> list_a{a};
+	std::vector<cppush::Code> list_a{a};
 	auto list_a_ptr = std::make_shared<cppush::CodeList>(list_a);
 
-	std::vector<std::shared_ptr<cppush::Code>> list_full{
+	std::vector<cppush::Code> list_full{
 		b,
 		c,
 		std::make_shared<cppush::CodeList>(list_a),
@@ -697,10 +697,10 @@ TEST_CASE("Instruction: CODE.LENGTH") {
 	auto c = std::make_shared<cppush::Literal<int>>(2);
 	auto d = std::make_shared<cppush::Literal<int>>(3);
 
-	std::vector<std::shared_ptr<cppush::Code>> list_a{a};
+	std::vector<cppush::Code> list_a{a};
 	auto list_a_ptr = std::make_shared<cppush::CodeList>(list_a);
 
-	std::vector<std::shared_ptr<cppush::Code>> list_full{
+	std::vector<cppush::Code> list_full{
 		b,
 		c,
 		std::make_shared<cppush::CodeList>(list_a),
@@ -746,7 +746,7 @@ TEST_CASE("Instruction: CODE.MEMBER") {
 	auto b = std::make_shared<cppush::Literal<int>>(1);
 	auto c = std::make_shared<cppush::Literal<int>>(2);
 
-	auto ab = std::make_shared<cppush::CodeList>(std::vector<std::shared_ptr<cppush::Code>>{a, b});
+	auto ab = std::make_shared<cppush::CodeList>(std::vector<cppush::Code>{a, b});
 
 	SECTION("( A B ) A") {
 		env.code_stack.push_back(a);
@@ -787,10 +787,10 @@ TEST_CASE("Instruction: CODE.NTH") {
 	auto b = std::make_shared<cppush::Literal<int>>(1);
 	auto c = std::make_shared<cppush::Literal<int>>(2);
 
-	std::vector<std::shared_ptr<cppush::Code>> list_a{a};
+	std::vector<cppush::Code> list_a{a};
 	auto list_a_ptr = std::make_shared<cppush::CodeList>(list_a);
 
-	std::vector<std::shared_ptr<cppush::Code>> list_full{
+	std::vector<cppush::Code> list_full{
 		b,
 		c,
 		list_a_ptr
@@ -872,10 +872,10 @@ TEST_CASE("Instruction: CODE.NTHCDR") {
 	auto b = std::make_shared<cppush::Literal<int>>(1);
 	auto c = std::make_shared<cppush::Literal<int>>(2);
 
-	std::vector<std::shared_ptr<cppush::Code>> list_a{a};
+	std::vector<cppush::Code> list_a{a};
 	auto list_a_ptr = std::make_shared<cppush::CodeList>(list_a);
 
-	std::vector<std::shared_ptr<cppush::Code>> list_full{
+	std::vector<cppush::Code> list_full{
 		b,
 		c,
 		list_a_ptr
@@ -986,7 +986,7 @@ TEST_CASE("Instruction: CODE.POSITION") {
 	auto a = std::make_shared<cppush::Literal<int>>(1);
 	auto b = std::make_shared<cppush::Literal<int>>(2);
 	auto c = std::make_shared<cppush::Literal<int>>(3);
-	auto ab = std::make_shared<cppush::CodeList>(std::vector<std::shared_ptr<cppush::Code>>{a, b});
+	auto ab = std::make_shared<cppush::CodeList>(std::vector<cppush::Code>{a, b});
 
 	SECTION("Coerce first item to list") {
 		env.code_stack.push_back(a);
@@ -1026,8 +1026,8 @@ TEST_CASE("Instruction: CODE.SIZE") {
 
 	auto nil = std::make_shared<cppush::CodeList>();
 	auto a = std::make_shared<cppush::Literal<int>>(1);
-	auto aa = std::make_shared<cppush::CodeList>(std::vector<std::shared_ptr<cppush::Code>>{a, a});
-	auto nested_aa = std::make_shared<cppush::CodeList>(std::vector<std::shared_ptr<cppush::Code>>{a, aa});
+	auto aa = std::make_shared<cppush::CodeList>(std::vector<cppush::Code>{a, a});
+	auto nested_aa = std::make_shared<cppush::CodeList>(std::vector<cppush::Code>{a, aa});
 
 	SECTION("() = 1") {
 		env.code_stack.push_back(nil);
@@ -1072,8 +1072,8 @@ TEST_CASE("Instruction: CODE.SUBST") {
 	auto a = std::make_shared<cppush::Literal<int>>(1);
 	auto b = std::make_shared<cppush::Literal<int>>(2);
 	auto c = std::make_shared<cppush::Literal<int>>(3);
-	auto ab = std::make_shared<cppush::CodeList>(std::vector<std::shared_ptr<cppush::Code>>{a, b});
-	auto ac = std::make_shared<cppush::CodeList>(std::vector<std::shared_ptr<cppush::Code>>{a, c});
+	auto ab = std::make_shared<cppush::CodeList>(std::vector<cppush::Code>{a, b});
+	auto ac = std::make_shared<cppush::CodeList>(std::vector<cppush::Code>{a, c});
 
 	SECTION("A B B = A") {
 		env.code_stack.push_back(b);
