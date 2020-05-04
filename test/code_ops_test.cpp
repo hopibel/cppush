@@ -12,18 +12,18 @@
 
 #include <iostream>
 
-TEST_CASE("Instruction: CODE.APPEND") {
+TEST_CASE("Instruction: code_append") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_append, "CODE.APPEND");
+	cppush::Instruction op(cppush::code_append, "code_append");
 
 	SECTION("Both atoms"){
 		auto first = std::make_shared<cppush::Literal<int>>(1);
 		auto second = std::make_shared<cppush::Literal<int>>(1);
-		env.code_stack.insert(env.code_stack.end(), {second, first});
+		env.get_stack<cppush::Code>().insert(env.get_stack<cppush::Code>().end(), {second, first});
 		op(env);
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(env.code_stack.back()->is_list());
-		auto& stack = env.code_stack.back()->get_stack();
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(env.get_stack<cppush::Code>().back()->is_list());
+		auto& stack = env.get_stack<cppush::Code>().back()->get_stack();
 		REQUIRE(stack[0] == second);
 		REQUIRE(stack[1] == first);
 	}
@@ -38,11 +38,11 @@ TEST_CASE("Instruction: CODE.APPEND") {
 					std::make_shared<cppush::Literal<int>>(2)
 				});
 
-		env.code_stack.insert(env.code_stack.end(), {second, first});
+		env.get_stack<cppush::Code>().insert(env.get_stack<cppush::Code>().end(), {second, first});
 		op(env);
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(env.code_stack.back()->is_list());
-		auto& stack = env.code_stack.back()->get_stack();
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(env.get_stack<cppush::Code>().back()->is_list());
+		auto& stack = env.get_stack<cppush::Code>().back()->get_stack();
 		REQUIRE(stack[0] == second->get_stack()[0]);
 		REQUIRE(stack[1] == first->get_stack()[0]);
 	}
@@ -55,57 +55,57 @@ TEST_CASE("Instruction: CODE.APPEND") {
 		auto atom = std::make_shared<cppush::Literal<int>>(2);
 
 		SECTION("Append list to atom") {
-			env.code_stack.insert(env.code_stack.end(), {atom, code_list});
+			env.get_stack<cppush::Code>().insert(env.get_stack<cppush::Code>().end(), {atom, code_list});
 			op(env);
-			REQUIRE(env.code_stack.size() == 1);
-			REQUIRE(env.code_stack.back()->is_list());
-			auto& stack = env.code_stack.back()->get_stack();
+			REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+			REQUIRE(env.get_stack<cppush::Code>().back()->is_list());
+			auto& stack = env.get_stack<cppush::Code>().back()->get_stack();
 			REQUIRE(stack[0] == atom);
 			REQUIRE(stack[1] == code_list->get_stack()[0]);
 		}
 
 		SECTION("Append atom to list") {
-			env.code_stack.insert(env.code_stack.end(), {code_list, atom});
+			env.get_stack<cppush::Code>().insert(env.get_stack<cppush::Code>().end(), {code_list, atom});
 			op(env);
-			REQUIRE(env.code_stack.size() == 1);
-			REQUIRE(env.code_stack.back()->is_list());
-			auto& stack = env.code_stack.back()->get_stack();
+			REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+			REQUIRE(env.get_stack<cppush::Code>().back()->is_list());
+			auto& stack = env.get_stack<cppush::Code>().back()->get_stack();
 			REQUIRE(stack[0] == code_list->get_stack()[0]);
 			REQUIRE(stack[1] == atom);
 		}
 	}
 }
 
-TEST_CASE("Instruction: CODE.ATOM") {
+TEST_CASE("Instruction: code_atom") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_atom, "CODE.ATOM");
+	cppush::Instruction op(cppush::code_atom, "code_atom");
 
 	SECTION("Atom") {
 		auto atom = std::make_shared<cppush::Literal<int>>(0);
-		env.code_stack.push_back(atom);
+		env.push<cppush::Code>(atom);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.bool_stack == std::vector<bool>{true});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
 	}
 
 	SECTION("List") {
 		auto code_list = std::make_shared<cppush::CodeList>();
-		env.code_stack.push_back(code_list);
+		env.push<cppush::Code>(code_list);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.bool_stack == std::vector<bool>{false});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<bool>() == std::vector<bool>{false});
 	}
 }
 
-TEST_CASE("Instruction: CODE.CAR") {
+TEST_CASE("Instruction: code_car") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_car, "CODE.CAR");
+	cppush::Instruction op(cppush::code_car, "code_car");
 
 	SECTION("Atom") {
 		auto atom = std::make_shared<cppush::Literal<int>>(0);
-		env.code_stack.push_back(atom);
+		env.push<cppush::Code>(atom);
 		op(env);
-		REQUIRE(env.code_stack == std::vector<cppush::Code>{atom});
+		REQUIRE(env.get_stack<cppush::Code>() == std::vector<cppush::Code>{atom});
 	}
 
 	SECTION("List") {
@@ -113,23 +113,23 @@ TEST_CASE("Instruction: CODE.CAR") {
 		auto atom_b = std::make_shared<cppush::Literal<int>>(1);
 		auto list_ab = std::vector<cppush::Code>{atom_a, atom_b};
 		auto code_list = std::make_shared<cppush::CodeList>(list_ab);
-		env.code_stack.push_back(code_list);
+		env.push<cppush::Code>(code_list);
 		op(env);
-		REQUIRE(env.code_stack == std::vector<cppush::Code>{atom_a});
+		REQUIRE(env.get_stack<cppush::Code>() == std::vector<cppush::Code>{atom_a});
 	}
 }
 
-TEST_CASE("Instruction: CODE.CDR") {
+TEST_CASE("Instruction: code_cdr") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_cdr, "CODE.CDR");
+	cppush::Instruction op(cppush::code_cdr, "code_cdr");
 
 	SECTION("Atom") {
 		auto atom = std::make_shared<cppush::Literal<int>>(0);
-		env.code_stack.push_back(atom);
+		env.push<cppush::Code>(atom);
 		op(env);
 		// CDR on atom results in empty list
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == cppush::CodeList());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == cppush::CodeList());
 	}
 
 	SECTION("List") {
@@ -138,26 +138,26 @@ TEST_CASE("Instruction: CODE.CDR") {
 		auto list_ab = std::vector<cppush::Code>{atom_a, atom_b};
 		auto list_b = std::vector<cppush::Code>{atom_b};
 		auto code_list = std::make_shared<cppush::CodeList>(list_ab);
-		env.code_stack.push_back(code_list);
+		env.push<cppush::Code>(code_list);
 		op(env);
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == cppush::CodeList(list_b));
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == cppush::CodeList(list_b));
 	}
 }
 
-TEST_CASE("Instruction: CODE.CONS") {
+TEST_CASE("Instruction: code_cons") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_cons, "CODE.CONS");
+	cppush::Instruction op(cppush::code_cons, "code_cons");
 
 	auto second = std::make_shared<cppush::Literal<int>>(1);
 
 	SECTION("First item is an atom") {
 		auto first = std::make_shared<cppush::Literal<int>>(0);
-		env.code_stack.push_back(second);
-		env.code_stack.push_back(first);
+		env.push<cppush::Code>(second);
+		env.push<cppush::Code>(first);
 		op(env);
-		REQUIRE(env.code_stack.size() == 1);
-		auto& code_list = env.code_stack.back()->get_stack();
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		auto& code_list = env.get_stack<cppush::Code>().back()->get_stack();
 		REQUIRE(code_list.size() == 2);
 		REQUIRE(*code_list[0] == *second);
 		REQUIRE(*code_list[1] == *first);
@@ -167,20 +167,20 @@ TEST_CASE("Instruction: CODE.CONS") {
 		auto first = std::make_shared<cppush::CodeList>(
 				std::vector<cppush::Code>{std::make_shared<cppush::Literal<int>>(0)}
 				);
-		env.code_stack.push_back(second);
-		env.code_stack.push_back(first);
+		env.push<cppush::Code>(second);
+		env.push<cppush::Code>(first);
 		op(env);
-		REQUIRE(env.code_stack.size() == 1);
-		auto& code_list = env.code_stack.back()->get_stack();
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		auto& code_list = env.get_stack<cppush::Code>().back()->get_stack();
 		REQUIRE(code_list.size() == 2);
 		REQUIRE(*code_list[0] == *second);
 		REQUIRE(*code_list[1] == *first->get_stack()[0]);
 	}
 }
 
-TEST_CASE("Instruction: CODE.CONTAINER") {
+TEST_CASE("Instruction: code_container") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_container, "CODE.CONTAINER");
+	cppush::Instruction op(cppush::code_container, "code_container");
 
 	/*
 	For example, if the top piece of code is "( B ( C ( A ) ) ( D ( A ) ) )" and the second piece of code is
@@ -205,27 +205,27 @@ TEST_CASE("Instruction: CODE.CONTAINER") {
 	auto container = std::make_shared<cppush::CodeList>(list_full);
 
 	SECTION("Find container") {
-		env.code_stack.push_back(std::make_shared<cppush::CodeList>(list_a));
-		env.code_stack.push_back(container);
+		env.push<cppush::Code>(std::make_shared<cppush::CodeList>(list_a));
+		env.push<cppush::Code>(container);
 		op(env);
 
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == cppush::CodeList(list_ca));
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == cppush::CodeList(list_ca));
 	}
 
 	SECTION("Push empty list if no container") {
-		env.code_stack.push_back(container);
-		env.code_stack.push_back(std::make_shared<cppush::CodeList>(list_a));
+		env.push<cppush::Code>(container);
+		env.push<cppush::Code>(std::make_shared<cppush::CodeList>(list_a));
 		op(env);
 
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == cppush::CodeList());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == cppush::CodeList());
 	}
 }
 
-TEST_CASE("Instruction: CODE.CONTAINS") {
+TEST_CASE("Instruction: code_contains") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_contains, "CODE.CONTAINS");
+	cppush::Instruction op(cppush::code_contains, "code_contains");
 
 	/*
 	 * First:	( A )
@@ -250,150 +250,150 @@ TEST_CASE("Instruction: CODE.CONTAINS") {
 	auto container = std::make_shared<cppush::CodeList>(list_full);
 
 	SECTION("Subtree found") {
-		env.code_stack.push_back(container);
-		env.code_stack.push_back(std::make_shared<cppush::CodeList>(list_a));
+		env.push<cppush::Code>(container);
+		env.push<cppush::Code>(std::make_shared<cppush::CodeList>(list_a));
 		op(env);
 
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.bool_stack == std::vector<bool>{true});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
 	}
 
 	SECTION("Not a subtree") {
 		// swap, so we have a superset instead of a subset
-		env.code_stack.push_back(std::make_shared<cppush::CodeList>(list_a));
-		env.code_stack.push_back(container);
+		env.push<cppush::Code>(std::make_shared<cppush::CodeList>(list_a));
+		env.push<cppush::Code>(container);
 		op(env);
 
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.bool_stack == std::vector<bool>{false});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<bool>() == std::vector<bool>{false});
 	}
 
 	SECTION("Items are equal") {
-		env.code_stack.push_back(container);
-		env.code_stack.push_back(container);
+		env.push<cppush::Code>(container);
+		env.push<cppush::Code>(container);
 		op(env);
 
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.bool_stack == std::vector<bool>{true});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
 	}
 }
 
-TEST_CASE("Instruction: CODE.DO") {
+TEST_CASE("Instruction: code_do") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_do, "CODE.DO");
+	cppush::Instruction op(cppush::code_do, "code_do");
 
 	std::shared_ptr<cppush::Instruction> pop_insn = std::make_shared<cppush::Instruction>(
-			cppush::protected_pop<cppush::Code>, "CODE.POP");
+			cppush::protected_pop<cppush::Code>, "code_pop");
 	std::shared_ptr<cppush::CodeList> code_list = std::make_shared<cppush::CodeList>();
 
-	env.code_stack.push_back(code_list);
+	env.push<cppush::Code>(code_list);
 	op(env);
-	REQUIRE(env.code_stack == std::vector<cppush::Code>{code_list});
-	REQUIRE(env.exec_stack.size() == 2);
-	REQUIRE(*env.exec_stack[0] == *pop_insn);
-	REQUIRE(*env.exec_stack[1] == *code_list);
+	REQUIRE(env.get_stack<cppush::Code>() == std::vector<cppush::Code>{code_list});
+	REQUIRE(env.get_stack<cppush::Exec>().size() == 2);
+	REQUIRE(*env.get_stack<cppush::Exec>()[0] == *pop_insn);
+	REQUIRE(*env.get_stack<cppush::Exec>()[1] == *code_list);
 }
 
-TEST_CASE("Instruction: CODE.DO*") {
+TEST_CASE("Instruction: code_do*") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_do_star, "CODE.DO*");
-
-	std::shared_ptr<cppush::CodeList> code_list = std::make_shared<cppush::CodeList>();
-
-	env.code_stack.push_back(code_list);
-	op(env);
-	REQUIRE(env.code_stack.empty());
-	REQUIRE(env.exec_stack.size() == 1);
-	REQUIRE(*env.exec_stack[0] == *code_list);
-}
-
-TEST_CASE("Instruction: CODE.QUOTE") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::code_quote, "CODE.QUOTE");
+	cppush::Instruction op(cppush::code_do_star, "code_do*");
 
 	std::shared_ptr<cppush::CodeList> code_list = std::make_shared<cppush::CodeList>();
 
-	env.exec_stack.push_back(code_list);
+	env.push<cppush::Code>(code_list);
 	op(env);
-	REQUIRE(env.exec_stack.empty());
-	REQUIRE(env.code_stack == std::vector<cppush::Code>{code_list});
+	REQUIRE(env.get_stack<cppush::Code>().empty());
+	REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
+	REQUIRE(*env.get_stack<cppush::Exec>()[0] == *code_list);
 }
 
-TEST_CASE("Instruction: CODE.DO*RANGE") {
+TEST_CASE("Instruction: code_quote") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_do_range, "CODE.DO*RANGE");
-	cppush::Instruction quote_op(cppush::code_quote, "CODE.QUOTE");
+	cppush::Instruction op(cppush::code_quote, "code_quote");
+
+	std::shared_ptr<cppush::CodeList> code_list = std::make_shared<cppush::CodeList>();
+
+	env.push<cppush::Exec>(code_list);
+	op(env);
+	REQUIRE(env.get_stack<cppush::Exec>().empty());
+	REQUIRE(env.get_stack<cppush::Code>() == std::vector<cppush::Code>{code_list});
+}
+
+TEST_CASE("Instruction: code_do*range") {
+	cppush::Env env;
+	cppush::Instruction op(cppush::code_do_range, "code_do*range");
+	cppush::Instruction quote_op(cppush::code_quote, "code_quote");
 
 	cppush::CodeList body;
-	env.code_stack.push_back(std::make_shared<cppush::CodeList>(body));
+	env.push<cppush::Code>(std::make_shared<cppush::CodeList>(body));
 
 	SECTION("index == dest") {
-		env.int_stack.insert(env.int_stack.end(), {0, 0});
+		env.get_stack<int>().insert(env.get_stack<int>().end(), {0, 0});
 		op(env);
-		REQUIRE(env.int_stack == std::vector<int>{0});
-		REQUIRE(env.exec_stack.size() == 1);
-		REQUIRE(*env.exec_stack.back() == body);
+		REQUIRE(env.get_stack<int>() == std::vector<int>{0});
+		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Exec>().back() == body);
 	}
 
 	SECTION("index < dest") {
-		env.int_stack.insert(env.int_stack.end(), {0, 9});
+		env.get_stack<int>().insert(env.get_stack<int>().end(), {0, 9});
 		op(env);
-		REQUIRE(env.int_stack == std::vector<int>{0});
-		REQUIRE(env.exec_stack.size() == 2);
-		auto& rcall = env.exec_stack[0]->get_stack();
+		REQUIRE(env.get_stack<int>() == std::vector<int>{0});
+		REQUIRE(env.get_stack<cppush::Exec>().size() == 2);
+		auto& rcall = env.get_stack<cppush::Exec>()[0]->get_stack();
 		REQUIRE(rcall.size() == 5);
 		REQUIRE(*rcall[0] == cppush::Literal<int>(1));
 		REQUIRE(*rcall[1] == cppush::Literal<int>(9));
 		REQUIRE(*rcall[2] == quote_op);
 		REQUIRE(*rcall[3] == body);
 		REQUIRE(*rcall[4] == op);
-		REQUIRE(*env.exec_stack[1] == body);
+		REQUIRE(*env.get_stack<cppush::Exec>()[1] == body);
 	}
 
 	SECTION("index > dest") {
-		env.int_stack.insert(env.int_stack.end(), {9, 0});
+		env.get_stack<int>().insert(env.get_stack<int>().end(), {9, 0});
 		op(env);
-		REQUIRE(env.int_stack == std::vector<int>{9});
-		REQUIRE(env.exec_stack.size() == 2);
-		auto& rcall = env.exec_stack[0]->get_stack();
+		REQUIRE(env.get_stack<int>() == std::vector<int>{9});
+		REQUIRE(env.get_stack<cppush::Exec>().size() == 2);
+		auto& rcall = env.get_stack<cppush::Exec>()[0]->get_stack();
 		REQUIRE(rcall.size() == 5);
 		REQUIRE(*rcall[0] == cppush::Literal<int>(8));
 		REQUIRE(*rcall[1] == cppush::Literal<int>(0));
 		REQUIRE(*rcall[2] == quote_op);
 		REQUIRE(*rcall[3] == body);
 		REQUIRE(*rcall[4] == op);
-		REQUIRE(*env.exec_stack[1] == body);
+		REQUIRE(*env.get_stack<cppush::Exec>()[1] == body);
 	}
 }
 
-TEST_CASE("Instruction: CODE.DO*COUNT") {
+TEST_CASE("Instruction: code_do*count") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_do_count, "CODE.DO*COUNT");
-	cppush::Instruction do_range(cppush::code_do_range, "CODE.DO*RANGE");
-	cppush::Instruction quote_op(cppush::code_quote, "CODE.QUOTE");
+	cppush::Instruction op(cppush::code_do_count, "code_do*count");
+	cppush::Instruction do_range(cppush::code_do_range, "code_do*range");
+	cppush::Instruction quote_op(cppush::code_quote, "code_quote");
 
 	cppush::CodeList body;
-	env.code_stack.push_back(std::make_shared<cppush::CodeList>(body));
+	env.push<cppush::Code>(std::make_shared<cppush::CodeList>(body));
 
 	int count;
 
 	SECTION("count < 1") {
 		count = 0;
-		env.int_stack.push_back(count);
+		env.push<int>(count);
 		op(env);
-		REQUIRE(env.int_stack == std::vector<int>{count});
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == body);
+		REQUIRE(env.get_stack<int>() == std::vector<int>{count});
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == body);
 	}
 
 	SECTION("count > 0") {
 		count = 2;
-		env.int_stack.push_back(count);
+		env.push<int>(count);
 		op(env);
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.exec_stack.size() == 1);
-		auto& rcall = env.exec_stack.back()->get_stack();
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
+		auto& rcall = env.get_stack<cppush::Exec>().back()->get_stack();
 		REQUIRE(rcall.size() == 5);
 		REQUIRE(*rcall[0] == cppush::Literal<int>(0));
 		REQUIRE(*rcall[1] == cppush::Literal<int>(count - 1));
@@ -403,35 +403,35 @@ TEST_CASE("Instruction: CODE.DO*COUNT") {
 	}
 }
 
-TEST_CASE("Instruction: CODE.DO*TIMES") {
+TEST_CASE("Instruction: code_do*times") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_do_times, "CODE.DO*TIMES");
-	cppush::Instruction quote_op(cppush::code_quote, "CODE.QUOTE");
-	cppush::Instruction pop_insn(cppush::protected_pop<int>, "INTEGER.POP");
-	cppush::Instruction do_range(cppush::code_do_range, "CODE.DO*RANGE");
+	cppush::Instruction op(cppush::code_do_times, "code_do*times");
+	cppush::Instruction quote_op(cppush::code_quote, "code_quote");
+	cppush::Instruction pop_insn(cppush::protected_pop<int>, "integer_pop");
+	cppush::Instruction do_range(cppush::code_do_range, "code_do*range");
 
 	cppush::CodeList body;
-	env.code_stack.push_back(std::make_shared<cppush::CodeList>(body));
+	env.push<cppush::Code>(std::make_shared<cppush::CodeList>(body));
 
 	int times;
 
 	SECTION("times < 1") {
 		times = 0;
-		env.int_stack.push_back(times);
+		env.push<int>(times);
 		op(env);
-		REQUIRE(env.int_stack == std::vector<int>{times});
-		REQUIRE(env.exec_stack.empty());
-		REQUIRE(*env.code_stack.back() == body);
+		REQUIRE(env.get_stack<int>() == std::vector<int>{times});
+		REQUIRE(env.get_stack<cppush::Exec>().empty());
+		REQUIRE(*env.get_stack<cppush::Code>().back() == body);
 	}
 
 	SECTION("times > 0") {
 		times = 2;
-		env.int_stack.push_back(times);
+		env.push<int>(times);
 		op(env);
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.exec_stack.size() == 1);
-		auto& rcall = env.exec_stack.back()->get_stack();
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
+		auto& rcall = env.get_stack<cppush::Exec>().back()->get_stack();
 		REQUIRE(rcall.size() == 5);
 		REQUIRE(*rcall[0] == cppush::Literal<int>(0));
 		REQUIRE(*rcall[1] == cppush::Literal<int>(times - 1));
@@ -444,9 +444,9 @@ TEST_CASE("Instruction: CODE.DO*TIMES") {
 	}
 }
 
-TEST_CASE("Instruction: CODE.EXTRACT") {
+TEST_CASE("Instruction: code_extract") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_extract, "CODE.EXTRACT");
+	cppush::Instruction op(cppush::code_extract, "code_extract");
 
 	/*
 	 * 0: ( B C ( A ) ( D ( A ) ) )
@@ -493,127 +493,127 @@ TEST_CASE("Instruction: CODE.EXTRACT") {
 
 	SECTION("Positive indexes") {
 		for (int i = 0; i < index_upper; ++i) {
-			env.code_stack.clear();
-			env.int_stack.clear();
-			env.code_stack.push_back(container);
-			env.int_stack.push_back(i);
+			env.get_stack<cppush::Code>().clear();
+			env.get_stack<int>().clear();
+			env.push<cppush::Code>(container);
+			env.push<int>(i);
 			op(env);
-			REQUIRE(env.int_stack.empty());
-			REQUIRE(env.code_stack.size() == 1);
-			REQUIRE(*env.code_stack.back() == *indexed_list[i]);
+			REQUIRE(env.get_stack<int>().empty());
+			REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+			REQUIRE(*env.get_stack<cppush::Code>().back() == *indexed_list[i]);
 		}
 	}
 
 	SECTION("Positive indexes out of bounds") {
 		for (int i = 0; i < index_upper; ++i) {
-			env.code_stack.clear();
-			env.int_stack.clear();
-			env.code_stack.push_back(container);
-			env.int_stack.push_back(i + index_upper);
+			env.get_stack<cppush::Code>().clear();
+			env.get_stack<int>().clear();
+			env.push<cppush::Code>(container);
+			env.push<int>(i + index_upper);
 			op(env);
-			REQUIRE(env.int_stack.empty());
-			REQUIRE(env.code_stack.size() == 1);
-			REQUIRE(*env.code_stack.back() == *indexed_list[i]);
+			REQUIRE(env.get_stack<int>().empty());
+			REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+			REQUIRE(*env.get_stack<cppush::Code>().back() == *indexed_list[i]);
 		}
 	}
 
 	SECTION("Negative indexes") {
 		for (int i = -1; i > -index_upper; --i) {
-			env.code_stack.clear();
-			env.int_stack.clear();
-			env.code_stack.push_back(container);
-			env.int_stack.push_back(i);
+			env.get_stack<cppush::Code>().clear();
+			env.get_stack<int>().clear();
+			env.push<cppush::Code>(container);
+			env.push<int>(i);
 			op(env);
-			REQUIRE(env.int_stack.empty());
-			REQUIRE(env.code_stack.size() == 1);
-			REQUIRE(*env.code_stack.back() == *indexed_list[std::abs(i)]);
+			REQUIRE(env.get_stack<int>().empty());
+			REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+			REQUIRE(*env.get_stack<cppush::Code>().back() == *indexed_list[std::abs(i)]);
 		}
 	}
 
 	SECTION("Negative indexes out of bounds") {
 		for (int i = 0; i > -index_upper; --i) {
-			env.code_stack.clear();
-			env.int_stack.clear();
-			env.code_stack.push_back(container);
-			env.int_stack.push_back(i - index_upper);
+			env.get_stack<cppush::Code>().clear();
+			env.get_stack<int>().clear();
+			env.push<cppush::Code>(container);
+			env.push<int>(i - index_upper);
 			op(env);
-			REQUIRE(env.int_stack.empty());
-			REQUIRE(env.code_stack.size() == 1);
-			REQUIRE(*env.code_stack.back() == *indexed_list[std::abs(i)]);
+			REQUIRE(env.get_stack<int>().empty());
+			REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+			REQUIRE(*env.get_stack<cppush::Code>().back() == *indexed_list[std::abs(i)]);
 		}
 	}
 }
 
-TEST_CASE("Instruction: CODE.FROM_BOOL") {
+TEST_CASE("Instruction: code_from_bool") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_from_bool, "CODE.FROM_BOOL");
+	cppush::Instruction op(cppush::code_from_bool, "code_from_bool");
 
 	auto bool_literal = std::make_shared<cppush::Literal<bool>>(true);
-	env.bool_stack.push_back(true);
+	env.push<bool>(true);
 	op(env);
-	REQUIRE(env.bool_stack.empty());
-	REQUIRE(*env.code_stack.back() == *bool_literal);
+	REQUIRE(env.get_stack<bool>().empty());
+	REQUIRE(*env.get_stack<cppush::Code>().back() == *bool_literal);
 }
 
-TEST_CASE("Instruction: CODE.FROM_FLOAT") {
+TEST_CASE("Instruction: code_from_float") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_from_float, "CODE.FROM_FLOAT");
+	cppush::Instruction op(cppush::code_from_float, "code_from_float");
 
 	const double val = 6.9; // nice
 
 	auto float_literal = std::make_shared<cppush::Literal<double>>(val);
-	env.float_stack.push_back(val);
+	env.push<double>(val);
 	op(env);
-	REQUIRE(env.float_stack.empty());
-	REQUIRE(*env.code_stack.back() == *float_literal);
+	REQUIRE(env.get_stack<double>().empty());
+	REQUIRE(*env.get_stack<cppush::Code>().back() == *float_literal);
 }
 
-TEST_CASE("Instruction: CODE.FROM_INT") {
+TEST_CASE("Instruction: code_from_int") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_from_int, "CODE.FROM_INT");
+	cppush::Instruction op(cppush::code_from_int, "code_from_int");
 
 	const int val = 69; // nice
 
 	auto int_literal = std::make_shared<cppush::Literal<int>>(val);
-	env.int_stack.push_back(val);
+	env.push<int>(val);
 	op(env);
-	REQUIRE(env.int_stack.empty());
-	REQUIRE(*env.code_stack.back() == *int_literal);
+	REQUIRE(env.get_stack<int>().empty());
+	REQUIRE(*env.get_stack<cppush::Code>().back() == *int_literal);
 }
 
-TEST_CASE("Instruction: CODE.IF") {
+TEST_CASE("Instruction: code_if") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_if, "CODE.IF");
+	cppush::Instruction op(cppush::code_if, "code_if");
 	cppush::CodeList branchA;
 	cppush::CodeList branchB({std::make_shared<cppush::CodeList>(branchA)});
 
-	env.code_stack.push_back(std::make_shared<cppush::CodeList>(branchB));
-	env.code_stack.push_back(std::make_shared<cppush::CodeList>(branchA));
+	env.push<cppush::Code>(std::make_shared<cppush::CodeList>(branchB));
+	env.push<cppush::Code>(std::make_shared<cppush::CodeList>(branchA));
 
 	REQUIRE(!(branchA == branchB));
 
 	SECTION("true") {
-		env.bool_stack.push_back(true);
+		env.push<bool>(true);
 		op(env);
-		REQUIRE(env.bool_stack.empty());
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.exec_stack.size() == 1);
-		REQUIRE(*env.exec_stack.back() == branchB);
+		REQUIRE(env.get_stack<bool>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Exec>().back() == branchB);
 	}
 
 	SECTION("false") {
-		env.bool_stack.push_back(false);
+		env.push<bool>(false);
 		op(env);
-		REQUIRE(env.bool_stack.empty());
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.exec_stack.size() == 1);
-		REQUIRE(*env.exec_stack.back() == branchA);
+		REQUIRE(env.get_stack<bool>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Exec>().back() == branchA);
 	}
 }
 
-TEST_CASE("Instruction: CODE.INSERT") {
+TEST_CASE("Instruction: code_insert") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_insert, "CODE.INSERT");
+	cppush::Instruction op(cppush::code_insert, "code_insert");
 
 	/*
 	 * 0: ( B C ( A ) )
@@ -640,53 +640,53 @@ TEST_CASE("Instruction: CODE.INSERT") {
 	auto container = std::make_shared<cppush::CodeList>(list_full);
 
 	SECTION("Positive index") {
-		env.code_stack.push_back(d);
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(4);
+		env.push<cppush::Code>(d);
+		env.push<cppush::Code>(container);
+		env.push<int>(4);
 		op(env);
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		auto last = env.code_stack[0]->get_stack().back()->get_stack()[0];
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		auto last = env.get_stack<cppush::Code>()[0]->get_stack().back()->get_stack()[0];
 		REQUIRE(*last == *d);
 	}
 
 	SECTION("Positive index out of bounds") {
-		env.code_stack.push_back(d);
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(4 + container->size());
+		env.push<cppush::Code>(d);
+		env.push<cppush::Code>(container);
+		env.push<int>(4 + container->size());
 		op(env);
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		auto last = env.code_stack[0]->get_stack().back()->get_stack()[0];
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		auto last = env.get_stack<cppush::Code>()[0]->get_stack().back()->get_stack()[0];
 		REQUIRE(*last == *d);
 	}
 
 	SECTION("Negative index") {
-		env.code_stack.push_back(d);
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(-4);
+		env.push<cppush::Code>(d);
+		env.push<cppush::Code>(container);
+		env.push<int>(-4);
 		op(env);
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		auto last = env.code_stack[0]->get_stack().back()->get_stack()[0];
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		auto last = env.get_stack<cppush::Code>()[0]->get_stack().back()->get_stack()[0];
 		REQUIRE(*last == *d);
 	}
 
 	SECTION("Negative index out of bounds") {
-		env.code_stack.push_back(d);
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(-4 - container->size());
+		env.push<cppush::Code>(d);
+		env.push<cppush::Code>(container);
+		env.push<int>(-4 - container->size());
 		op(env);
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		auto last = env.code_stack[0]->get_stack().back()->get_stack()[0];
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		auto last = env.get_stack<cppush::Code>()[0]->get_stack().back()->get_stack()[0];
 		REQUIRE(*last == *d);
 	}
 }
 
-TEST_CASE("Instruction: CODE.LENGTH") {
+TEST_CASE("Instruction: code_length") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_length, "CODE.LENGTH");
+	cppush::Instruction op(cppush::code_length, "code_length");
 
 	/*
 	 * ( B C ( A ) )
@@ -708,15 +708,15 @@ TEST_CASE("Instruction: CODE.LENGTH") {
 
 	auto container = std::make_shared<cppush::CodeList>(list_full);
 
-	env.code_stack.push_back(container);
+	env.push<cppush::Code>(container);
 	op(env);
-	REQUIRE(env.code_stack.empty());
-	REQUIRE(env.int_stack == std::vector<int>{static_cast<int>(container->get_stack().size())});
+	REQUIRE(env.get_stack<cppush::Code>().empty());
+	REQUIRE(env.get_stack<int>() == std::vector<int>{static_cast<int>(container->get_stack().size())});
 }
 
-TEST_CASE("Instruction: CODE.LIST") {
+TEST_CASE("Instruction: code_list") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_list, "CODE.LIST");
+	cppush::Instruction op(cppush::code_list, "code_list");
 
 	/*
 	 * A B -> ( B A )
@@ -725,18 +725,18 @@ TEST_CASE("Instruction: CODE.LIST") {
 	auto a = std::make_shared<cppush::Literal<int>>(0);
 	auto b = std::make_shared<cppush::Literal<int>>(1);
 
-	env.code_stack.push_back(b);
-	env.code_stack.push_back(a);
+	env.push<cppush::Code>(b);
+	env.push<cppush::Code>(a);
 	op(env);
-	REQUIRE(env.code_stack.size() == 1);
-	auto& stack = env.code_stack[0]->get_stack();
+	REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+	auto& stack = env.get_stack<cppush::Code>()[0]->get_stack();
 	REQUIRE(*stack[0] == *b);
 	REQUIRE(*stack[1] == *a);
 }
 
-TEST_CASE("Instruction: CODE.MEMBER") {
+TEST_CASE("Instruction: code_member") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_member, "CODE.MEMBER");
+	cppush::Instruction op(cppush::code_member, "code_member");
 
 	/*
 	 * ( A B )
@@ -749,35 +749,35 @@ TEST_CASE("Instruction: CODE.MEMBER") {
 	auto ab = std::make_shared<cppush::CodeList>(std::vector<cppush::Code>{a, b});
 
 	SECTION("( A B ) A") {
-		env.code_stack.push_back(a);
-		env.code_stack.push_back(ab);
+		env.push<cppush::Code>(a);
+		env.push<cppush::Code>(ab);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.bool_stack == std::vector<bool>{true});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
 	}
 
 	SECTION("( A B ) C") {
-		env.code_stack.push_back(c);
-		env.code_stack.push_back(ab);
+		env.push<cppush::Code>(c);
+		env.push<cppush::Code>(ab);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.bool_stack == std::vector<bool>{false});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<bool>() == std::vector<bool>{false});
 	}
 }
 
-TEST_CASE("Instruction: CODE.NOOP") {
+TEST_CASE("Instruction: code_noop") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_noop, "CODE.NOOP");
+	cppush::Instruction op(cppush::code_noop, "code_noop");
 
-	env.exec_stack.push_back(std::make_shared<cppush::Instruction>(op));
-	auto exec_stack_copy = env.exec_stack;
+	env.push<cppush::Exec>(std::make_shared<cppush::Instruction>(op));
+	auto exec_stack_copy = env.get_stack<cppush::Exec>();
 	op(env);
-	REQUIRE(env.exec_stack == exec_stack_copy);
+	REQUIRE(env.get_stack<cppush::Exec>() == exec_stack_copy);
 }
 
-TEST_CASE("Instruction: CODE.NTH") {
+TEST_CASE("Instruction: code_nth") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_nth, "CODE.NTH");
+	cppush::Instruction op(cppush::code_nth, "code_nth");
 
 	/*
 	 * ( B C ( A ) )
@@ -800,69 +800,69 @@ TEST_CASE("Instruction: CODE.NTH") {
 
 	SECTION("Empty list") {
 		auto empty_list = cppush::CodeList();
-		env.code_stack.push_back(std::make_shared<cppush::CodeList>(empty_list));
-		env.int_stack.push_back(0);
+		env.push<cppush::Code>(std::make_shared<cppush::CodeList>(empty_list));
+		env.push<int>(0);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == empty_list);
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == empty_list);
 	}
 
 	SECTION("Atom") {
-		env.code_stack.push_back(a);
-		env.int_stack.push_back(0);
+		env.push<cppush::Code>(a);
+		env.push<int>(0);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == *a);
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == *a);
 	}
 
 	SECTION("Nth") {
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(2);
+		env.push<cppush::Code>(container);
+		env.push<int>(2);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == *list_a_ptr);
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == *list_a_ptr);
 	}
 
 	SECTION("Nth out of bounds") {
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(5);
+		env.push<cppush::Code>(container);
+		env.push<int>(5);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == *list_a_ptr);
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == *list_a_ptr);
 	}
 
 	SECTION("Nth negative") {
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(-2);
+		env.push<cppush::Code>(container);
+		env.push<int>(-2);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == *list_a_ptr);
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == *list_a_ptr);
 	}
 
 	SECTION("Nth negative out of bounds") {
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(-5);
+		env.push<cppush::Code>(container);
+		env.push<int>(-5);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == *list_a_ptr);
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == *list_a_ptr);
 	}
 }
 
-TEST_CASE("Instruction: CODE.NTHCDR") {
+TEST_CASE("Instruction: code_nthcdr") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_nthcdr, "CODE.NTHCDR");
+	cppush::Instruction op(cppush::code_nthcdr, "code_nthcdr");
 
 	/*
 	 * ( B C ( A ) )
@@ -885,103 +885,103 @@ TEST_CASE("Instruction: CODE.NTHCDR") {
 
 	SECTION("Empty list") {
 		auto empty_list = cppush::CodeList();
-		env.code_stack.push_back(std::make_shared<cppush::CodeList>(empty_list));
-		env.int_stack.push_back(1);
+		env.push<cppush::Code>(std::make_shared<cppush::CodeList>(empty_list));
+		env.push<int>(1);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == empty_list);
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == empty_list);
 	}
 
 	SECTION("Atom") {
-		env.code_stack.push_back(a);
-		env.int_stack.push_back(0);
+		env.push<cppush::Code>(a);
+		env.push<int>(0);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == *a);
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == *a);
 	}
 
 	SECTION("Nth") {
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(1);
+		env.push<cppush::Code>(container);
+		env.push<int>(1);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		auto stack = env.code_stack.back()->get_stack();
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		auto stack = env.get_stack<cppush::Code>().back()->get_stack();
 		for (int i = 0; i < static_cast<int>(stack.size()); ++i) {
 			REQUIRE(*stack[i] == *list_full[i+1]);
 		}
 	}
 
 	SECTION("Nth out of bounds") {
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(4);
+		env.push<cppush::Code>(container);
+		env.push<int>(4);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		auto stack = env.code_stack.back()->get_stack();
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		auto stack = env.get_stack<cppush::Code>().back()->get_stack();
 		for (int i = 0; i < static_cast<int>(stack.size()); ++i) {
 			REQUIRE(*stack[i] == *list_full[i+1]);
 		}
 	}
 
 	SECTION("Nth negative") {
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(-1);
+		env.push<cppush::Code>(container);
+		env.push<int>(-1);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		auto stack = env.code_stack.back()->get_stack();
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		auto stack = env.get_stack<cppush::Code>().back()->get_stack();
 		for (int i = 0; i < static_cast<int>(stack.size()); ++i) {
 			REQUIRE(*stack[i] == *list_full[i+1]);
 		}
 	}
 
 	SECTION("Nth negative out of bounds") {
-		env.code_stack.push_back(container);
-		env.int_stack.push_back(-4);
+		env.push<cppush::Code>(container);
+		env.push<int>(-4);
 		op(env);
 
-		REQUIRE(env.int_stack.empty());
-		REQUIRE(env.code_stack.size() == 1);
-		auto stack = env.code_stack.back()->get_stack();
+		REQUIRE(env.get_stack<int>().empty());
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		auto stack = env.get_stack<cppush::Code>().back()->get_stack();
 		for (int i = 0; i < static_cast<int>(stack.size()); ++i) {
 			REQUIRE(*stack[i] == *list_full[i+1]);
 		}
 	}
 }
 
-TEST_CASE("Instruction: CODE.NULL") {
+TEST_CASE("Instruction: code_null") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_null, "CODE.NULL");
+	cppush::Instruction op(cppush::code_null, "code_null");
 
 	auto nil = std::make_shared<cppush::CodeList>();
 	auto a = std::make_shared<cppush::Literal<int>>(1);
 
 	SECTION("Empty list") {
-		env.code_stack.push_back(nil);
+		env.push<cppush::Code>(nil);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.bool_stack == std::vector<bool>{true});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
 	}
 
 	SECTION("Not an empty list") {
-		env.code_stack.push_back(a);
+		env.push<cppush::Code>(a);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.bool_stack == std::vector<bool>{false});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<bool>() == std::vector<bool>{false});
 	}
 }
 
-TEST_CASE("Instruction: CODE.POSITION") {
+TEST_CASE("Instruction: code_position") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_position, "CODE.POSITION");
+	cppush::Instruction op(cppush::code_position, "code_position");
 
 	auto a = std::make_shared<cppush::Literal<int>>(1);
 	auto b = std::make_shared<cppush::Literal<int>>(2);
@@ -989,33 +989,33 @@ TEST_CASE("Instruction: CODE.POSITION") {
 	auto ab = std::make_shared<cppush::CodeList>(std::vector<cppush::Code>{a, b});
 
 	SECTION("Coerce first item to list") {
-		env.code_stack.push_back(a);
-		env.code_stack.push_back(a);
+		env.push<cppush::Code>(a);
+		env.push<cppush::Code>(a);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.int_stack == std::vector<int>{0});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<int>() == std::vector<int>{0});
 	}
 
 	SECTION("-1 when not found") {
-		env.code_stack.push_back(c);
-		env.code_stack.push_back(ab);
+		env.push<cppush::Code>(c);
+		env.push<cppush::Code>(ab);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.int_stack == std::vector<int>{-1});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<int>() == std::vector<int>{-1});
 	}
 
 	SECTION("Position found") {
-		env.code_stack.push_back(b);
-		env.code_stack.push_back(ab);
+		env.push<cppush::Code>(b);
+		env.push<cppush::Code>(ab);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.int_stack == std::vector<int>{1});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<int>() == std::vector<int>{1});
 	}
 }
 
-TEST_CASE("Instruction: CODE.SIZE") {
+TEST_CASE("Instruction: code_size") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_size, "CODE.SIZE");
+	cppush::Instruction op(cppush::code_size, "code_size");
 
 	/*
 	 * () = 1
@@ -1030,37 +1030,37 @@ TEST_CASE("Instruction: CODE.SIZE") {
 	auto nested_aa = std::make_shared<cppush::CodeList>(std::vector<cppush::Code>{a, aa});
 
 	SECTION("() = 1") {
-		env.code_stack.push_back(nil);
+		env.push<cppush::Code>(nil);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.int_stack == std::vector<int>{1});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<int>() == std::vector<int>{1});
 	}
 
 	SECTION("A = 1") {
-		env.code_stack.push_back(a);
+		env.push<cppush::Code>(a);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.int_stack == std::vector<int>{1});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<int>() == std::vector<int>{1});
 	}
 
 	SECTION("( A A ) = 3") {
-		env.code_stack.push_back(aa);
+		env.push<cppush::Code>(aa);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.int_stack == std::vector<int>{3});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<int>() == std::vector<int>{3});
 	}
 
 	SECTION("( A ( A A ) ) = 5") {
-		env.code_stack.push_back(nested_aa);
+		env.push<cppush::Code>(nested_aa);
 		op(env);
-		REQUIRE(env.code_stack.empty());
-		REQUIRE(env.int_stack == std::vector<int>{5});
+		REQUIRE(env.get_stack<cppush::Code>().empty());
+		REQUIRE(env.get_stack<int>() == std::vector<int>{5});
 	}
 }
 
-TEST_CASE("Instruction: CODE.SUBST") {
+TEST_CASE("Instruction: code_subst") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::code_subst, "CODE.SUBST");
+	cppush::Instruction op(cppush::code_subst, "code_subst");
 
 	/*
 	 * A B B = A
@@ -1076,38 +1076,38 @@ TEST_CASE("Instruction: CODE.SUBST") {
 	auto ac = std::make_shared<cppush::CodeList>(std::vector<cppush::Code>{a, c});
 
 	SECTION("A B B = A") {
-		env.code_stack.push_back(b);
-		env.code_stack.push_back(b);
-		env.code_stack.push_back(a);
+		env.push<cppush::Code>(b);
+		env.push<cppush::Code>(b);
+		env.push<cppush::Code>(a);
 		op(env);
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == *a);
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == *a);
 	}
 
 	SECTION("A B A = B") {
-		env.code_stack.push_back(a);
-		env.code_stack.push_back(b);
-		env.code_stack.push_back(a);
+		env.push<cppush::Code>(a);
+		env.push<cppush::Code>(b);
+		env.push<cppush::Code>(a);
 		op(env);
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == *b);
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == *b);
 	}
 
 	SECTION("A B C = A") {
-		env.code_stack.push_back(c);
-		env.code_stack.push_back(b);
-		env.code_stack.push_back(a);
+		env.push<cppush::Code>(c);
+		env.push<cppush::Code>(b);
+		env.push<cppush::Code>(a);
 		op(env);
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == *a);
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == *a);
 	}
 
 	SECTION("( A B ) C B = ( A C )") {
-		env.code_stack.push_back(b);
-		env.code_stack.push_back(c);
-		env.code_stack.push_back(ab);
+		env.push<cppush::Code>(b);
+		env.push<cppush::Code>(c);
+		env.push<cppush::Code>(ab);
 		op(env);
-		REQUIRE(env.code_stack.size() == 1);
-		REQUIRE(*env.code_stack.back() == *ac);
+		REQUIRE(env.get_stack<cppush::Code>().size() == 1);
+		REQUIRE(*env.get_stack<cppush::Code>().back() == *ac);
 	}
 }

@@ -34,7 +34,7 @@ unsigned push_cast(Env& env) {
 	if (stack.size() > 0) {
 		From top = env.pop<From>();
 
-		env.get_stack<To>().push_back(static_cast<To>(top));
+		env.push<To>(static_cast<To>(top));
 	}
 	return 1;
 }

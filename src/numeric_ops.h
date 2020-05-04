@@ -58,7 +58,7 @@ unsigned lt(Env& env) {
 		T top = env.pop<T>();
 		T second = env.pop<T>();
 
-		env.get_stack<bool>().push_back(second < top);
+		env.push<bool>(second < top);
 	}
 	return 1;
 }
@@ -70,7 +70,7 @@ unsigned gt(Env& env) {
 		T top = env.pop<T>();
 		T second = env.pop<T>();
 
-		env.get_stack<bool>().push_back(second > top);
+		env.push<bool>(second > top);
 	}
 	return 1;
 }

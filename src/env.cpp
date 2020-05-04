@@ -11,7 +11,7 @@ void Env::load_program(const Code& program) {
 
 void Env::run() {
 	// pop-execute loop
-	while (exec_stack.size() > 0) {
+	while (get_stack<Exec>().size() > 0) {
 		auto top = pop<Exec>();
 		(*top)(*this);
 	}

@@ -25,7 +25,7 @@ bool CodeBase::operator==(const CodeBase& rhs) const {
 
 unsigned CodeList::operator()(Env& env) const {
 	for (auto it = stack_.rbegin(); it < stack_.rend(); ++it) {
-		env.exec_stack.push_back(*it);
+		env.push<Exec>(*it);
 	}
 	return 1;
 }

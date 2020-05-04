@@ -70,7 +70,7 @@ unsigned shove(Env& env) {
 
 template <typename T>
 unsigned stackdepth(Env& env) {
-	env.get_stack<int>().push_back(env.get_stack<T>().size());
+	env.push<int>(env.get_stack<T>().size());
 	return 1;
 }
 

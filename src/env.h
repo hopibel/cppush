@@ -29,15 +29,6 @@ struct Exec {};
 
 class Env {
 	public:
-		// Stacks
-		std::vector<Code> exec_stack;
-		std::vector<Code> code_stack;
-		std::vector<int> int_stack;
-		std::vector<double> float_stack;
-		std::vector<bool> bool_stack;
-		// use inexact module tagging instead of names
-		// TODO(hopibel): add a vector type for basic data types
-
 		void load_program(const Code& program); // TODO(hopibel): Program struct with config
 		void run();
 
@@ -49,13 +40,25 @@ class Env {
 	
 	private:
 		std::vector<Code> instruction_set_;
+
+		// Stacks
+		std::vector<Code> exec_stack_;
+		std::vector<Code> code_stack_;
+		std::vector<int> int_stack_;
+		std::vector<double> float_stack_;
+		std::vector<bool> bool_stack_;
+		// use inexact module tagging instead of names
+		// TODO(hopibel): add a vector type for basic data types
+
+		// Input values
+		std::vector<Code> inputs_;
 };
 
-template <> inline auto& Env::get_stack<int>() {return int_stack;}
-template <> inline auto& Env::get_stack<double>() {return float_stack;}
-template <> inline auto& Env::get_stack<bool>() {return bool_stack;}
-template <> inline auto& Env::get_stack<Code>() {return code_stack;}
-template <> inline auto& Env::get_stack<Exec>() {return exec_stack;}
+template <> inline auto& Env::get_stack<int>() {return int_stack_;}
+template <> inline auto& Env::get_stack<double>() {return float_stack_;}
+template <> inline auto& Env::get_stack<bool>() {return bool_stack_;}
+template <> inline auto& Env::get_stack<Code>() {return code_stack_;}
+template <> inline auto& Env::get_stack<Exec>() {return exec_stack_;}
 
 // pop from a stack and return element popped
 template <typename T>
