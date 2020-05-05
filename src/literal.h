@@ -2,28 +2,45 @@
 #define LITERAL_H
 
 #include "code.h"
-#include "env.h"
 
+// declarations
 namespace cppush {
+
+class Env;
 
 template <typename T>
 class Literal : public CodeAtom {
-	public:
-		Literal(T val) : value_(val) {}
+public:
+	Literal(T val);
+	unsigned operator()(Env& env) const override;
 
-		unsigned operator()(Env& env) const override {
-			env.push<T>(value_);
-			return 1;
-		}
+protected:
+	bool equal_to(const CodeBase& rhs) const override;
 
-	protected:
-		bool equal_to(const CodeBase& rhs) const override {
-			return value_ == static_cast<const Literal<T>&>(rhs).value_;
-		}
-
-	private:
-		T value_;
+private:
+	T value_;
 };
+
+} // namespace cppush
+
+#include "env.h"
+
+// definitions
+namespace cppush {
+
+template <typename T>
+Literal<T>::Literal(T val) : value_(val) {}
+
+template <typename T>
+unsigned Literal<T>::operator()(Env& env) const {
+	env.push<T>(value_);
+	return 1;
+}
+
+template <typename T>
+bool Literal<T>::equal_to(const CodeBase& rhs) const {
+	return value_ == static_cast<const Literal<T>&>(rhs).value_;
+}
 
 } // namespace cppush
 

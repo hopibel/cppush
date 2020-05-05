@@ -27,8 +27,6 @@ private:
 	unsigned (*const op_)(Env&);
 };
 
-using Instruction_ptr = std::shared_ptr<Instruction>;
-
 } // namespace cppush
 
 #endif // INSTRUCTION_H

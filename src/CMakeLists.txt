@@ -4,6 +4,7 @@ add_library(cppush
 	env.cpp
 	env.h
 	instruction.h
+	input_instruction.h
 	instruction_set.h
 	instruction_set.cpp
 	literal.h

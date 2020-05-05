@@ -30,13 +30,18 @@ struct Exec {};
 class Env {
 	public:
 		void load_program(const Code& program); // TODO(hopibel): Program struct with config
+		template <typename T> void load_inputs(std::vector<T> inputs);
+
 		void run();
 
 		// needed for generic stack manipulation functions
 		template <typename T> auto& get_stack() = delete;
-
 		template <typename T> auto pop();
 		template <typename T, typename U> inline void push(U item);
+
+		// retrieve nth input item. needed for implementing input instructions.
+		// n is assumed to be a valid index
+		Code get_input(int n) {return inputs_[n];}
 	
 	private:
 		std::vector<Code> instruction_set_;
@@ -53,6 +58,21 @@ class Env {
 		// Input values
 		std::vector<Code> inputs_;
 };
+
+} // namespace cppush
+
+#include "literal.h"
+
+// definitions
+namespace cppush {
+
+template <typename T>
+void Env::load_inputs(const std::vector<T> inputs) {
+	inputs_.clear();
+	for (const auto el : inputs) {
+		inputs_.push_back(std::make_shared<Literal<T>>(el));
+	}
+}
 
 template <> inline auto& Env::get_stack<int>() {return int_stack_;}
 template <> inline auto& Env::get_stack<double>() {return float_stack_;}

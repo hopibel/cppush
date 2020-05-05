@@ -2,6 +2,7 @@
 
 #include "code.h"
 #include "instruction.h"
+#include "input_instruction.h"
 #include "bool_ops.h"
 #include "code_ops.h"
 #include "common_ops.h"
@@ -11,7 +12,6 @@
 
 #include <utility>
 #include <string>
-#include <unordered_map>
 
 namespace cppush {
 
@@ -152,24 +152,30 @@ const std::map<std::string, std::pair<unsigned (*)(Env&), Types>> core_instructi
 	{"exec_yankdup", {yankdup<Exec>, Type::Exec | Type::Int}},
 };
 
-void load_instruction(std::vector<Instruction_ptr>& instruction_set, std::string name) {
+void load_instruction(std::vector<Code>& instruction_set, std::string name) {
 	auto insn = core_instructions.at(name);
 	instruction_set.push_back(std::make_shared<Instruction>(std::get<0>(insn), name));
 }
 
 } // namespace detail
 
-void register_core(std::vector<Instruction_ptr>& instruction_set) {
+void register_core(std::vector<Code>& instruction_set) {
 	for (const auto& el : detail::core_instructions) {
 		detail::load_instruction(instruction_set, el.first);
 	}
 }
 
-void register_core_by_stack(std::vector<Instruction_ptr>& instruction_set, const Types& types) {
+void register_core_by_stack(std::vector<Code>& instruction_set, const Types& types) {
 	for (const auto& el : detail::core_instructions) {
 		if ((std::get<Types>(el.second) | types) == types) {
 			detail::load_instruction(instruction_set, el.first);
 		}
+	}
+}
+
+void register_n_inputs(std::vector<Code>& instruction_set, int n) {
+	for (int i = 0; i < n; ++i) {
+		instruction_set.push_back(std::make_shared<InputInstruction>("input_"+i, i));
 	}
 }
 
