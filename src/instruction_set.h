@@ -5,6 +5,7 @@
 #include "instruction.h"
 #include "types.h"
 
+#include <initializer_list>
 #include <map>
 #include <memory>
 #include <string>
@@ -12,19 +13,9 @@
 
 namespace cppush {
 
-namespace detail {
-
-extern const std::map<std::string, std::pair<unsigned (*)(Env&), Types>> core_instructions;
-void load_instruction(std::vector<Code>& instruction_set, std::string name);
-
-} // namespace detail
-
 void register_core(std::vector<Code>& instruction_set);
 
-template <typename... Args>
-void register_core_by_name(std::vector<Code>& instruction_set, Args... args) {
-	(detail::load_instruction(instruction_set, args), ...);
-}
+void register_core_by_name(std::vector<Code>& instruction_set, std::initializer_list<std::string> names);
 
 // Append instructions for the enabled stacks
 void register_core_by_stack(std::vector<Code>& instruction_set, const Types& types);

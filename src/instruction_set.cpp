@@ -10,12 +10,11 @@
 #include "numeric_ops.h"
 #include "types.h"
 
-#include <utility>
+#include <initializer_list>
 #include <string>
+#include <utility>
 
 namespace cppush {
-
-namespace detail {
 
 const std::map<std::string, std::pair<unsigned (*)(Env&), Types>> core_instructions{
 	// exec
@@ -152,30 +151,34 @@ const std::map<std::string, std::pair<unsigned (*)(Env&), Types>> core_instructi
 	{"exec_yankdup", {yankdup<Exec>, Type::Exec | Type::Int}},
 };
 
-void load_instruction(std::vector<Code>& instruction_set, std::string name) {
+std::shared_ptr<Instruction> load_instruction(std::string name) {
 	auto insn = core_instructions.at(name);
-	instruction_set.push_back(std::make_shared<Instruction>(std::get<0>(insn), name));
+	return std::make_shared<Instruction>(std::get<0>(insn), name);
 }
 
-} // namespace detail
-
 void register_core(std::vector<Code>& instruction_set) {
-	for (const auto& el : detail::core_instructions) {
-		detail::load_instruction(instruction_set, el.first);
+	for (const auto& el : core_instructions) {
+		instruction_set.push_back(load_instruction(el.first));
+	}
+}
+
+void register_core_by_name(std::vector<Code>& instruction_set, std::initializer_list<std::string> names) {
+	for (auto name : names) {
+		instruction_set.push_back(load_instruction(name));
 	}
 }
 
 void register_core_by_stack(std::vector<Code>& instruction_set, const Types& types) {
-	for (const auto& el : detail::core_instructions) {
+	for (const auto& el : core_instructions) {
 		if ((std::get<Types>(el.second) | types) == types) {
-			detail::load_instruction(instruction_set, el.first);
+			instruction_set.push_back(load_instruction(el.first));
 		}
 	}
 }
 
 void register_n_inputs(std::vector<Code>& instruction_set, int n) {
 	for (int i = 0; i < n; ++i) {
-		instruction_set.push_back(std::make_shared<InputInstruction>("input_"+i, i));
+		instruction_set.push_back(std::make_shared<InputInstruction>("input_" + i, i));
 	}
 }
 

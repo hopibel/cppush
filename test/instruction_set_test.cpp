@@ -10,16 +10,16 @@
 
 TEST_CASE("register_core_by_name()") {
 	std::vector<cppush::Code> iset;
-	cppush::register_core_by_name(iset, "code_noop");
+	cppush::register_core_by_name(iset, {"code_noop"});
 	REQUIRE(iset.size() == 1);
-	REQUIRE(*iset[0] == cppush::Instruction(cppush::code_noop, "code_noop"));
+	REQUIRE(*iset[0] == cppush::Instruction(cppush::code_noop, {"code_noop"}));
 }
 
 TEST_CASE("register_core_by_stack()") {
 	std::vector<cppush::Code> iset;
 	cppush::register_core_by_stack(iset, cppush::Types(0));
 	REQUIRE(iset.size() == 1); // code_noop
-	REQUIRE(*iset[0] == cppush::Instruction(cppush::code_noop, "code_noop"));
+	REQUIRE(*iset[0] == cppush::Instruction(cppush::code_noop, {"code_noop"}));
 }
 
 TEST_CASE("register_n_inputs()") {

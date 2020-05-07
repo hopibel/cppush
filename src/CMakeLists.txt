@@ -23,4 +23,3 @@ add_library(cppush
 target_include_directories(cppush PUBLIC
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
 )
-target_compile_features(cppush PUBLIC cxx_std_17)
