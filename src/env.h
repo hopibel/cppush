@@ -37,7 +37,7 @@ class Env {
 		// needed for generic stack manipulation functions
 		template <typename T> auto& get_stack() = delete;
 		template <typename T> auto pop();
-		template <typename T, typename U> inline void push(U item);
+		template <typename T, typename U> inline void push(const U& item);
 
 		// retrieve nth input item. needed for implementing input instructions.
 		// n is assumed to be a valid index
@@ -91,9 +91,9 @@ inline auto Env::pop() {
 
 // push to a stack
 template <typename T, typename U>
-inline void Env::push(U item) { get_stack<T>().push_back(item); }
+inline void Env::push(const U& item) { get_stack<T>().push_back(item); }
 template <>
-inline void Env::push<Exec>(Code item) { get_stack<Exec>().push_back(item); }
+inline void Env::push<Exec>(const Code& item) { get_stack<Exec>().push_back(item); }
 
 } // namespace cppush
 

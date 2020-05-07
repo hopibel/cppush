@@ -157,7 +157,8 @@ TEMPLATE_TEST_CASE("Instruction: *_lt", "", int, double) {
 			stack.push_back(j);
 			op(env);
 			REQUIRE(stack.empty());
-			REQUIRE(bool_stack == std::vector<bool>{i < j});
+			REQUIRE(env.pop<bool>() == (i < j));
+			REQUIRE(env.get_stack<bool>().empty());
 		}
 	}
 }
@@ -176,7 +177,8 @@ TEMPLATE_TEST_CASE("Instruction: *_gt", "", int, double) {
 			stack.push_back(j);
 			op(env);
 			REQUIRE(stack.empty());
-			REQUIRE(bool_stack == std::vector<bool>{i > j});
+			REQUIRE(env.pop<bool>() == (i > j));
+			REQUIRE(env.get_stack<bool>().empty());
 		}
 	}
 }
@@ -256,7 +258,8 @@ TEST_CASE("Instruction: BOOLEAN.FROMINT") {
 		env.push<int>(i);
 		op(env);
 		REQUIRE(env.get_stack<int>().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{i != 0});
+		REQUIRE(env.pop<bool>() == (i != 0));
+		REQUIRE(env.get_stack<bool>().empty());
 	}
 }
 
@@ -270,7 +273,8 @@ TEST_CASE("Instruction: BOOLEAN.FROMFLOAT") {
 		env.push<double>(i);
 		op(env);
 		REQUIRE(env.get_stack<double>().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{i != 0.0});
+		REQUIRE(env.pop<bool>() == (i != 0.0));
+		REQUIRE(env.get_stack<bool>().empty());
 	}
 }
 

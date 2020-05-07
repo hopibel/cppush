@@ -31,7 +31,8 @@ TEST_CASE("Instruction: BOOLEAN.AND") {
 	}
 
 	op(env);
-	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
+	REQUIRE(env.pop<bool>() == expected);
+	REQUIRE(env.get_stack<bool>().empty());
 }
 
 TEST_CASE("Instruction: BOOLEAN.OR") {
@@ -59,7 +60,8 @@ TEST_CASE("Instruction: BOOLEAN.OR") {
 	}
 
 	op(env);
-	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
+	REQUIRE(env.pop<bool>() == expected);
+	REQUIRE(env.get_stack<bool>().empty());
 }
 
 TEST_CASE("Instruction: BOOLEAN.NOT") {
@@ -79,7 +81,8 @@ TEST_CASE("Instruction: BOOLEAN.NOT") {
 	}
 
 	op(env);
-	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
+	REQUIRE(env.pop<bool>() == expected);
+	REQUIRE(env.get_stack<bool>().empty());
 }
 
 TEST_CASE("Instruction: BOOLEAN.NAND") {
@@ -107,7 +110,8 @@ TEST_CASE("Instruction: BOOLEAN.NAND") {
 	}
 
 	op(env);
-	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
+	REQUIRE(env.pop<bool>() == expected);
+	REQUIRE(env.get_stack<bool>().empty());
 }
 
 
@@ -136,7 +140,8 @@ TEST_CASE("Instruction: BOOLEAN.NOR") {
 	}
 
 	op(env);
-	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
+	REQUIRE(env.pop<bool>() == expected);
+	REQUIRE(env.get_stack<bool>().empty());
 }
 
 TEST_CASE("Instruction: BOOLEAN.XOR") {
@@ -164,7 +169,8 @@ TEST_CASE("Instruction: BOOLEAN.XOR") {
 	}
 
 	op(env);
-	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
+	REQUIRE(env.pop<bool>() == expected);
+	REQUIRE(env.get_stack<bool>().empty());
 }
 
 TEST_CASE("Instruction: BOOLEAN.INVERT_FIRST_THEN_AND") {
@@ -198,7 +204,8 @@ TEST_CASE("Instruction: BOOLEAN.INVERT_FIRST_THEN_AND") {
 	}
 
 	op(env);
-	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
+	REQUIRE(env.pop<bool>() == expected);
+	REQUIRE(env.get_stack<bool>().empty());
 }
 
 TEST_CASE("Instruction: BOOLEAN.INVERT_SECOND_THEN_AND") {
@@ -232,5 +239,6 @@ TEST_CASE("Instruction: BOOLEAN.INVERT_SECOND_THEN_AND") {
 	}
 
 	op(env);
-	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
+	REQUIRE(env.pop<bool>() == expected);
+	REQUIRE(env.get_stack<bool>().empty());
 }

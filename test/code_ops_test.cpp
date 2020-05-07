@@ -85,7 +85,8 @@ TEST_CASE("Instruction: code_atom") {
 		env.push<cppush::Code>(atom);
 		op(env);
 		REQUIRE(env.get_stack<cppush::Code>().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
+		REQUIRE(env.pop<bool>() == true);
+		REQUIRE(env.get_stack<bool>().empty());
 	}
 
 	SECTION("List") {
@@ -93,7 +94,8 @@ TEST_CASE("Instruction: code_atom") {
 		env.push<cppush::Code>(code_list);
 		op(env);
 		REQUIRE(env.get_stack<cppush::Code>().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{false});
+		REQUIRE(env.pop<bool>() == false);
+		REQUIRE(env.get_stack<bool>().empty());
 	}
 }
 
@@ -255,7 +257,8 @@ TEST_CASE("Instruction: code_contains") {
 		op(env);
 
 		REQUIRE(env.get_stack<cppush::Code>().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
+		REQUIRE(env.pop<bool>() == true);
+		REQUIRE(env.get_stack<bool>().empty());
 	}
 
 	SECTION("Not a subtree") {
@@ -265,7 +268,8 @@ TEST_CASE("Instruction: code_contains") {
 		op(env);
 
 		REQUIRE(env.get_stack<cppush::Code>().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{false});
+		REQUIRE(env.pop<bool>() == false);
+		REQUIRE(env.get_stack<bool>().empty());
 	}
 
 	SECTION("Items are equal") {
@@ -274,7 +278,8 @@ TEST_CASE("Instruction: code_contains") {
 		op(env);
 
 		REQUIRE(env.get_stack<cppush::Code>().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
+		REQUIRE(env.pop<bool>() == true);
+		REQUIRE(env.get_stack<bool>().empty());
 	}
 }
 
@@ -753,7 +758,8 @@ TEST_CASE("Instruction: code_member") {
 		env.push<cppush::Code>(ab);
 		op(env);
 		REQUIRE(env.get_stack<cppush::Code>().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
+		REQUIRE(env.pop<bool>() == true);
+		REQUIRE(env.get_stack<bool>().empty());
 	}
 
 	SECTION("( A B ) C") {
@@ -761,7 +767,8 @@ TEST_CASE("Instruction: code_member") {
 		env.push<cppush::Code>(ab);
 		op(env);
 		REQUIRE(env.get_stack<cppush::Code>().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{false});
+		REQUIRE(env.pop<bool>() == false);
+		REQUIRE(env.get_stack<bool>().empty());
 	}
 }
 
@@ -968,14 +975,16 @@ TEST_CASE("Instruction: code_null") {
 		env.push<cppush::Code>(nil);
 		op(env);
 		REQUIRE(env.get_stack<cppush::Code>().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{true});
+		REQUIRE(env.pop<bool>() == true);
+		REQUIRE(env.get_stack<bool>().empty());
 	}
 
 	SECTION("Not an empty list") {
 		env.push<cppush::Code>(a);
 		op(env);
 		REQUIRE(env.get_stack<cppush::Code>().empty());
-		REQUIRE(env.get_stack<bool>() == std::vector<bool>{false});
+		REQUIRE(env.pop<bool>() == false);
+		REQUIRE(env.get_stack<bool>().empty());
 	}
 }
 

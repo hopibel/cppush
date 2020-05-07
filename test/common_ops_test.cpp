@@ -39,9 +39,9 @@ TEMPLATE_TEST_CASE("Instruction: *.POP", "", bool, int, double, cppush::Code, cp
 	cppush::Env env;
 	cppush::Instruction op(cppush::protected_pop<TestType>, "POP");
 
-	auto val = generate_test_values<TestType>(1)[0];
+	auto vals = generate_test_values<TestType>(1);
 
-	env.push<TestType>(val);
+	env.push<TestType>(vals[0]);
 	op(env);
 	REQUIRE(env.get_stack<TestType>().empty());
 }
@@ -63,10 +63,10 @@ TEMPLATE_TEST_CASE("Instruction: *.FLUSH", "", bool, int, double, cppush::Code, 
 	cppush::Env env;
 	cppush::Instruction op(cppush::flush<TestType>, "FLUSH");
 
-	auto val = generate_test_values<TestType>(1)[0];
-
-	env.push<TestType>(val);
-	env.push<TestType>(val);
+	auto vals = generate_test_values<TestType>(4);
+	for (auto val : vals) {
+		env.push<TestType>(val);
+	}
 	op(env);
 	REQUIRE(env.get_stack<TestType>().empty());
 }
@@ -75,14 +75,13 @@ TEMPLATE_TEST_CASE("Instruction: *.ROT", "", bool, int, double, cppush::Code, cp
 	cppush::Env env;
 	cppush::Instruction op(cppush::rot<TestType>, "ROT");
 
-	auto vals = generate_test_values<TestType>(3);
-
-	env.push<TestType>(vals[0]);
-	env.push<TestType>(vals[1]);
-	env.push<TestType>(vals[2]);
+	auto vals = generate_test_values<TestType>(4);
+	for (auto val : vals) {
+		env.push<TestType>(val);
+	}
 	op(env);
 
-	vals = {vals[1], vals[2], vals[0]};
+	vals = {vals[0], vals[2], vals[3], vals[1]};
 	REQUIRE(env.get_stack<TestType>() == vals);
 }
 
