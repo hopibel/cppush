@@ -38,10 +38,6 @@ class Env {
 		template <typename T> auto& get_stack() = delete;
 		template <typename T> auto pop();
 		template <typename T, typename U> inline void push(const U& item);
-
-		// retrieve nth input item. needed for implementing input instructions.
-		// n is assumed to be a valid index
-		Code get_input(int n) {return inputs_[n];}
 	
 	private:
 		std::vector<Code> instruction_set_;
@@ -57,6 +53,11 @@ class Env {
 
 		// Input values
 		std::vector<Code> inputs_;
+
+		// retrieve nth input item. needed for implementing input instructions.
+		// n is assumed to be a valid index
+		friend class InputInstruction;
+		Code get_input_(int n) {return inputs_[n];}
 };
 
 } // namespace cppush

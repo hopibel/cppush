@@ -16,7 +16,7 @@ public:
 		name(name), index_(index) {}
 
 	unsigned operator()(Env& env) const override {
-		return (*env.get_input(index_))(env);
+		return (*env.get_input_(index_))(env);
 	}
 
 protected:
