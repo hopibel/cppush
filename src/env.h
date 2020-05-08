@@ -28,36 +28,36 @@ struct Parameters {
 struct Exec {};
 
 class Env {
-	public:
-		void load_program(const Code& program); // TODO(hopibel): Program struct with config
-		template <typename T> void load_inputs(std::vector<T> inputs);
+public:
+	void load_program(const Code& program); // TODO(hopibel): Program struct with config
+	template <typename T> void load_inputs(std::vector<T> inputs);
 
-		void run();
+	void run();
 
-		// needed for generic stack manipulation functions
-		template <typename T> auto& get_stack() = delete;
-		template <typename T> auto pop();
-		template <typename T, typename U> inline void push(const U& item);
-	
-	private:
-		std::vector<Code> instruction_set_;
+	// needed for generic stack manipulation functions
+	template <typename T> auto& get_stack() = delete;
+	template <typename T> auto pop();
+	template <typename T, typename U> inline void push(const U& item);
 
-		// Stacks
-		std::vector<Code> exec_stack_;
-		std::vector<Code> code_stack_;
-		std::vector<int> int_stack_;
-		std::vector<double> float_stack_;
-		std::vector<bool> bool_stack_;
-		// use inexact module tagging instead of names
-		// TODO(hopibel): add a vector type for basic data types
+private:
+	std::vector<Code> instruction_set_;
 
-		// Input values
-		std::vector<Code> inputs_;
+	// Stacks
+	std::vector<Code> exec_stack_;
+	std::vector<Code> code_stack_;
+	std::vector<int> int_stack_;
+	std::vector<double> float_stack_;
+	std::vector<bool> bool_stack_;
+	// use inexact module tagging instead of names
+	// TODO(hopibel): add a vector type for basic data types
 
-		// retrieve nth input item. needed for implementing input instructions.
-		// n is assumed to be a valid index
-		friend class InputInstruction;
-		Code get_input_(int n) {return inputs_[n];}
+	// Input values
+	std::vector<Code> inputs_;
+
+	// retrieve nth input item. needed for implementing input instructions.
+	// n is assumed to be a valid index
+	friend class InputInstruction;
+	Code get_input_(int n) {return inputs_[n];}
 };
 
 } // namespace cppush
