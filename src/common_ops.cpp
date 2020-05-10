@@ -8,7 +8,7 @@ namespace cppush {
 
 namespace detail {
 
-unsigned code_equal_impl(Env& env, std::vector<Code>& stack) {
+unsigned code_equal_impl(Env& env, std::vector<Code_ptr>& stack) {
 	if (stack.size() >= 2) {
 		auto first = stack.back();
 		stack.pop_back();
@@ -25,7 +25,7 @@ unsigned code_equal_impl(Env& env, std::vector<Code>& stack) {
 } // namespace detail
 
 template <>
-unsigned equal<Code>(Env& env) {return detail::code_equal_impl(env, env.get_stack<Code>());}
+unsigned equal<Code_ptr>(Env& env) {return detail::code_equal_impl(env, env.get_stack<Code_ptr>());}
 template <>
 unsigned equal<Exec>(Env& env) {return detail::code_equal_impl(env, env.get_stack<Exec>());}
 

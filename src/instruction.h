@@ -19,7 +19,7 @@ public:
 	unsigned operator()(Env& env) const override {return op_(env);}
 
 protected:
-	bool equal_to(const CodeBase& rhs) const override {
+	bool equal_to(const Code& rhs) const override {
 		return name == static_cast<const Instruction&>(rhs).name;
 	}
 

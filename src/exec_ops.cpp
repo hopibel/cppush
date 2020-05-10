@@ -25,7 +25,7 @@ unsigned exec_do_range(Env& env) {
 			static auto do_range_insn = std::make_shared<Instruction>(
 					exec_do_range, "EXEC.DO*RANGE");
 
-			std::vector<Code> rcall{
+			std::vector<Code_ptr> rcall{
 					std::make_shared<Literal<int>>(index),
 					std::make_shared<Literal<int>>(dest),
 					do_range_insn, code
@@ -50,7 +50,7 @@ unsigned exec_do_count(Env& env) {
 		static auto do_range_insn = std::make_shared<Instruction>(
 				exec_do_range, "EXEC.DO*RANGE");
 
-		std::vector<Code> rcall{
+		std::vector<Code_ptr> rcall{
 				std::make_shared<Literal<int>>(0),
 				std::make_shared<Literal<int>>(count - 1),
 				do_range_insn, code
@@ -74,9 +74,9 @@ unsigned exec_do_times(Env& env) {
 		static auto int_pop = std::make_shared<Instruction>(
 				protected_pop<int>, "INTEGER.POP");
 
-		std::vector<Code> pop_code{int_pop, code};
+		std::vector<Code_ptr> pop_code{int_pop, code};
 
-		std::vector<Code> rcall{
+		std::vector<Code_ptr> rcall{
 				std::make_shared<Literal<int>>(0),
 				std::make_shared<Literal<int>>(times - 1),
 				do_range_insn, std::make_shared<CodeList>(pop_code)
@@ -116,7 +116,7 @@ unsigned exec_s(Env& env) {
 		auto b = env.pop<Exec>();
 		auto c = env.pop<Exec>();
 
-		std::vector<Code> bc{b, c};
+		std::vector<Code_ptr> bc{b, c};
 
 		stack.push_back(std::make_shared<CodeList>(bc));
 		stack.push_back(c);
@@ -131,7 +131,7 @@ unsigned exec_y(Env& env) {
 		static auto y_insn = std::make_shared<Instruction>(
 				exec_y, "EXEC.Y");
 
-		std::vector<Code> rcall{y_insn, first};
+		std::vector<Code_ptr> rcall{y_insn, first};
 		env.push<Exec>(std::make_shared<CodeList>(rcall));
 		env.push<Exec>(first);
 	}

@@ -15,7 +15,7 @@ public:
 	unsigned operator()(Env& env) const override;
 
 protected:
-	bool equal_to(const CodeBase& rhs) const override;
+	bool equal_to(const Code& rhs) const override;
 
 private:
 	T value_;
@@ -38,7 +38,7 @@ unsigned Literal<T>::operator()(Env& env) const {
 }
 
 template <typename T>
-bool Literal<T>::equal_to(const CodeBase& rhs) const {
+bool Literal<T>::equal_to(const Code& rhs) const {
 	return value_ == static_cast<const Literal<T>&>(rhs).value_;
 }
 

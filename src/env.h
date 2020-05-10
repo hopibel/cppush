@@ -24,12 +24,12 @@ struct Parameters {
 	bool top_level_pop_code{false};
 };
 
-// dummy type for templating functions for Exec stack
+// TODO(hopibel): move to code.h ?
 struct Exec {};
 
 class Env {
 public:
-	void load_program(const Code& program); // TODO(hopibel): Program struct with config
+	void load_program(const Code_ptr& program); // TODO(hopibel): Program struct with config
 	template <typename T> void load_inputs(std::vector<T> inputs);
 
 	void run();
@@ -40,11 +40,11 @@ public:
 	template <typename T, typename U> inline void push(const U& item);
 
 private:
-	std::vector<Code> instruction_set_;
+	std::vector<Code_ptr> instruction_set_;
 
 	// Stacks
-	std::vector<Code> exec_stack_;
-	std::vector<Code> code_stack_;
+	std::vector<Code_ptr> exec_stack_;
+	std::vector<Code_ptr> code_stack_;
 	std::vector<int> int_stack_;
 	std::vector<double> float_stack_;
 	std::vector<bool> bool_stack_;
@@ -52,12 +52,12 @@ private:
 	// TODO(hopibel): add a vector type for basic data types
 
 	// Input values
-	std::vector<Code> inputs_;
+	std::vector<Code_ptr> inputs_;
 
 	// retrieve nth input item. needed for implementing input instructions.
 	// n is assumed to be a valid index
 	friend class InputInstruction;
-	Code get_input_(int n) {return inputs_[n];}
+	Code_ptr get_input_(int n) {return inputs_[n];}
 };
 
 } // namespace cppush
@@ -78,10 +78,9 @@ void Env::load_inputs(const std::vector<T> inputs) {
 template <> inline auto& Env::get_stack<int>() {return int_stack_;}
 template <> inline auto& Env::get_stack<double>() {return float_stack_;}
 template <> inline auto& Env::get_stack<bool>() {return bool_stack_;}
-template <> inline auto& Env::get_stack<Code>() {return code_stack_;}
+template <> inline auto& Env::get_stack<Code_ptr>() {return code_stack_;}
 template <> inline auto& Env::get_stack<Exec>() {return exec_stack_;}
 
-// pop from a stack and return element popped
 template <typename T>
 inline auto Env::pop() {
 	auto& stack = get_stack<T>();
@@ -94,7 +93,7 @@ inline auto Env::pop() {
 template <typename T, typename U>
 inline void Env::push(const U& item) { get_stack<T>().push_back(item); }
 template <>
-inline void Env::push<Exec>(const Code& item) { get_stack<Exec>().push_back(item); }
+inline void Env::push<Exec>(const Code_ptr& item) { get_stack<Exec>().push_back(item); }
 
 } // namespace cppush
 

@@ -11,12 +11,10 @@
 
 namespace cppush {
 
-// TODO(hopibel): refactor to use push/pop functions
-
 unsigned code_append(Env& env) {
-	if (env.get_stack<Code>().size() >= 2) {
-		auto first = env.pop<Code>();
-		auto second = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() >= 2) {
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
 
 		// important! copy, not reference
 		auto first_stack = first->get_stack();
@@ -30,7 +28,7 @@ unsigned code_append(Env& env) {
 		}
 
 		second_stack.insert(second_stack.end(), first_stack.begin(), first_stack.end());
-		env.push<Code>(std::make_shared<CodeList>(second_stack));
+		env.push<Code_ptr>(std::make_shared<CodeList>(second_stack));
 
 		return first_stack.size();
 	}
@@ -38,15 +36,15 @@ unsigned code_append(Env& env) {
 }
 
 unsigned code_atom(Env& env) {
-	if (env.get_stack<Code>().size() > 0) {
-		auto first = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() > 0) {
+		auto first = env.pop<Code_ptr>();
 		env.push<bool>(first->is_atom());
 	}
 	return 1;
 }
 
 unsigned code_car(Env& env) {
-	auto& stack = env.get_stack<Code>();
+	auto& stack = env.get_stack<Code_ptr>();
 	if (stack.size() > 0) {
 		auto first = stack.back();
 
@@ -58,7 +56,7 @@ unsigned code_car(Env& env) {
 }
 
 unsigned code_cdr(Env& env) {
-	auto& stack = env.get_stack<Code>();
+	auto& stack = env.get_stack<Code_ptr>();
 	if (stack.size() > 0) {
 		auto top_stack = stack.back()->get_stack();
 
@@ -72,9 +70,9 @@ unsigned code_cdr(Env& env) {
 
 // prepend second item on stack to first. if second is a list, don't expand
 unsigned code_cons(Env& env) {
-	if (env.get_stack<Code>().size() >= 2) {
-		auto first = env.pop<Code>();
-		auto second = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() >= 2) {
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
 
 		auto first_stack = first->get_stack();
 		if (first->is_list()) {
@@ -84,14 +82,14 @@ unsigned code_cons(Env& env) {
 			first_stack.push_back(first);
 		}
 
-		env.push<Code>(std::make_shared<CodeList>(first_stack));
+		env.push<Code_ptr>(std::make_shared<CodeList>(first_stack));
 	}
 	return 1;
 }
 
 namespace detail {
 
-Code find_container(Code& tree, Code& subtree) {
+Code_ptr find_container(Code_ptr& tree, Code_ptr& subtree) {
 	// check if we're already in the container
 	auto& stack = tree->get_stack();
 	for (auto c : stack) {
@@ -112,7 +110,7 @@ Code find_container(Code& tree, Code& subtree) {
 	return std::make_shared<CodeList>();
 	}
 
-bool contains(const Code& tree, const Code& subtree) {
+bool contains(const Code_ptr& tree, const Code_ptr& subtree) {
 	auto& stack = tree->get_stack();
 	for (auto el : stack) {
 		if (contains(el, subtree)) {
@@ -125,11 +123,11 @@ bool contains(const Code& tree, const Code& subtree) {
 } // namespace detail
 
 unsigned code_container(Env& env) {
-	if (env.get_stack<Code>().size() >= 2) {
-		auto first = env.pop<Code>();
-		auto second = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() >= 2) {
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
 
-		env.push<Code>(detail::find_container(first, second));
+		env.push<Code_ptr>(detail::find_container(first, second));
 
 		return first->size() * second->size();
 	}
@@ -137,9 +135,9 @@ unsigned code_container(Env& env) {
 }
 
 unsigned code_contains(Env& env) {
-	if (env.get_stack<Code>().size() >= 2) {
-		auto first = env.pop<Code>();
-		auto second = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() >= 2) {
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
 
 		env.push<bool>(detail::contains(second, first));
 
@@ -149,10 +147,10 @@ unsigned code_contains(Env& env) {
 }
 
 unsigned code_do(Env& env) {
-	auto& stack = env.get_stack<Code>();
+	auto& stack = env.get_stack<Code_ptr>();
 	if (stack.size() > 0) {
 		static std::shared_ptr<Instruction> code_pop = std::make_shared<Instruction>(
-				protected_pop<Code>, "code_pop");
+				protected_pop<Code_ptr>, "code_pop");
 		env.push<Exec>(code_pop);
 		env.push<Exec>(stack.back());
 	}
@@ -160,27 +158,27 @@ unsigned code_do(Env& env) {
 }
 
 unsigned code_do_star(Env& env) {
-	if (env.get_stack<Code>().size() > 0) {
-		env.push<Exec>(env.pop<Code>());
+	if (env.get_stack<Code_ptr>().size() > 0) {
+		env.push<Exec>(env.pop<Code_ptr>());
 	}
 	return 1;
 }
 
 unsigned code_quote(Env& env) {
 	if (!env.get_stack<Exec>().empty()) {
-		env.push<Code>(env.pop<Exec>());
+		env.push<Code_ptr>(env.pop<Exec>());
 	}
 	return 1;
 }
 
 unsigned code_do_range(Env& env) {
-	auto code_stack_size = env.get_stack<Code>().size();
+	auto code_stack_size = env.get_stack<Code_ptr>().size();
 	auto int_stack_size = env.get_stack<int>().size();
 
 	if (code_stack_size > 0 && int_stack_size >= 2) {
 		int dest = env.pop<int>();
 		int index = env.get_stack<int>().back();
-		auto code = env.pop<Code>();
+		auto code = env.pop<Code_ptr>();
 
 		if (index != dest) {
 			index += index > dest ? -1 : 1;
@@ -190,7 +188,7 @@ unsigned code_do_range(Env& env) {
 			static auto quote_insn = std::make_shared<Instruction>(
 					code_quote, "code_quote");
 
-			std::vector<Code> rcall{
+			std::vector<Code_ptr> rcall{
 					std::make_shared<Literal<int>>(index),
 					std::make_shared<Literal<int>>(dest),
 					quote_insn, code, do_range_insn
@@ -204,19 +202,19 @@ unsigned code_do_range(Env& env) {
 }
 
 unsigned code_do_count(Env& env) {
-	auto code_stack_size = env.get_stack<Code>().size();
+	auto code_stack_size = env.get_stack<Code_ptr>().size();
 	auto int_stack_size = env.get_stack<int>().size();
 
 	if (code_stack_size > 0 && int_stack_size > 0 && env.get_stack<int>().back() > 0) {
 		int count = env.pop<int>();
-		auto code = env.pop<Code>();
+		auto code = env.pop<Code_ptr>();
 
 		static auto do_range_insn = std::make_shared<Instruction>(
 				code_do_range, "code_do*range");
 		static auto quote_insn = std::make_shared<Instruction>(
 				code_quote, "code_quote");
 
-		std::vector<Code> rcall{
+		std::vector<Code_ptr> rcall{
 			std::make_shared<Literal<int>>(0),
 			std::make_shared<Literal<int>>(count - 1),
 			quote_insn, code, do_range_insn
@@ -228,12 +226,12 @@ unsigned code_do_count(Env& env) {
 }
 
 unsigned code_do_times(Env& env) {
-	auto& code_stack = env.get_stack<Code>();
+	auto& code_stack = env.get_stack<Code_ptr>();
 	auto& int_stack = env.get_stack<int>();
 
 	if (code_stack.size() > 0 && int_stack.size() > 0 && int_stack.back() > 0) {
 		int times = env.pop<int>();
-		auto code = env.pop<Code>();
+		auto code = env.pop<Code_ptr>();
 
 		static auto do_range_insn = std::make_shared<Instruction>(
 				code_do_range, "code_do*range");
@@ -242,9 +240,9 @@ unsigned code_do_times(Env& env) {
 		static auto int_pop = std::make_shared<Instruction>(
 				protected_pop<int>, "integer_pop");
 
-		std::vector<Code> pop_code{int_pop, code};
+		std::vector<Code_ptr> pop_code{int_pop, code};
 
-		std::vector<Code> rcall{
+		std::vector<Code_ptr> rcall{
 			std::make_shared<Literal<int>>(0),
 			std::make_shared<Literal<int>>(times - 1),
 			quote_insn, std::make_shared<CodeList>(pop_code), do_range_insn
@@ -258,7 +256,7 @@ unsigned code_do_times(Env& env) {
 namespace detail {
 
 // assumptions: 0 <= index < code->size()
-Code extract_recursive(Code& code, int index) {
+Code_ptr extract_recursive(Code_ptr& code, int index) {
 	if (index == 0) {
 		return code;
 	}
@@ -278,17 +276,17 @@ Code extract_recursive(Code& code, int index) {
 }
 
 unsigned code_extract(Env& env) {
-	if (env.get_stack<Code>().size() > 0 && env.get_stack<int>().size() > 0) {
-		auto code = env.get_stack<Code>().back();
+	if (env.get_stack<Code_ptr>().size() > 0 && env.get_stack<int>().size() > 0) {
+		auto code = env.get_stack<Code_ptr>().back();
 		auto index = env.pop<int>();
 
 		index = std::abs(index) % code->size(); // restrict to reasonable range
 		if (index == 0) { // no need to change code stack
 			return 1;
 		}
-		env.pop<Code>();
+		env.pop<Code_ptr>();
 
-		env.push<Code>(detail::extract_recursive(code, index));
+		env.push<Code_ptr>(detail::extract_recursive(code, index));
 		return code->size();
 	}
 	return 1;
@@ -296,7 +294,7 @@ unsigned code_extract(Env& env) {
 
 unsigned code_from_bool(Env& env) {
 	if (env.get_stack<bool>().size() > 0) {
-		env.push<Code>(
+		env.push<Code_ptr>(
 				std::make_shared<Literal<bool>>(env.pop<bool>()));
 	}
 	return 1;
@@ -304,7 +302,7 @@ unsigned code_from_bool(Env& env) {
 
 unsigned code_from_float(Env& env) {
 	if (env.get_stack<double>().size() > 0) {
-		env.push<Code>(
+		env.push<Code_ptr>(
 				std::make_shared<Literal<double>>(env.pop<double>()));
 	}
 	return 1;
@@ -312,16 +310,16 @@ unsigned code_from_float(Env& env) {
 
 unsigned code_from_int(Env& env) {
 	if (env.get_stack<int>().size() > 0) {
-		env.push<Code>(
+		env.push<Code_ptr>(
 				std::make_shared<Literal<int>>(env.pop<int>()));
 	}
 	return 1;
 }
 
 unsigned code_if(Env& env) {
-	if (env.get_stack<Code>().size() >= 2 && env.get_stack<bool>().size() > 0) {
-		auto first = env.pop<Code>();
-		auto second = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() >= 2 && env.get_stack<bool>().size() > 0) {
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
 		if (env.pop<bool>()) {
 			env.push<Exec>(second);
 		} else {
@@ -334,7 +332,7 @@ unsigned code_if(Env& env) {
 namespace detail {
 
 // insert subtree into code at index (based on depth-first traversal)
-Code insert_recursive(Code& code, Code& subtree, int index) {
+Code_ptr insert_recursive(Code_ptr& code, Code_ptr& subtree, int index) {
 	if (index == 0) {
 		return subtree;
 	}
@@ -357,22 +355,22 @@ Code insert_recursive(Code& code, Code& subtree, int index) {
 }
 
 unsigned code_insert(Env& env) {
-	if (env.get_stack<Code>().size() >= 2 && env.get_stack<int>().size() > 0) {
-		auto first = env.pop<Code>();
-		auto second = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() >= 2 && env.get_stack<int>().size() > 0) {
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
 		int index = env.pop<int>();
 
 		index = std::abs(index) % first->size();
 		auto result = detail::insert_recursive(first, second, index);
 
-		env.push<Code>(result);
+		env.push<Code_ptr>(result);
 	}
 	return 1;
 }
 
 unsigned code_length(Env& env) {
-	if (env.get_stack<Code>().size() > 0) {
-		auto code = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() > 0) {
+		auto code = env.pop<Code_ptr>();
 		if (code->is_list()) {
 			env.push<int>(code->get_stack().size());
 		} else {
@@ -383,20 +381,20 @@ unsigned code_length(Env& env) {
 }
 
 unsigned code_list(Env& env) {
-	if (env.get_stack<Code>().size() >= 2) {
-		auto first = env.pop<Code>();
-		auto second = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() >= 2) {
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
 
-		std::vector<Code> list{second, first};
-		env.push<Code>(std::make_shared<CodeList>(list));
+		std::vector<Code_ptr> list{second, first};
+		env.push<Code_ptr>(std::make_shared<CodeList>(list));
 	}
 	return 1;
 }
 
 unsigned code_member(Env& env) {
-	if (env.get_stack<Code>().size() >= 2) {
-		auto first = env.pop<Code>();
-		auto second = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() >= 2) {
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
 
 		if (first->is_atom()) {
 			env.push<bool>(*first == *second);
@@ -416,11 +414,11 @@ unsigned code_member(Env& env) {
 unsigned code_noop(Env&) {return 1;}
 
 unsigned code_nth(Env& env) {
-	auto& stack = env.get_stack<Code>();
+	auto& stack = env.get_stack<Code_ptr>();
 	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
 		int index = env.pop<int>();
 		if (!stack.back()->get_stack().empty()) {
-			auto code_list = env.pop<Code>()->get_stack();
+			auto code_list = env.pop<Code_ptr>()->get_stack();
 			index = std::abs(index) % code_list.size();
 			stack.push_back(code_list[index]);
 
@@ -431,11 +429,11 @@ unsigned code_nth(Env& env) {
 }
 
 unsigned code_nthcdr(Env& env) {
-	auto& stack = env.get_stack<Code>();
+	auto& stack = env.get_stack<Code_ptr>();
 	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
 		int index = env.pop<int>();
 		if (!stack.back()->get_stack().empty()) {
-			auto code_list = env.pop<Code>()->get_stack();
+			auto code_list = env.pop<Code_ptr>()->get_stack();
 			index = std::abs(index) % code_list.size();
 			code_list.erase(code_list.begin(), code_list.begin() + index);
 			stack.push_back(std::make_shared<CodeList>(code_list));
@@ -447,8 +445,8 @@ unsigned code_nthcdr(Env& env) {
 }
 
 unsigned code_null(Env& env) {
-	if (env.get_stack<Code>().size() > 0) {
-		auto code = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() > 0) {
+		auto code = env.pop<Code_ptr>();
 		if (code->is_list() && code->get_stack().empty()) {
 			env.push<bool>(true);
 		} else {
@@ -459,9 +457,9 @@ unsigned code_null(Env& env) {
 }
 
 unsigned code_position(Env& env) {
-	if (env.get_stack<Code>().size() >= 2) {
-		auto first = env.pop<Code>();
-		auto second = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() >= 2) {
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
 		const auto& stack = first->get_stack();
 
 		if (stack.empty()) {
@@ -483,18 +481,18 @@ unsigned code_position(Env& env) {
 }
 
 unsigned code_size(Env& env) {
-	if (env.get_stack<Code>().size() > 0) {
-		auto code = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() > 0) {
+		auto code = env.pop<Code_ptr>();
 		env.push<int>(code->size());
 	}
 	return 1;
 }
 
 unsigned code_subst(Env& env) {
-	if (env.get_stack<Code>().size() >= 3) {
-		auto first = env.pop<Code>();
-		auto second = env.pop<Code>();
-		auto third = env.pop<Code>();
+	if (env.get_stack<Code_ptr>().size() >= 3) {
+		auto first = env.pop<Code_ptr>();
+		auto second = env.pop<Code_ptr>();
+		auto third = env.pop<Code_ptr>();
 
 		int fsize = first->size();
 		int ssize = second->size();
@@ -502,16 +500,16 @@ unsigned code_subst(Env& env) {
 
 		// second == third?
 		if (*second == *third) {
-			env.push<Code>(first);
+			env.push<Code_ptr>(first);
 			return ssize < tsize ? ssize : tsize;
 		}
 
 		// atom?
 		if (first->is_atom()) {
 			if (*first == *third) {
-				env.push<Code>(second);
+				env.push<Code_ptr>(second);
 			} else {
-				env.push<Code>(first);
+				env.push<Code_ptr>(first);
 			}
 			return fsize < tsize ? fsize : tsize;
 		}
@@ -522,7 +520,7 @@ unsigned code_subst(Env& env) {
 				stack[i] = second;
 			}
 		}
-		env.push<Code>(std::make_shared<CodeList>(stack));
+		env.push<Code_ptr>(std::make_shared<CodeList>(stack));
 		return fsize < tsize ? fsize : tsize;
 	}
 	return 1;

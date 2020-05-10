@@ -11,7 +11,7 @@
 #include <memory>
 #include <vector>
 
-TEMPLATE_TEST_CASE("Instruction: *.=", "", bool, int, double, cppush::Code, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.=", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::equal<TestType>, "=");
 
@@ -35,7 +35,7 @@ TEMPLATE_TEST_CASE("Instruction: *.=", "", bool, int, double, cppush::Code, cppu
 	REQUIRE(env.get_stack<TestType>().empty());
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.POP", "", bool, int, double, cppush::Code, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.POP", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::protected_pop<TestType>, "POP");
 
@@ -46,7 +46,7 @@ TEMPLATE_TEST_CASE("Instruction: *.POP", "", bool, int, double, cppush::Code, cp
 	REQUIRE(env.get_stack<TestType>().empty());
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.DUP", "", bool, int, double, cppush::Code, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.DUP", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::dup<TestType>, "DUP");
 
@@ -59,7 +59,7 @@ TEMPLATE_TEST_CASE("Instruction: *.DUP", "", bool, int, double, cppush::Code, cp
 	REQUIRE(env.get_stack<TestType>() == duped);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.FLUSH", "", bool, int, double, cppush::Code, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.FLUSH", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::flush<TestType>, "FLUSH");
 
@@ -71,7 +71,7 @@ TEMPLATE_TEST_CASE("Instruction: *.FLUSH", "", bool, int, double, cppush::Code, 
 	REQUIRE(env.get_stack<TestType>().empty());
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.ROT", "", bool, int, double, cppush::Code, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.ROT", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::rot<TestType>, "ROT");
 
@@ -85,7 +85,7 @@ TEMPLATE_TEST_CASE("Instruction: *.ROT", "", bool, int, double, cppush::Code, cp
 	REQUIRE(env.get_stack<TestType>() == vals);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.SHOVE", "", bool, int, double, cppush::Code, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.SHOVE", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::shove<TestType>, "SHOVE");
 
@@ -113,7 +113,7 @@ TEMPLATE_TEST_CASE("Instruction: *.SHOVE", "", bool, int, double, cppush::Code, 
 	REQUIRE(env.get_stack<TestType>() == vals);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.STACKDEPTH", "", bool, int, double, cppush::Code, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.STACKDEPTH", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::stackdepth<TestType>, "STACKDEPTH");
 
@@ -131,7 +131,7 @@ TEMPLATE_TEST_CASE("Instruction: *.STACKDEPTH", "", bool, int, double, cppush::C
 	REQUIRE(env.pop<int>() == expected);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.SWAP", "", bool, int, double, cppush::Code, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.SWAP", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::swap<TestType>, "SWAP");
 
@@ -144,7 +144,7 @@ TEMPLATE_TEST_CASE("Instruction: *.SWAP", "", bool, int, double, cppush::Code, c
 	REQUIRE(env.get_stack<TestType>() == vals);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.YANK", "", bool, int, double, cppush::Code, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.YANK", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::yank<TestType>, "YANK");
 
@@ -176,7 +176,7 @@ TEMPLATE_TEST_CASE("Instruction: *.YANK", "", bool, int, double, cppush::Code, c
 	REQUIRE(env.get_stack<TestType>() == vals);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.YANKDUP", "", bool, int, double, cppush::Code, cppush::Exec) {
+TEMPLATE_TEST_CASE("Instruction: *.YANKDUP", "", bool, int, double, cppush::Code_ptr, cppush::Exec) {
 	cppush::Env env;
 	cppush::Instruction op(cppush::yankdup<TestType>, "YANKDUP");
 

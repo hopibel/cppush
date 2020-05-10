@@ -13,15 +13,15 @@
 
 namespace cppush {
 
-void register_core(std::vector<Code>& instruction_set);
+void register_core(std::vector<Code_ptr>& instruction_set);
 
-void register_core_by_name(std::vector<Code>& instruction_set, std::initializer_list<std::string> names);
+void register_core_by_name(std::vector<Code_ptr>& instruction_set, std::initializer_list<std::string> names);
 
 // Append instructions for the enabled stacks
-void register_core_by_stack(std::vector<Code>& instruction_set, const Types& types);
+void register_core_by_stack(std::vector<Code_ptr>& instruction_set, const Types& types);
 
 // Create input instructions
-void register_n_inputs(std::vector<Code>& instruction_set, int n);
+void register_n_inputs(std::vector<Code_ptr>& instruction_set, int n);
 
 } // namespace cppush
 
