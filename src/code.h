@@ -18,7 +18,7 @@ public:
 	Code() {}
 	Code(const std::vector<Code_ptr>& stack) : stack_(stack) {}
 
-	virtual ~Code() {}
+	virtual ~Code() = default;
 
 	bool operator==(const Code& rhs) const;
 
