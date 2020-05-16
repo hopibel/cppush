@@ -11,18 +11,16 @@ namespace cppush {
 class Code;
 class Env;
 
-using Code_ptr = std::shared_ptr<Code>;
-
 class Code {
 public:
 	Code() {}
-	Code(const std::vector<Code_ptr>& stack) : stack_(stack) {}
+	Code(const std::vector<const Code*> stack) : stack_(stack) {}
 
 	virtual ~Code() = default;
 
 	bool operator==(const Code& rhs) const;
 
-	const std::vector<Code_ptr>& get_stack() const {return stack_;}
+	const std::vector<const Code*>& get_stack() const {return stack_;}
 
 	virtual bool is_atom() const = 0;
 	bool is_list() const {return !is_atom();}
@@ -36,13 +34,14 @@ protected:
 
 private:
 	friend class CodeList;
-	const std::vector<Code_ptr> stack_;
+	const std::vector<const Code*> stack_;
 };
 
+// TODO: move stack here. CodeList should be exclusive owner of its elements
 class CodeList : public Code {
 public:
 	CodeList() : size_(1) {}
-	CodeList(const std::vector<Code_ptr>& stack) : Code(stack) {calc_size_();}
+	CodeList(const std::vector<const Code*>& stack) : Code(stack) {calc_size_();}
 
 	bool is_atom() const {return false;}
 	unsigned operator()(Env& env) const override;

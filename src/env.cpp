@@ -5,8 +5,8 @@
 
 namespace cppush {
 
-void Env::load_program(const Code_ptr& program) {
-	push<Exec>(program);
+void Env::load_program(const CodeList& program) {
+	push<Exec>(&program);
 }
 
 void Env::run() {

@@ -20,7 +20,7 @@ public:
 
 protected:
 	bool equal_to(const Code& rhs) const override {
-		return name == static_cast<const Instruction&>(rhs).name;
+		return op_ == static_cast<const Instruction&>(rhs).op_;
 	}
 
 private:

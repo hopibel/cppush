@@ -15,8 +15,8 @@ namespace cppush {
 
 unsigned code_append(Env& env);
 unsigned code_atom(Env& env);
-unsigned code_car(Env& env);
-unsigned code_cdr(Env& env);
+unsigned code_car(Env& env); // push first element of top item
+unsigned code_cdr(Env& env); // push rest of top item (coerced to list)
 unsigned code_cons(Env& env);
 unsigned code_container(Env& env);
 unsigned code_contains(Env& env);

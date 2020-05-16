@@ -6,6 +6,7 @@
 #include <chrono>
 #include <memory>
 #include <vector>
+#include <utility>
 
 namespace cppush {
 
@@ -29,22 +30,24 @@ struct Exec {};
 
 class Env {
 public:
-	void load_program(const Code_ptr& program); // TODO(hopibel): Program struct with config
+	void load_program(const CodeList& program); // TODO(hopibel): Program struct with config
 	template <typename T> void load_inputs(std::vector<T> inputs);
-
 	void run();
+
+	// hold code generated during execution
+	const Code* guard(std::unique_ptr<Code> code);
 
 	// needed for generic stack manipulation functions
 	template <typename T> auto& get_stack() = delete;
 	template <typename T> auto pop();
-	template <typename T, typename U> inline void push(const U& item);
+	template <typename T, typename U> void push(const U item);
 
 private:
-	std::vector<Code_ptr> instruction_set_;
+	std::vector<std::unique_ptr<Code>> guard_buffer;
 
 	// Stacks
-	std::vector<Code_ptr> exec_stack_;
-	std::vector<Code_ptr> code_stack_;
+	std::vector<const Code*> exec_stack_;
+	std::vector<const Code*> code_stack_;
 	std::vector<int> int_stack_;
 	std::vector<double> float_stack_;
 	std::vector<bool> bool_stack_;
@@ -52,12 +55,13 @@ private:
 	// TODO(hopibel): add a vector type for basic data types
 
 	// Input values
-	std::vector<Code_ptr> inputs_;
+	// TODO(hopibel): should probably be only literals
+	std::vector<std::unique_ptr<const Code>> inputs_;
 
 	// retrieve nth input item. needed for implementing input instructions.
 	// n is assumed to be a valid index
 	friend class InputInstruction;
-	Code_ptr get_input_(int n) {return inputs_[n];}
+	const Code* get_input_(int n) {return inputs_[n].get();}
 };
 
 } // namespace cppush
@@ -71,14 +75,19 @@ template <typename T>
 void Env::load_inputs(const std::vector<T> inputs) {
 	inputs_.clear();
 	for (const auto el : inputs) {
-		inputs_.push_back(std::make_shared<Literal<T>>(el));
+		inputs_.push_back(std::make_unique<Literal<T>>(el));
 	}
+}
+
+inline const Code* Env::guard(std::unique_ptr<Code> code) {
+	guard_buffer.push_back(std::move(code));
+	return guard_buffer.back().get();
 }
 
 template <> inline auto& Env::get_stack<int>() {return int_stack_;}
 template <> inline auto& Env::get_stack<double>() {return float_stack_;}
 template <> inline auto& Env::get_stack<bool>() {return bool_stack_;}
-template <> inline auto& Env::get_stack<Code_ptr>() {return code_stack_;}
+template <> inline auto& Env::get_stack<Code>() {return code_stack_;}
 template <> inline auto& Env::get_stack<Exec>() {return exec_stack_;}
 
 template <typename T>
@@ -91,9 +100,9 @@ inline auto Env::pop() {
 
 // push to a stack
 template <typename T, typename U>
-inline void Env::push(const U& item) { get_stack<T>().push_back(item); }
+inline void Env::push(const U item) { get_stack<T>().push_back(item); }
 template <>
-inline void Env::push<Exec>(const Code_ptr& item) { get_stack<Exec>().push_back(item); }
+inline void Env::push<Exec>(const Code* item) { get_stack<Exec>().push_back(item); }
 
 } // namespace cppush
 

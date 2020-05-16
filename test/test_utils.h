@@ -2,52 +2,19 @@
 #define TEST_UTILS_H
 
 #include "code.h"
+#include "env.h"
 #include "literal.h"
 
+#include <memory>
 #include <vector>
 
 template <typename T>
-auto generate_test_values(int len) = delete;
+void generate_test_values(cppush::Env&, int len);
 
-template <>
-auto generate_test_values<int>(int len) {
-	std::vector<int> vec;
-	for (int i = 0; i < len; ++i) {
-		vec.push_back(i);
-	}
-	return vec;
-}
-
-template <>
-auto generate_test_values<double>(int len) {
-	std::vector<double> vec;
-	for (double f = 0; f < len; ++f) {
-		vec.push_back(f + 0.5);
-	}
-	return vec;
-}
-
-template <>
-auto generate_test_values<bool>(int len) {
-	std::vector<bool> vec;
-	for (int i = 0; i < len; ++i) {
-		vec.push_back(static_cast<bool>(i % 2));
-	}
-	return vec;
-}
-
-template <>
-auto generate_test_values<cppush::Code_ptr>(int len) {
-	std::vector<cppush::Code_ptr> vec;
-	for (int i = 0; i < len; ++i) {
-		vec.push_back(std::make_shared<cppush::Literal<int>>(i));
-	}
-	return vec;
-}
-
-template <>
-auto generate_test_values<cppush::Exec>(int len) {
-	return generate_test_values<cppush::Code_ptr>(len);
-}
+template <> void generate_test_values<int>(cppush::Env& env, int len);
+template <> void generate_test_values<double>(cppush::Env& env, int len);
+template <> void generate_test_values<bool>(cppush::Env& env, int len);
+template <> void generate_test_values<cppush::Code>(cppush::Env& env, int len);
+template <> void generate_test_values<cppush::Exec>(cppush::Env& env, int len);
 
 #endif // TEST_UTILS_H

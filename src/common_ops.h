@@ -18,7 +18,7 @@ unsigned equal(Env& env) {
 	}
 	return 1;
 }
-template <> unsigned equal<Code_ptr>(Env& env);
+template <> unsigned equal<Code>(Env& env);
 template <> unsigned equal<Exec>(Env& env);
 
 template <typename T>

@@ -9,12 +9,12 @@
 #include <memory>
 #include <vector>
 
-TEST_CASE("Instruction: EXEC.DO*RANGE") {
+TEST_CASE("Instruction: exec_do*range") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_do_range, "EXEC.DO*RANGE");
+	cppush::Instruction op(cppush::exec_do_range, "exec_do*range");
 
 	cppush::CodeList body;
-	env.push<cppush::Exec>(std::make_shared<cppush::CodeList>(body));
+	env.push<cppush::Exec>(&body);
 
 	SECTION("index == dest") {
 		env.get_stack<int>().insert(env.get_stack<int>().end(), {0, 0});
@@ -53,12 +53,12 @@ TEST_CASE("Instruction: EXEC.DO*RANGE") {
 	}
 }
 
-TEST_CASE("Instruction: EXEC.DO*COUNT") {
+TEST_CASE("Instruction: exec_do*count") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_do_count, "EXEC.DO*COUNT");
-	cppush::Instruction do_range(cppush::exec_do_range, "EXEC.DO*RANGE");
+	cppush::Instruction op(cppush::exec_do_count, "exec_do*count");
+	cppush::Instruction do_range(cppush::exec_do_range, "exec_do*range");
 	cppush::CodeList body;
-	env.push<cppush::Exec>(std::make_shared<cppush::CodeList>(body));
+	env.push<cppush::Exec>(&body);
 
 	int count;
 
@@ -86,13 +86,13 @@ TEST_CASE("Instruction: EXEC.DO*COUNT") {
 	}
 }
 
-TEST_CASE("Instruction: EXEC.DO*TIMES") {
+TEST_CASE("Instruction: exec_do*times") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_do_times, "EXEC.DO*TIMES");
-	cppush::Instruction do_range(cppush::exec_do_range, "EXEC.DO*RANGE");
-	cppush::Instruction pop_insn(cppush::protected_pop<int>, "INTEGER.POP");
+	cppush::Instruction op(cppush::exec_do_times, "exec_do*times");
+	cppush::Instruction do_range(cppush::exec_do_range, "exec_do*range");
+	cppush::Instruction pop_insn(cppush::protected_pop<int>, "integer_pop");
 	cppush::CodeList body;
-	env.push<cppush::Exec>(std::make_shared<cppush::CodeList>(body));
+	env.push<cppush::Exec>(&body);
 
 	int times;
 
@@ -123,13 +123,13 @@ TEST_CASE("Instruction: EXEC.DO*TIMES") {
 	}
 }
 
-TEST_CASE("Instruction: EXEC.IF") {
+TEST_CASE("Instruction: exec_if") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_if, "EXEC.IF");
+	cppush::Instruction op(cppush::exec_if, "exec_if");
 	cppush::CodeList branchA;
-	cppush::CodeList branchB({std::make_shared<cppush::CodeList>(branchA)});
-	env.push<cppush::Exec>(std::make_shared<cppush::CodeList>(branchB));
-	env.push<cppush::Exec>(std::make_shared<cppush::CodeList>(branchA));
+	cppush::CodeList branchB({ &branchA });
+	env.push<cppush::Exec>(&branchB);
+	env.push<cppush::Exec>(&branchA);
 
 	REQUIRE(!(branchA == branchB));
 
@@ -150,14 +150,14 @@ TEST_CASE("Instruction: EXEC.IF") {
 	}
 }
 
-TEST_CASE("Instruction: EXEC.K") {
+TEST_CASE("Instruction: exec_k") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_k, "EXEC.K");
+	cppush::Instruction op(cppush::exec_k, "exec_k");
 	cppush::CodeList branchA;
-	cppush::CodeList branchB({std::make_shared<cppush::CodeList>(branchA)});
+	cppush::CodeList branchB({ &branchA });
 
-	env.push<cppush::Exec>(std::make_shared<cppush::CodeList>(branchB));
-	env.push<cppush::Exec>(std::make_shared<cppush::CodeList>(branchA));
+	env.push<cppush::Exec>(&branchB);
+	env.push<cppush::Exec>(&branchA);
 
 	REQUIRE(!(branchA == branchB));
 
@@ -168,16 +168,16 @@ TEST_CASE("Instruction: EXEC.K") {
 	REQUIRE(*env.get_stack<cppush::Exec>().back() == branchA);
 }
 
-TEST_CASE("Instruction: EXEC.S") {
+TEST_CASE("Instruction: exec_s") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_s, "EXEC.S");
+	cppush::Instruction op(cppush::exec_s, "exec_s");
 	cppush::CodeList a;
-	cppush::CodeList b({std::make_shared<cppush::CodeList>(a)});
-	cppush::CodeList c({std::make_shared<cppush::CodeList>(b)});
+	cppush::CodeList b({ &a });
+	cppush::CodeList c({ &b });
 
-	env.push<cppush::Exec>(std::make_shared<cppush::CodeList>(c));
-	env.push<cppush::Exec>(std::make_shared<cppush::CodeList>(b));
-	env.push<cppush::Exec>(std::make_shared<cppush::CodeList>(a));
+	env.push<cppush::Exec>(&c);
+	env.push<cppush::Exec>(&b);
+	env.push<cppush::Exec>(&a);
 
 	REQUIRE(!(a == b));
 	REQUIRE(!(a == c));
@@ -189,21 +189,18 @@ TEST_CASE("Instruction: EXEC.S") {
 	REQUIRE(env.get_stack<cppush::Exec>().size() == 3);
 	REQUIRE(env.get_stack<cppush::Exec>()[0]->get_stack().size() == 2);
 
-	auto bc = cppush::CodeList(std::vector<std::shared_ptr<cppush::Code>>{
-			std::make_shared<cppush::CodeList>(b),
-			std::make_shared<cppush::CodeList>(c)
-			});
+	auto bc = cppush::CodeList({ &b, &c });
 	REQUIRE(*env.get_stack<cppush::Exec>()[0] == bc);
 	REQUIRE(*env.get_stack<cppush::Exec>()[1] == c);
 	REQUIRE(*env.get_stack<cppush::Exec>()[2] == a);
 }
 
-TEST_CASE("Instruction: EXEC.Y") {
+TEST_CASE("Instruction: exec_y") {
 	cppush::Env env;
-	cppush::Instruction op(cppush::exec_y, "EXEC.Y");
+	cppush::Instruction op(cppush::exec_y, "exec_y");
 	cppush::CodeList body;
 
-	env.push<cppush::Exec>(std::make_shared<cppush::CodeList>(body));
+	env.push<cppush::Exec>(&body);
 
 	// Before:	A
 	// After:	A (EXEC.Y A)

@@ -3,6 +3,7 @@
 #include "env.h"
 #include "exec_ops.h"
 #include "instruction.h"
+#include "instruction_set.h"
 #include "literal.h"
 
 #include <memory>
@@ -14,6 +15,9 @@ unsigned exec_do_range(Env& env) {
 	auto exec_stack_size = env.get_stack<Exec>().size();
 	auto int_stack_size = env.get_stack<int>().size();
 
+	// TODO: namespace global
+	static const auto do_range_insn = Instruction(exec_do_range, "exec_do*range");
+
 	if (exec_stack_size > 0 && int_stack_size >= 2) {
 		int dest = env.pop<int>();
 		int index = env.get_stack<int>().back();
@@ -22,16 +26,14 @@ unsigned exec_do_range(Env& env) {
 		if (index != dest) {
 			index += index > dest ? -1 : 1;
 
-			static auto do_range_insn = std::make_shared<Instruction>(
-					exec_do_range, "EXEC.DO*RANGE");
-
-			std::vector<Code_ptr> rcall{
-					std::make_shared<Literal<int>>(index),
-					std::make_shared<Literal<int>>(dest),
-					do_range_insn, code
+			std::vector<const Code*> rcall{
+				env.guard(std::make_unique<Literal<int>>(index)),
+				env.guard(std::make_unique<Literal<int>>(dest)),
+				&do_range_insn, code
 			};
 
-			env.push<Exec>(std::make_shared<CodeList>(rcall));
+			// TODO(hopibel): push guard unique_ptr to avoid leak
+			env.push<Exec>(env.guard(std::make_unique<CodeList>(rcall)));
 		}
 		env.push<Exec>(code);
 	}
@@ -43,20 +45,20 @@ unsigned exec_do_count(Env& env) {
 	auto exec_stack_size = env.get_stack<Exec>().size();
 	auto int_stack_size = env.get_stack<int>().size();
 
+	// TODO: namespace global
+	static const auto do_range_insn = Instruction(exec_do_range, "exec_do*range");
+
 	if (exec_stack_size > 0 && int_stack_size > 0 && env.get_stack<int>().back() > 0) {
 		int count = env.pop<int>();
 		auto code = env.pop<Exec>();
 
-		static auto do_range_insn = std::make_shared<Instruction>(
-				exec_do_range, "EXEC.DO*RANGE");
-
-		std::vector<Code_ptr> rcall{
-				std::make_shared<Literal<int>>(0),
-				std::make_shared<Literal<int>>(count - 1),
-				do_range_insn, code
+		std::vector<const Code*> rcall{
+			env.guard(std::make_unique<Literal<int>>(0)), // TODO: namespace global
+			env.guard(std::make_unique<Literal<int>>(count - 1)),
+			&do_range_insn, code
 		};
 
-		env.push<Exec>(std::make_shared<CodeList>(rcall));
+		env.push<Exec>(env.guard(std::make_unique<CodeList>(rcall)));
 	}
 	return 1;
 }
@@ -65,24 +67,26 @@ unsigned exec_do_times(Env& env) {
 	auto exec_stack_size = env.get_stack<Exec>().size();
 	auto int_stack_size = env.get_stack<int>().size();
 
+	// TODO: namespace global
+	static const auto do_range_insn = Instruction(exec_do_range, "exec_do*range");
+	static const auto int_pop = Instruction(protected_pop<int>, "integer_pop");
+
 	if (exec_stack_size > 0 && int_stack_size > 0 && env.get_stack<int>().back() > 0) {
 		int times = env.pop<int>();
 		auto code = env.pop<Exec>();
 
-		static auto do_range_insn = std::make_shared<Instruction>(
-				exec_do_range, "EXEC.DO*RANGE");
-		static auto int_pop = std::make_shared<Instruction>(
-				protected_pop<int>, "INTEGER.POP");
+		auto pop_code = env.guard(std::make_unique<CodeList>(
+			std::vector<const Code*>{ &int_pop, code }
+		));
 
-		std::vector<Code_ptr> pop_code{int_pop, code};
-
-		std::vector<Code_ptr> rcall{
-				std::make_shared<Literal<int>>(0),
-				std::make_shared<Literal<int>>(times - 1),
-				do_range_insn, std::make_shared<CodeList>(pop_code)
+		std::vector<const Code*> rcall{
+			env.guard(std::make_unique<Literal<int>>(0)), // TODO: namespace global
+			env.guard(std::make_unique<Literal<int>>(times - 1)),
+			&do_range_insn, pop_code
 		};
 
-		env.push<Exec>(std::make_shared<CodeList>(rcall));
+		// TODO(hopibel): push guard unique_ptr to avoid leak
+		env.push<Exec>(env.guard(std::make_unique<CodeList>(rcall)));
 	}
 	return 1;
 }
@@ -103,24 +107,23 @@ unsigned exec_if(Env& env) {
 unsigned exec_k(Env& env) {
 	if (env.get_stack<Exec>().size() >= 2) {
 		auto first = env.pop<Exec>();
-		auto second = env.pop<Exec>();
+		env.pop<Exec>();
 		env.push<Exec>(first);
 	}
 	return 1;
 }
 
 unsigned exec_s(Env& env) {
-	auto& stack = env.get_stack<Exec>();
-	if (stack.size() >= 3) {
+	if (env.get_stack<Exec>().size() >= 3) {
 		auto a = env.pop<Exec>();
 		auto b = env.pop<Exec>();
 		auto c = env.pop<Exec>();
 
-		std::vector<Code_ptr> bc{b, c};
-
-		stack.push_back(std::make_shared<CodeList>(bc));
-		stack.push_back(c);
-		stack.push_back(a);
+		env.push<Exec>(env.guard(std::make_unique<CodeList>(
+			std::vector<const Code*>{ b, c }
+		)));
+		env.push<Exec>(c);
+		env.push<Exec>(a);
 	}
 	return 1;
 }
@@ -128,11 +131,11 @@ unsigned exec_s(Env& env) {
 unsigned exec_y(Env& env) {
 	if (env.get_stack<Exec>().size() > 0) {
 		auto first = env.pop<Exec>();
-		static auto y_insn = std::make_shared<Instruction>(
-				exec_y, "EXEC.Y");
+		static const auto y_insn = Instruction(exec_y, "exec_y");
 
-		std::vector<Code_ptr> rcall{y_insn, first};
-		env.push<Exec>(std::make_shared<CodeList>(rcall));
+		env.push<Exec>(env.guard(std::make_unique<CodeList>(
+			std::vector<const Code*>{ &y_insn, first }
+		)));
 		env.push<Exec>(first);
 	}
 	return 1;

@@ -16,7 +16,7 @@
 
 namespace cppush {
 
-const std::map<std::string, std::pair<unsigned (*)(Env&), Types>> core_instructions{
+const std::map<std::string, std::tuple<unsigned (*)(Env&), Types>> core_instructions{
 	// exec
 	{"exec_do*range", {exec_do_range, Type::Exec | Type::Int}},
 	{"exec_do*count", {exec_do_count, Type::Exec | Type::Int}},
@@ -35,7 +35,7 @@ const std::map<std::string, std::pair<unsigned (*)(Env&), Types>> core_instructi
 	{"code_container", {code_container, Type::Code}},
 	{"code_contains", {code_contains, Type::Code | Type::Bool}},
 	{"code_do", {code_do, Type::Code | Type::Exec}},
-	{"code_do*star", {code_do_star, Type::Code | Type::Exec}},
+	{"code_do*", {code_do_star, Type::Code | Type::Exec}},
 	{"code_quote", {code_quote, Type::Code | Type::Exec}},
 	{"code_do*range", {code_do_range, Type::Code | Type::Exec | Type::Int}},
 	{"code_do*count", {code_do_count, Type::Code | Type::Exec | Type::Int}},
@@ -99,76 +99,76 @@ const std::map<std::string, std::pair<unsigned (*)(Env&), Types>> core_instructi
 	{"float_tan", {trig_tan, Type::Float}},
 
 	// common stack ops
-	{"code_eq", {equal<Code_ptr>, Type::Code | Type::Bool}},
+	{"code_eq", {equal<Code>, Type::Code | Type::Bool}},
 	{"integer_eq", {equal<int>, Type::Int | Type::Bool}},
 	{"float_eq", {equal<double>, Type::Float | Type::Bool}},
 	{"boolean_eq", {equal<bool>, Type::Bool}},
 	{"exec_eq", {equal<Exec>, Type::Exec | Type::Bool}},
-	{"code_pop", {protected_pop<Code_ptr>, Type::Code}},
+	{"code_pop", {protected_pop<Code>, Type::Code}},
 	{"integer_pop", {protected_pop<int>, Type::Int}},
 	{"float_pop", {protected_pop<double>, Type::Float}},
 	{"boolean_pop", {protected_pop<bool>, Type::Bool}},
 	{"exec_pop", {protected_pop<Exec>, Type::Exec}},
-	{"code_dup", {dup<Code_ptr>, Type::Code}},
+	{"code_dup", {dup<Code>, Type::Code}},
 	{"integer_dup", {dup<int>, Type::Int}},
 	{"float_dup", {dup<double>, Type::Float}},
 	{"boolean_dup", {dup<bool>, Type::Bool}},
 	{"exec_dup", {dup<Exec>, Type::Exec}},
-	{"code_flush", {flush<Code_ptr>, Type::Code}},
+	{"code_flush", {flush<Code>, Type::Code}},
 	{"integer_flush", {flush<int>, Type::Int}},
 	{"float_flush", {flush<double>, Type::Float}},
 	{"boolean_flush", {flush<bool>, Type::Bool}},
 	{"exec_flush", {flush<Exec>, Type::Exec}},
-	{"code_rot", {rot<Code_ptr>, Type::Code}},
+	{"code_rot", {rot<Code>, Type::Code}},
 	{"integer_rot", {rot<int>, Type::Int}},
 	{"float_rot", {rot<double>, Type::Float}},
 	{"boolean_rot", {rot<bool>, Type::Bool}},
 	{"exec_rot", {rot<Exec>, Type::Exec}},
-	{"code_shove", {shove<Code_ptr>, Type::Code | Type::Int}},
+	{"code_shove", {shove<Code>, Type::Code | Type::Int}},
 	{"integer_shove", {shove<int>, Type::Int}},
 	{"float_shove", {shove<double>, Type::Float | Type::Int}},
 	{"boolean_shove", {shove<bool>, Type::Bool | Type::Int}},
 	{"exec_shove", {shove<Exec>, Type::Exec | Type::Int}},
-	{"code_stackdepth", {stackdepth<Code_ptr>, Type::Code | Type::Int}},
+	{"code_stackdepth", {stackdepth<Code>, Type::Code | Type::Int}},
 	{"integer_stackdepth", {stackdepth<int>, Type::Int}},
 	{"float_stackdepth", {stackdepth<double>, Type::Float | Type::Int}},
 	{"boolean_stackdepth", {stackdepth<bool>, Type::Bool | Type::Int}},
 	{"exec_stackdepth", {stackdepth<Exec>, Type::Exec | Type::Int}},
-	{"code_swap", {swap<Code_ptr>, Type::Code}},
+	{"code_swap", {swap<Code>, Type::Code}},
 	{"integer_swap", {swap<int>, Type::Int}},
 	{"float_swap", {swap<double>, Type::Float}},
 	{"boolean_swap", {swap<bool>, Type::Bool}},
 	{"exec_swap", {swap<Exec>, Type::Exec}},
-	{"code_yank", {yank<Code_ptr>, Type::Code | Type::Int}},
+	{"code_yank", {yank<Code>, Type::Code | Type::Int}},
 	{"integer_yank", {yank<int>, Type::Int}},
 	{"float_yank", {yank<double>, Type::Float | Type::Int}},
 	{"boolean_yank", {yank<bool>, Type::Bool | Type::Int}},
 	{"exec_yank", {yank<Exec>, Type::Exec | Type::Int}},
-	{"code_yankdup", {yankdup<Code_ptr>, Type::Code | Type::Int}},
+	{"code_yankdup", {yankdup<Code>, Type::Code | Type::Int}},
 	{"integer_yankdup", {yankdup<int>, Type::Int}},
 	{"float_yankdup", {yankdup<double>, Type::Float | Type::Int}},
 	{"boolean_yankdup", {yankdup<bool>, Type::Bool | Type::Int}},
 	{"exec_yankdup", {yankdup<Exec>, Type::Exec | Type::Int}},
 };
 
-std::shared_ptr<Instruction> load_instruction(std::string name) {
+Instruction load_instruction(std::string name) {
 	auto insn = core_instructions.at(name);
-	return std::make_shared<Instruction>(std::get<0>(insn), name);
+	return Instruction(std::get<0>(insn), name);
 }
 
-void register_core(std::vector<Code_ptr>& instruction_set) {
+void register_core(std::vector<Instruction>& instruction_set) {
 	for (const auto& el : core_instructions) {
 		instruction_set.push_back(load_instruction(el.first));
 	}
 }
 
-void register_core_by_name(std::vector<Code_ptr>& instruction_set, std::initializer_list<std::string> names) {
+void register_core_by_name(std::vector<Instruction>& instruction_set, std::initializer_list<std::string> names) {
 	for (auto name : names) {
 		instruction_set.push_back(load_instruction(name));
 	}
 }
 
-void register_core_by_stack(std::vector<Code_ptr>& instruction_set, const Types& types) {
+void register_core_by_stack(std::vector<Instruction>& instruction_set, const Types& types) {
 	for (const auto& el : core_instructions) {
 		if ((std::get<Types>(el.second) | types) == types) {
 			instruction_set.push_back(load_instruction(el.first));
@@ -176,11 +176,11 @@ void register_core_by_stack(std::vector<Code_ptr>& instruction_set, const Types&
 	}
 }
 
-void register_n_inputs(std::vector<Code_ptr>& instruction_set, int n) {
-	for (int i = 0; i < n; ++i) {
-		instruction_set.push_back(std::make_shared<InputInstruction>("input_" + i, i));
-	}
-}
+//void register_n_inputs(std::vector<Instruction>& instruction_set, int n) {
+//	for (int i = 0; i < n; ++i) {
+//		instruction_set.push_back(InputInstruction("input_" + i, i));
+//	}
+//}
 
 // Parentheses required
 //	// exec
