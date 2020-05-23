@@ -14,7 +14,7 @@ unsigned equal(Env& env) {
 	if (env.get_stack<T>().size() >= 2) {
 		auto first = env.pop<T>();
 		auto second = env.pop<T>();
-		env.get_stack<bool>().push_back(first == second);
+		env.push<bool>(first == second);
 	}
 	return 1;
 }
@@ -121,6 +121,16 @@ unsigned yankdup(Env& env) {
 	}
 	return 1;
 }
+
+/**
+ * Templated input instruction. No need to subclass Instruction
+ */
+template <unsigned N>
+unsigned input_n(Env& env) {
+	return env.push_input_(N);
+}
+// base case
+template <> unsigned input_n<0>(Env& env);
 
 } // namespace cppush
 

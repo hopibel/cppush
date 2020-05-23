@@ -1,40 +1,64 @@
 #include "code.h"
 #include "env.h"
+#include "util.h"
 
-#include <memory>
+#include <string>
 #include <typeinfo>
 
 namespace cppush {
 
-bool Code::operator==(const Code& rhs) const {
-	const Code& lhs = *this;
-
-	if (&lhs == &rhs) {return true;}
-	if (typeid(lhs) != typeid(rhs)) {return false;}
-	
-	auto lstack = lhs.get_stack();
-	auto rstack = rhs.get_stack();
-
-	if (lstack.size() != rstack.size()) {return false;}
-	for (unsigned i = 0; i < lstack.size(); ++i) {
-		if (!(*lstack[i] == *rstack[i])) {return false;}
-	}
-
-	return lhs.equal_to(rhs);
+unsigned Literal::operator()(Env& env) const {
+	std::visit(overloaded{
+		[&](bool arg) { env.push<bool>(arg); },
+		[&](int arg) { env.push<int>(arg); },
+		[&](double arg) { env.push<double>(arg); }
+	}, value_);
+	return 1;
 }
 
 unsigned CodeList::operator()(Env& env) const {
-	for (auto it = stack_.rbegin(); it < stack_.rend(); ++it) {
+	for (auto it = list_.rbegin(); it < list_.rend(); ++it) {
 		env.push<Exec>(*it);
 	}
 	return 1;
 }
 
 void CodeList::calc_size_() {
-	size_ = 1; // +1 for the list itself
-	for (auto i : stack_) {
-		size_ += i->size();
+	size_ = 1;
+	for (const auto& i : list_) {
+		size_ += std::visit(overloaded{
+			[&](CodeList arg) { return arg.size(); },
+			[&](auto&&) -> unsigned { return 1; }
+		}, i);
 	}
+}
+
+std::string Literal::to_string() const {
+	return std::visit(overloaded{
+		[](auto&& arg) -> std::string { return std::to_string(arg); }
+	}, value_);
+}
+
+// wrap string representation in parentheses
+std::string CodeList::to_string() const {
+	std::string output = "(";
+	for (const auto& el : list_) {
+		if (&el != &list_[0]) {
+			output = output + " ";
+		}
+		output = output + std::visit(overloaded{
+			[](auto&& arg) { return arg.to_string(); }
+		}, el);
+	}
+	output += ")";
+	return output;
+}
+
+std::ostream& operator<<(std::ostream& os, const Code& value) {
+	os << std::visit(overloaded{
+		[](auto&& arg) { return arg.to_string(); }
+	}, value);
+	return os;
 }
 
 } // namespace cppush

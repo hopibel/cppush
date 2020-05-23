@@ -5,7 +5,3 @@ include(CTest)
 
 add_subdirectory(src)
 add_subdirectory(test)
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-	target_compile_options(cppush PUBLIC -Wall -Wextra)
-endif()

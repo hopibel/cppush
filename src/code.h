@@ -1,63 +1,91 @@
 #ifndef CODE_H
 #define CODE_H
 
-#include <initializer_list>
-#include <memory>
+#include "util.h"
+
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace cppush {
 
-class Code;
 class Env;
 
-class Code {
+class Instruction;
+class Literal;
+class CodeList;
+using Code = std::variant<Instruction, Literal, CodeList>;
+
+using literal_t = std::variant<bool, int, double>;
+
+class Instruction {
 public:
-	Code() {}
-	Code(const std::vector<const Code*> stack) : stack_(stack) {}
+	Instruction(unsigned (*op)(Env&), std::string name) : op_(op), name_(name) {}
 
-	virtual ~Code() = default;
+	unsigned operator()(Env& env) const { return op_(env); }
+	bool operator==(const Instruction& rhs) const { return op_ == rhs.op_; }
 
-	bool operator==(const Code& rhs) const;
-
-	const std::vector<const Code*>& get_stack() const {return stack_;}
-
-	virtual bool is_atom() const = 0;
-	bool is_list() const {return !is_atom();}
-
-	virtual unsigned operator()(Env& env) const = 0;
-	virtual unsigned size() const = 0;
-
-protected:
-	// operator== already checked CodeList stacks at this point, so they must be equal
-	virtual bool equal_to(const Code&) const {return true;}
+	std::string to_string() const { return name_; }
 
 private:
-	friend class CodeList;
-	const std::vector<const Code*> stack_;
+	unsigned (*op_)(Env&);
+	std::string name_;
 };
 
-// TODO: move stack here. CodeList should be exclusive owner of its elements
-class CodeList : public Code {
+class Literal {
 public:
-	CodeList() : size_(1) {}
-	CodeList(const std::vector<const Code*>& stack) : Code(stack) {calc_size_();}
+	Literal(bool value) : value_(value) {}
+	Literal(int value) : value_(value) {}
+	Literal(double value) : value_(value) {}
 
-	bool is_atom() const {return false;}
-	unsigned operator()(Env& env) const override;
-	unsigned size() const override {return size_;}
+	unsigned operator()(Env& env) const;
+	bool operator==(const Literal& rhs) const { return value_ == rhs.value_; }
+
+	std::string to_string() const;
 
 private:
+	literal_t value_;
+};
+
+class CodeList {
+public:
+	CodeList() : size_(1) {}
+	CodeList(const std::vector<Code>& list) : list_(list) { calc_size_(); }
+
+	unsigned operator()(Env& env) const;
+	bool operator==(const CodeList& rhs) const { return list_ == rhs.list_; }
+	bool operator!=(const CodeList& rhs) const { return !(*this == rhs); }
+
+	const std::vector<Code>& get_list() const { return list_; }
+	unsigned size() const { return size_; }
+	std::string to_string() const;
+
+private:
+	std::vector<Code> list_;
 	unsigned size_;
+
 	void calc_size_();
 };
 
-class CodeAtom : public Code {
-public:
-	bool is_atom() const {return true;}
-	unsigned size() const override {return 1;}
-};
+inline bool is_list(const Code& code) {
+	return std::visit(overloaded{
+		[](CodeList) { return true; },
+		[](auto&&) { return false; }
+	}, code);
+}
+inline bool is_atom(const Code& code) { return !is_list(code); }
+inline unsigned size(const Code& code) {
+	return std::visit(overloaded{
+		[](CodeList arg) -> unsigned { return arg.size(); },
+		[](auto&&) -> unsigned { return 1; }
+	}, code);
+}
+
+// string conversion
+std::ostream& operator<<(std::ostream& os, const Code& value);
 
 } // namespace cppush
+
+#include "env.h"
 
 #endif // CODE_H

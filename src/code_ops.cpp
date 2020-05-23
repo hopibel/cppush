@@ -2,12 +2,12 @@
 #include "code_ops.h"
 #include "common_ops.h"
 #include "env.h"
-#include "instruction.h"
-#include "literal.h"
+#include "util.h"
 
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <variant>
 
 namespace cppush {
 
@@ -16,29 +16,31 @@ unsigned code_append(Env& env) {
 		auto first = env.pop<Code>();
 		auto second = env.pop<Code>();
 
-		// important! copy, not reference
-		auto first_stack = first->get_stack();
-		if (first->is_atom()) {
-			first_stack.push_back(first);
+		std::vector<Code> first_list;
+		if (is_atom(first)) {
+			first_list.push_back(first);
+		} else {
+			first_list = std::get<CodeList>(first).get_list();
 		}
 
-		auto second_stack = second->get_stack();
-		if (second->is_atom()) {
-			second_stack.push_back(second);
+		std::vector<Code> second_list;
+		if (is_atom(second)) {
+			second_list.push_back(second);
+		} else {
+			second_list = std::get<CodeList>(second).get_list();
 		}
 
-		second_stack.insert(second_stack.end(), first_stack.begin(), first_stack.end());
-		env.push<Code>(env.guard(std::make_unique<CodeList>(second_stack)));
+		second_list.insert(second_list.end(), first_list.begin(), first_list.end());
+		env.push<Code>(CodeList(second_list));
 
-		return first_stack.size();
+		return first_list.size();
 	}
 	return 1;
 }
 
 unsigned code_atom(Env& env) {
 	if (env.get_stack<Code>().size() > 0) {
-		auto first = env.pop<Code>();
-		env.push<bool>(first->is_atom());
+		env.push<bool>(is_atom(env.pop<Code>()));
 	}
 	return 1;
 }
@@ -46,10 +48,12 @@ unsigned code_atom(Env& env) {
 unsigned code_car(Env& env) {
 	auto& stack = env.get_stack<Code>();
 	if (stack.size() > 0) {
-		auto first = stack.back();
-
-		if (!first->get_stack().empty()) {
-			stack.back() = first->get_stack().front();
+		auto& first = stack.back();
+		if (is_list(first)) {
+			auto first_list = std::get<CodeList>(first).get_list();
+			if (first_list.size() > 0) {
+				stack.back() = first_list.front();
+			}
 		}
 	}
 	return 1;
@@ -58,12 +62,14 @@ unsigned code_car(Env& env) {
 unsigned code_cdr(Env& env) {
 	auto& stack = env.get_stack<Code>();
 	if (stack.size() > 0) {
-		auto top_stack = stack.back()->get_stack();
-
-		if (!top_stack.empty()) {
-			top_stack.erase(top_stack.begin());
+		auto& first = stack.back();
+		if (size(first) > 1) {
+			auto first_list = std::get<CodeList>(first).get_list();
+			first_list.erase(first_list.begin());
+			stack.back() = CodeList(first_list);
+		} else {
+			stack.back() = CodeList();
 		}
-		stack.back() = env.guard(std::make_unique<CodeList>(top_stack));
 	}
 	return 1;
 }
@@ -74,51 +80,53 @@ unsigned code_cons(Env& env) {
 		auto first = env.pop<Code>();
 		auto second = env.pop<Code>();
 
-		auto first_stack = first->get_stack();
-		if (first->is_list()) {
-			first_stack.insert(first_stack.begin(), second);
+		std::vector<Code> vec{second};
+		if (is_list(first)) {
+			auto& first_list = std::get<CodeList>(first).get_list();
+			vec.insert(vec.end(), first_list.begin(), first_list.end());
 		} else {
-			first_stack.push_back(second);
-			first_stack.push_back(first);
+			vec.push_back(first);
 		}
-
-		env.push<Code>(env.guard(std::make_unique<CodeList>(first_stack)));
+		env.push<Code>(CodeList(vec));
 	}
 	return 1;
 }
 
 namespace detail {
 
-const Code* find_container(const Code* tree, const Code* subtree) {
+const Code find_container(const Code& tree, const Code& subtree) {
 	// check if we're already in the container
-	auto& stack = tree->get_stack();
-	for (auto c : stack) {
-		if (*c == *subtree) {
-			return tree;
+	if (is_list(tree)) {
+		auto& code_list = std::get<CodeList>(tree).get_list();
+		for (const auto& node : code_list) {
+			if (node == subtree) {
+				return tree;
+			}
 		}
-	}
 
-	// recurse
-	for (auto c : stack) {
-		auto container = find_container(c, subtree);
-		if (!container->get_stack().empty()) {
-			return container; // nonempty list means match
+		// recurse
+		for (const auto& node : code_list) {
+			auto& container = find_container(node, subtree);
+			if (std::get<CodeList>(container).get_list().size() > 0) {
+				return container; // nonempty list means match
+			}
 		}
 	}
 
 	// no match. return empty list
-	static const CodeList empty_list;
-	return &empty_list;
-	}
+	return CodeList();
+}
 
-bool contains(const Code* tree, const Code* subtree) {
-	auto& stack = tree->get_stack();
-	for (auto el : stack) {
-		if (contains(el, subtree)) {
-			return true;
+bool contains(const Code tree, const Code subtree) {
+	if (is_list(tree)) {
+		auto& code_list = std::get<CodeList>(tree).get_list();
+		for (const auto& el : code_list) {
+			if (contains(el, subtree)) {
+				return true;
+			}
 		}
 	}
-	return *tree == *subtree; // equality also counts as subset I guess
+	return tree == subtree; // equality also counts as subset I guess
 }
 
 } // namespace detail
@@ -130,7 +138,7 @@ unsigned code_container(Env& env) {
 
 		env.push<Code>(detail::find_container(first, second));
 
-		return first->size() * second->size();
+		return size(first) * size(second);
 	}
 	return 1;
 }
@@ -142,7 +150,7 @@ unsigned code_contains(Env& env) {
 
 		env.push<bool>(detail::contains(second, first));
 
-		return first->size() * second->size();
+		return size(first) * size(second);
 	}
 	return 1;
 }
@@ -150,9 +158,8 @@ unsigned code_contains(Env& env) {
 unsigned code_do(Env& env) {
 	auto& stack = env.get_stack<Code>();
 	if (stack.size() > 0) {
-		// TODO: replace with load_instruction for consistent naming
 		static const auto code_pop = Instruction(protected_pop<Code>, "code_pop");
-		env.push<Exec>(&code_pop);
+		env.push<Exec>(code_pop);
 		env.push<Exec>(stack.back());
 	}
 	return 1;
@@ -188,15 +195,9 @@ unsigned code_do_range(Env& env) {
 			static const auto do_range_insn = Instruction(code_do_range, "code_do*range");
 			static const auto quote_insn = Instruction(code_quote, "code_quote");
 
-			std::vector<const Code*> rcall{
-					env.guard(std::make_unique<Literal<int>>(index)),
-					env.guard(std::make_unique<Literal<int>>(dest)),
-					&quote_insn,
-					code,
-					&do_range_insn
-			};
-
-			env.push<Exec>(env.guard(std::make_unique<CodeList>(rcall)));
+			env.push<Exec>(CodeList({
+				Literal(index), Literal(dest), quote_insn, code, do_range_insn
+			}));
 		}
 		env.push<Exec>(code);
 	}
@@ -213,17 +214,10 @@ unsigned code_do_count(Env& env) {
 
 		static const auto do_range_insn = Instruction(code_do_range, "code_do*range");
 		static const auto quote_insn = Instruction(code_quote, "code_quote");
-		static const Literal<int> zero(0);
 
-		std::vector<const Code*> rcall{
-			&zero,
-			env.guard(std::make_unique<Literal<int>>(count - 1)),
-			&quote_insn,
-			code,
-			&do_range_insn
-		};
-
-		env.push<Exec>(env.guard(std::make_unique<CodeList>(rcall)));
+		env.push<Exec>(CodeList({
+			Literal(0), Literal(count - 1), quote_insn, code, do_range_insn
+		}));
 	}
 	return 1;
 }
@@ -239,19 +233,11 @@ unsigned code_do_times(Env& env) {
 		static const auto do_range_insn = Instruction(code_do_range, "code_do*range");
 		static const auto quote_insn = Instruction(code_quote, "code_quote");
 		static const auto int_pop = Instruction(protected_pop<int>, "integer_pop");
-		static const Literal<int> zero(0);
 
-		std::vector<const Code*> pop_code{&int_pop, code};
-
-		std::vector<const Code*> rcall{
-			&zero,
-			env.guard(std::make_unique<Literal<int>>(times - 1)),
-			&quote_insn,
-			env.guard(std::make_unique<CodeList>(pop_code)),
-			&do_range_insn
-		};
-
-		env.push<Exec>(env.guard(std::make_unique<CodeList>(rcall)));
+		env.push<Exec>(CodeList({
+			Literal(0), Literal(times - 1),
+			quote_insn, CodeList({ int_pop, code }), do_range_insn
+		}));
 	}
 	return 1;
 }
@@ -259,17 +245,17 @@ unsigned code_do_times(Env& env) {
 namespace detail {
 
 // assumptions: 0 <= index < code->size()
-const Code* extract_recursive(const Code* code, int index) {
+const Code extract_recursive(const Code& code, unsigned index) {
 	if (index == 0) {
 		return code;
 	}
 	index -= 1;
-	const auto& stack = code->get_stack();
-	for (auto el : stack) {
-		if (index < static_cast<int>(el->size())) {
+	const auto& code_list = std::get<CodeList>(code).get_list();
+	for (auto el : code_list) {
+		if (index < size(el)) {
 			return extract_recursive(el, index);
 		}
-		index -= el->size();
+		index -= size(el);
 	}
 
 	// shouldn't reach
@@ -283,50 +269,47 @@ unsigned code_extract(Env& env) {
 		auto code = env.get_stack<Code>().back();
 		auto index = env.pop<int>();
 
-		index = std::abs(index) % code->size(); // restrict to reasonable range
+		index = std::abs(index) % size(code); // restrict to reasonable range
 		if (index == 0) { // no need to change code stack
 			return 1;
 		}
 		env.pop<Code>();
 
 		env.push<Code>(detail::extract_recursive(code, index));
-		return code->size();
+		return size(code);
 	}
 	return 1;
 }
 
 unsigned code_from_bool(Env& env) {
 	if (env.get_stack<bool>().size() > 0) {
-		env.push<Code>(
-			env.guard(std::make_unique<Literal<bool>>(env.pop<bool>())));
+		env.push<Code>(Literal(env.pop<bool>()));
 	}
 	return 1;
 }
 
 unsigned code_from_float(Env& env) {
 	if (env.get_stack<double>().size() > 0) {
-		env.push<Code>(
-			env.guard(std::make_unique<Literal<double>>(env.pop<double>())));
+		env.push<Code>(Literal(env.pop<double>()));
 	}
 	return 1;
 }
 
 unsigned code_from_int(Env& env) {
 	if (env.get_stack<int>().size() > 0) {
-		env.push<Code>(
-			env.guard(std::make_unique<Literal<int>>(env.pop<int>())));
+		env.push<Code>(Literal(env.pop<int>()));
 	}
 	return 1;
 }
 
 unsigned code_if(Env& env) {
 	if (env.get_stack<Code>().size() >= 2 && env.get_stack<bool>().size() > 0) {
-		auto first = env.pop<Code>();
-		auto second = env.pop<Code>();
 		if (env.pop<bool>()) {
-			env.push<Exec>(second);
+			env.pop<Code>();
+			env.push<Exec>(env.pop<Code>());
 		} else {
-			env.push<Exec>(first);
+			env.push<Exec>(env.pop<Code>());
+			env.pop<Code>();
 		}
 	}
 	return 1;
@@ -335,20 +318,20 @@ unsigned code_if(Env& env) {
 namespace detail {
 
 // insert subtree into code at index (based on depth-first traversal)
-const Code* insert_recursive(Env& env, const Code* code, const Code* subtree, int index) {
+const Code insert_recursive(Env& env, const Code& code, const Code& subtree, unsigned index) {
 	if (index == 0) {
 		return subtree;
 	}
 	index -= 1;
 
-	auto stack = code->get_stack();
-	for (int i = 0; i < static_cast<int>(stack.size()); ++i) {
-		if (index < static_cast<int>(stack[i]->size())) {
-			auto new_code = insert_recursive(env, stack[i], subtree, index);
-			stack[i] = new_code;
-			return env.guard(std::make_unique<CodeList>(stack));
+	auto code_list = std::get<CodeList>(code).get_list();
+	for (unsigned i = 0; i < code_list.size(); ++i) {
+		if (index < size(code_list[i])) {
+			auto new_code = insert_recursive(env, code_list[i], subtree, index);
+			code_list[i] = new_code;
+			return CodeList(code_list);
 		}
-		index -= stack[i]->size();
+		index -= size(code_list[i]);
 	}
 
 	// shouldn't reach
@@ -363,7 +346,7 @@ unsigned code_insert(Env& env) {
 		auto second = env.pop<Code>();
 		int index = env.pop<int>();
 
-		index = std::abs(index) % first->size();
+		index = std::abs(index) % size(first);
 		auto result = detail::insert_recursive(env, first, second, index);
 
 		env.push<Code>(result);
@@ -374,8 +357,8 @@ unsigned code_insert(Env& env) {
 unsigned code_length(Env& env) {
 	if (env.get_stack<Code>().size() > 0) {
 		auto code = env.pop<Code>();
-		if (code->is_list()) {
-			env.push<int>(code->get_stack().size());
+		if (is_list(code)) {
+			env.push<int>(std::get<CodeList>(code).get_list().size());
 		} else {
 			env.push<int>(1);
 		}
@@ -387,9 +370,7 @@ unsigned code_list(Env& env) {
 	if (env.get_stack<Code>().size() >= 2) {
 		auto first = env.pop<Code>();
 		auto second = env.pop<Code>();
-
-		std::vector<const Code*> list{second, first};
-		env.push<Code>(env.guard(std::make_unique<CodeList>(list)));
+		env.push<Code>(CodeList({ second, first }));
 	}
 	return 1;
 }
@@ -399,11 +380,11 @@ unsigned code_member(Env& env) {
 		auto first = env.pop<Code>();
 		auto second = env.pop<Code>();
 
-		if (first->is_atom()) {
-			env.push<bool>(*first == *second);
+		if (is_atom(first)) {
+			env.push<bool>(first == second);
 		} else {
-			for (auto el : first->get_stack()) {
-				if (*el == *second) {
+			for (const auto& el : std::get<CodeList>(first).get_list()) {
+				if (el == second) {
 					env.push<bool>(true);
 					return 1;
 				}
@@ -414,47 +395,53 @@ unsigned code_member(Env& env) {
 	return 1;
 }
 
-unsigned code_noop(Env&) {return 1;}
+unsigned code_noop(Env&) { return 1; }
 
 unsigned code_nth(Env& env) {
 	auto& stack = env.get_stack<Code>();
 	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
 		int index = env.pop<int>();
-		if (!stack.back()->get_stack().empty()) {
-			auto code_list = env.pop<Code>()->get_stack();
-			index = std::abs(index) % code_list.size();
-			stack.push_back(code_list[index]);
-
-			return code_list.size();
+		if (is_list(stack.back())) {
+			const auto& code_list = std::get<CodeList>(stack.back()).get_list();
+			if (code_list.size() > 0) {
+				index = std::abs(index) % code_list.size();
+				stack.back() = code_list[index];
+			}
 		}
 	}
 	return 1;
 }
 
 unsigned code_nthcdr(Env& env) {
-	auto& stack = env.get_stack<Code>();
-	if (stack.size() > 0 && env.get_stack<int>().size() > 0) {
+	if (env.get_stack<Code>().size() > 0 && env.get_stack<int>().size() > 0) {
 		int index = env.pop<int>();
-		if (!stack.back()->get_stack().empty()) {
-			auto code_list = env.pop<Code>()->get_stack();
+		const auto code = env.pop<Code>();
+		std::vector<Code> code_list;
+
+		// coerce to list if necessary
+		if (is_list(code)) {
+			code_list = std::get<CodeList>(code).get_list();
+		} else {
+			code_list = {code};
+		}
+
+		if (code_list.size()) {
 			index = std::abs(index) % code_list.size();
 			code_list.erase(code_list.begin(), code_list.begin() + index);
-			stack.push_back(env.guard(std::make_unique<CodeList>(code_list)));
-
-			return code_list.size();
 		}
+		env.push<Code>(CodeList(code_list));
+
+		return code_list.size() - index;
 	}
 	return 1;
 }
 
 unsigned code_null(Env& env) {
 	if (env.get_stack<Code>().size() > 0) {
-		auto code = env.pop<Code>();
-		if (code->is_list() && code->get_stack().empty()) {
-			env.push<bool>(true);
-		} else {
-			env.push<bool>(false);
-		}
+		std::visit(overloaded{
+			[&](CodeList arg) { env.push<bool>(arg.get_list().empty()); },
+			[&](auto&&) { env.push<bool>(false); }
+		}, env.pop<Code>());
 	}
 	return 1;
 }
@@ -463,22 +450,23 @@ unsigned code_position(Env& env) {
 	if (env.get_stack<Code>().size() >= 2) {
 		auto first = env.pop<Code>();
 		auto second = env.pop<Code>();
-		const auto& stack = first->get_stack();
 
-		if (stack.empty()) {
-			env.push<int>(*first == *second ? 0 : -1);
+		if (is_atom(first)) {
+			env.push<int>(first == second ? 0 : -1);
 			return 1;
 		}
 
-		for (int i = 0; i < static_cast<int>(stack.size()); ++i) {
-			if (*stack[i] == *second) {
+		const auto& code_list = std::get<CodeList>(first).get_list();
+		for (unsigned i = 0; i < code_list.size(); ++i) {
+			if (code_list[i] == second) {
 				env.push<int>(i);
-				return stack.size() * second->size();
+				return code_list.size() * size(second);
 			}
 		}
 
+		// not found
 		env.push<int>(-1);
-		return stack.size() * second->size();
+		return code_list.size() * size(second);
 	}
 	return 1;
 }
@@ -486,7 +474,7 @@ unsigned code_position(Env& env) {
 unsigned code_size(Env& env) {
 	if (env.get_stack<Code>().size() > 0) {
 		auto code = env.pop<Code>();
-		env.push<int>(code->size());
+		env.push<int>(size(code));
 	}
 	return 1;
 }
@@ -497,34 +485,31 @@ unsigned code_subst(Env& env) {
 		auto second = env.pop<Code>();
 		auto third = env.pop<Code>();
 
-		int fsize = first->size();
-		int ssize = second->size();
-		int tsize = third->size();
+		int fsize = size(first);
+		int ssize = size(second);
+		int tsize = size(third);
 
 		// second == third?
-		if (*second == *third) {
+		if (second == third) {
 			env.push<Code>(first);
-			return ssize < tsize ? ssize : tsize;
-		}
-
-		// atom?
-		if (first->is_atom()) {
-			if (*first == *third) {
+			return std::min(ssize, tsize);
+		} else if (is_atom(first)) {
+			if (first == third) {
 				env.push<Code>(second);
 			} else {
 				env.push<Code>(first);
 			}
-			return fsize < tsize ? fsize : tsize;
-		}
-
-		auto stack = first->get_stack();
-		for (int i = 0; i < static_cast<int>(stack.size()); ++i) {
-			if (*stack[i] == *third) {
-				stack[i] = second;
+			return std::min(fsize, tsize);
+		} else {
+			auto code_list = std::get<CodeList>(first).get_list();
+			for (unsigned i = 0; i < code_list.size(); ++i) {
+				if (code_list[i] == third) {
+					code_list[i] = second;
+				}
 			}
+			env.push<Code>(CodeList(code_list));
+			return std::min(fsize, tsize);
 		}
-		env.push<Code>(env.guard(std::make_unique<CodeList>(stack)));
-		return std::min(fsize, tsize);
 	}
 	return 1;
 }

@@ -5,168 +5,144 @@
 #include "code.h"
 #include "common_ops.h"
 #include "env.h"
-#include "instruction.h"
 
 #include <algorithm>
 #include <memory>
 #include <vector>
 
-TEMPLATE_TEST_CASE("Instruction: *.=", "", bool, int, double, cppush::Code, cppush::Exec) {
-	cppush::Env env;
-	cppush::Instruction op(cppush::equal<TestType>, "=");
+using namespace cppush;
 
-	generate_test_values<TestType>(env, 2);
-	auto vals = env.get_stack<TestType>();
-	env.get_stack<TestType>().clear();
-
+TEMPLATE_TEST_CASE("Instruction: equal", "", bool, int, double, Code, Exec) {
+	Env env;
+	Instruction op(equal<TestType>, "equal");
+	auto vec = generate_test_values<TestType>(2);
 	bool expected;
 
-	SECTION("Equal") {
-		env.push<TestType>(vals[0]);
-		env.push<TestType>(vals[0]);
+	SECTION("A A -> true") {
+		env.push<TestType>(vec[0]);
+		env.push<TestType>(vec[0]);
 		expected = true;
 	}
-
-	SECTION("Not equal") {
-		env.push<TestType>(vals[0]);
-		env.push<TestType>(vals[1]);
+	SECTION("B A -> false") {
+		env.push<TestType>(vec[0]);
+		env.push<TestType>(vec[1]);
 		expected = false;
 	}
-
 	op(env);
 	REQUIRE(env.pop<bool>() == expected);
 	REQUIRE(env.get_stack<TestType>().empty());
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.POP", "", bool, int, double, cppush::Code, cppush::Exec) {
-	cppush::Env env;
-	cppush::Instruction op(cppush::protected_pop<TestType>, "POP");
+TEMPLATE_TEST_CASE("Instruction: pop", "", bool, int, double, Code, Exec) {
+	Env env;
+	Instruction op(protected_pop<TestType>, "pop");
 
-	generate_test_values<TestType>(env, 1);
-	auto vals = env.get_stack<TestType>();
-	env.get_stack<TestType>().clear();
-
-	env.push<TestType>(vals[0]);
+	auto val = generate_test_values<TestType>(1);
+	env.push<TestType>(val[0]);
 	op(env);
 	REQUIRE(env.get_stack<TestType>().empty());
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.DUP", "", bool, int, double, cppush::Code, cppush::Exec) {
-	cppush::Env env;
-	cppush::Instruction op(cppush::dup<TestType>, "DUP");
+TEMPLATE_TEST_CASE("Instruction: dup", "", bool, int, double, Code, Exec) {
+	Env env;
+	Instruction op(dup<TestType>, "dup");
 
-	generate_test_values<TestType>(env, 1);
-	auto vals = env.get_stack<TestType>();
-	env.get_stack<TestType>().clear();
-
-	auto duped = vals;
-	duped.push_back(duped[0]);
-
-	env.push<TestType>(vals[0]);
+	auto val = generate_test_values<TestType>(1);
+	val.push_back(val[0]);
+	env.push<TestType>(val[0]);
 	op(env);
-	REQUIRE(env.get_stack<TestType>() == duped);
+	REQUIRE(env.get_stack<TestType>() == val);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.FLUSH", "", bool, int, double, cppush::Code, cppush::Exec) {
-	cppush::Env env;
-	cppush::Instruction op(cppush::flush<TestType>, "FLUSH");
+TEMPLATE_TEST_CASE("Instruction: flush", "", bool, int, double, Code, Exec) {
+	Env env;
+	Instruction op(flush<TestType>, "flush");
 
-	generate_test_values<TestType>(env, 4);
-	auto vals = env.get_stack<TestType>();
-	env.get_stack<TestType>().clear();
-
-	for (auto val : vals) {
-		env.push<TestType>(val);
+	auto vec = generate_test_values<TestType>(4);
+	for (auto el : vec) {
+		env.push<TestType>(el);
 	}
 	op(env);
 	REQUIRE(env.get_stack<TestType>().empty());
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.ROT", "", bool, int, double, cppush::Code, cppush::Exec) {
-	cppush::Env env;
-	cppush::Instruction op(cppush::rot<TestType>, "ROT");
+TEMPLATE_TEST_CASE("Instruction: rot", "", bool, int, double, Code, Exec) {
+	Env env;
+	Instruction op(rot<TestType>, "rot");
 
-	generate_test_values<TestType>(env, 4);
-	auto vals = env.get_stack<TestType>();
-	env.get_stack<TestType>().clear();
+	auto vec = generate_test_values<TestType>(4);
+	auto expected = vec;
+	std::rotate(expected.begin() + 1, expected.begin() + 2, expected.end());
 
-	for (auto val : vals) {
-		env.push<TestType>(val);
+	for (auto el : vec) {
+		env.push<TestType>(el);
 	}
 	op(env);
-
-	vals = {vals[0], vals[2], vals[3], vals[1]};
-	REQUIRE(env.get_stack<TestType>() == vals);
+	REQUIRE(env.get_stack<TestType>() == expected);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.SHOVE", "", bool, int, double, cppush::Code, cppush::Exec) {
-	cppush::Env env;
-	cppush::Instruction op(cppush::shove<TestType>, "SHOVE");
+TEMPLATE_TEST_CASE("Instruction: shove", "", bool, int, double, Code, Exec) {
+	Env env;
+	Instruction op(shove<TestType>, "shove");
 
-	generate_test_values<TestType>(env, 3);
-	auto vals = env.get_stack<TestType>();
-	env.get_stack<TestType>().clear();
+	auto vec = generate_test_values<TestType>(3);
+	env.push<TestType>(vec[0]);
+	env.push<TestType>(vec[1]);
+	env.push<TestType>(vec[2]);
 
-	env.push<TestType>(vals[0]);
-	env.push<TestType>(vals[1]);
-	env.push<TestType>(vals[2]);
-
+	auto expected = vec;
 	auto int_stack_size = env.get_stack<int>().size();
 
 	SECTION("Zero or negative index") {
 		SECTION("Zero index") { env.push<int>(0); }
 		SECTION("Negative index") { env.push<int>(-1); }
 	}
-
 	SECTION("Positive index, max or out of bounds") {
 		SECTION("Positive index") { env.push<int>(2); }
 		SECTION("Positive out of bounds index") { env.push<int>(4); }
-		vals = {vals[2], vals[0], vals[1]};
+		expected = {vec[2], vec[0], vec[1]};
 	}
-
 	op(env);
 	REQUIRE(env.get_stack<int>().size() == int_stack_size);
-	REQUIRE(env.get_stack<TestType>() == vals);
+	REQUIRE(env.get_stack<TestType>() == expected);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.STACKDEPTH", "", bool, int, double, cppush::Code, cppush::Exec) {
-	cppush::Env env;
-	cppush::Instruction op(cppush::stackdepth<TestType>, "STACKDEPTH");
+TEMPLATE_TEST_CASE("Instruction: stackdepth", "", bool, int, double, Code, Exec) {
+	Env env;
+	Instruction op(stackdepth<TestType>, "stackdepth");
 
-	generate_test_values<TestType>(env, 3);
-	auto vals = env.get_stack<TestType>();
-	env.get_stack<TestType>().clear();
+	auto vec = generate_test_values<TestType>(3);
 	int expected;
-
 	SECTION("Empty") { expected = 0; }
 	SECTION("3 items") {
-		env.get_stack<TestType>().insert(
-			env.get_stack<TestType>().end(), vals.begin(), vals.end());
+		env.push<TestType>(vec[0]);
+		env.push<TestType>(vec[1]);
+		env.push<TestType>(vec[2]);
 		expected = 3;
 	}
-
+	auto int_stack_size = env.get_stack<int>().size();
 	op(env);
 	REQUIRE(env.pop<int>() == expected);
+	REQUIRE(env.get_stack<int>().size() == int_stack_size);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.SWAP", "", bool, int, double, cppush::Code, cppush::Exec) {
-	cppush::Env env;
-	cppush::Instruction op(cppush::swap<TestType>, "SWAP");
+TEMPLATE_TEST_CASE("Instruction: swap", "", bool, int, double, Code, Exec) {
+	Env env;
+	Instruction op(swap<TestType>, "swap");
 
-	generate_test_values<TestType>(env, 2);
-	auto vals = env.get_stack<TestType>();
-	env.get_stack<TestType>().clear();
+	auto vec = generate_test_values<TestType>(2);
+	auto expected = vec;
+	expected = {vec[1], vec[0]};
 
-	env.push<TestType>(vals[0]);
-	env.push<TestType>(vals[1]);
+	env.push<TestType>(vec[0]);
+	env.push<TestType>(vec[1]);
 	op(env);
-	vals = {vals[1], vals[0]};
-	REQUIRE(env.get_stack<TestType>() == vals);
+	REQUIRE(env.get_stack<TestType>() == expected);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.YANK", "", bool, int, double, cppush::Code, cppush::Exec) {
-	cppush::Env env;
-	cppush::Instruction op(cppush::yank<TestType>, "YANK");
+TEMPLATE_TEST_CASE("Instruction: yank", "", bool, int, double, Code, Exec) {
+	Env env;
+	Instruction op(yank<TestType>, "yank");
 
 	SECTION("Insufficient items on stack should be NOOP") {
 		env.push<int>(0);
@@ -175,32 +151,28 @@ TEMPLATE_TEST_CASE("Instruction: *.YANK", "", bool, int, double, cppush::Code, c
 		return;
 	}
 
-	generate_test_values<TestType>(env, 3);
-	auto vals = env.get_stack<TestType>();
-	env.get_stack<TestType>().clear();
+	auto vec = generate_test_values<TestType>(3);
+	auto expected = vec;
+	for (auto el : vec) { env.push<TestType>(el); }
+	auto int_stack_size = env.get_stack<int>().size(); // workaround for int
 
-	for (auto el : vals) { env.push<TestType>(el); }
-	auto int_stack_size = env.get_stack<int>().size();
-
-	SECTION("Zero or negative index") {
+	SECTION("Zero or negative index: A B C -> A B C") {
 		SECTION("Zero index") { env.push<int>(0); }
-		SECTION("Negative index") { env.push<int>(-1); }
+		SECTION("Clamp negative to zero") { env.push<int>(-1); }
 	}
-
-	SECTION("Max or out of bounds index") {
+	SECTION("Positive index") {
 		SECTION("Positive index") { env.push<int>(2); }
-		SECTION("Positive out of bounds index") { env.push<int>(4); }
-		std::rotate(vals.begin(), vals.begin()+1, vals.end());
+		SECTION("Clamp to max index") { env.push<int>(4); }
+		std::rotate(expected.begin(), expected.begin()+1, expected.end());
 	}
-
 	op(env);
 	REQUIRE(env.get_stack<int>().size() == int_stack_size);
-	REQUIRE(env.get_stack<TestType>() == vals);
+	REQUIRE(env.get_stack<TestType>() == expected);
 }
 
-TEMPLATE_TEST_CASE("Instruction: *.YANKDUP", "", bool, int, double, cppush::Code, cppush::Exec) {
-	cppush::Env env;
-	cppush::Instruction op(cppush::yankdup<TestType>, "YANKDUP");
+TEMPLATE_TEST_CASE("Instruction: yankdup", "", bool, int, double, Code, Exec) {
+	Env env;
+	Instruction op(yankdup<TestType>, "yankdup");
 
 	SECTION("Insufficient items on stack should be NOOP") {
 		env.push<int>(0);
@@ -209,26 +181,22 @@ TEMPLATE_TEST_CASE("Instruction: *.YANKDUP", "", bool, int, double, cppush::Code
 		return;
 	}
 
-	generate_test_values<TestType>(env, 3);
-	auto vals = env.get_stack<TestType>();
-	env.get_stack<TestType>().clear();
-
-	for (auto el : vals) { env.push<TestType>(el); }
+	auto vec = generate_test_values<TestType>(3);
+	auto expected = vec;
+	for (auto el : vec) { env.push<TestType>(el); }
 	auto int_stack_size = env.get_stack<int>().size();
 
 	SECTION("Zero or negative index") {
 		SECTION("Zero index") { env.push<int>(0); }
-		SECTION("Negative index") { env.push<int>(-1); }
-		vals.push_back(vals.back());
+		SECTION("Clamp negative to zero") { env.push<int>(-1); }
+		expected.push_back(expected.back());
 	}
-
-	SECTION("Max or out of bounds index") {
+	SECTION("Positive index") {
 		SECTION("Positive index") { env.push<int>(2); }
-		SECTION("Positive out of bounds index") { env.push<int>(4); }
-		vals.push_back(vals[0]);
+		SECTION("Clamp to max index") { env.push<int>(4); }
+		expected.push_back(expected[0]);
 	}
-
 	op(env);
 	REQUIRE(env.get_stack<int>().size() == int_stack_size);
-	REQUIRE(env.get_stack<TestType>() == vals);
+	REQUIRE(env.get_stack<TestType>() == expected);
 }

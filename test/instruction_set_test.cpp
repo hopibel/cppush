@@ -1,37 +1,34 @@
 #include <catch2/catch.hpp>
 
+#include "code.h"
 #include "code_ops.h"
-#include "instruction.h"
-#include "input_instruction.h"
+#include "env.h"
 #include "instruction_set.h"
 #include "types.h"
 
 #include <vector>
 
+using namespace cppush;
+
 TEST_CASE("register_core_by_name()") {
-	std::vector<cppush::Instruction> iset;
-	cppush::register_core_by_name(iset, {"code_noop"});
-	REQUIRE(iset.size() == 1);
-	REQUIRE(iset[0] == cppush::Instruction(cppush::code_noop, {"code_noop"}));
+	auto iset = register_core_by_name({"code_noop"});
+	REQUIRE(iset == std::vector<Instruction>{Instruction(code_noop, "code_noop")});
 }
 
 TEST_CASE("register_core_by_stack()") {
-	std::vector<cppush::Instruction> iset;
-	cppush::register_core_by_stack(iset, cppush::Types(0));
-	REQUIRE(iset.size() == 1); // code_noop
-	REQUIRE(iset[0] == cppush::Instruction(cppush::code_noop, {"code_noop"}));
+	auto iset = register_core_by_stack(Types(0));
+	REQUIRE(iset == std::vector<Instruction>{Instruction(code_noop, "code_noop")});
 }
 
-//TEST_CASE("register_n_inputs()") {
-//	std::vector<cppush::Code_ptr> iset;
-//	cppush::register_n_inputs(iset, 3);
-//
-//	std::vector<int> inputs{0, 1, 2};
-//	cppush::Env env;
-//	env.load_inputs(inputs);
-//
-//	for (int i = 0; i < 3; ++i) {
-//		(*iset[i])(env);
-//		REQUIRE(env.pop<int>() == inputs[i]);
-//	}
-//}
+TEST_CASE("register_n_inputs()") {
+	auto iset = register_n_inputs<2>();
+	Env env;
+	env.load_program(
+		Program{CodeList()},
+		{ 1, 2.0 }
+	);
+	iset[0](env);
+	iset[1](env);
+	REQUIRE(env.get_stack<int>() == std::vector<int>{1});
+	REQUIRE(env.get_stack<double>() == std::vector<double>{2.0});
+}

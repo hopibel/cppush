@@ -1,214 +1,187 @@
 #include <catch2/catch.hpp>
 
+#include "test_utils.h"
+
 #include "exec_ops.h"
 #include "code.h"
 #include "env.h"
-#include "instruction.h"
-#include "literal.h"
 
 #include <memory>
 #include <vector>
 
+using namespace cppush;
+
 TEST_CASE("Instruction: exec_do*range") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_do_range, "exec_do*range");
+	Env env;
+	Instruction op(exec_do_range, "exec_do*range");
+	std::vector<Code> expected_exec;
+	int expected_int;
 
-	cppush::CodeList body;
-	env.push<cppush::Exec>(&body);
+	CodeList body;
+	env.push<Exec>(body);
 
-	SECTION("index == dest") {
-		env.get_stack<int>().insert(env.get_stack<int>().end(), {0, 0});
-		op(env);
-		REQUIRE(env.get_stack<int>() == std::vector<int>{0});
-		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
-		REQUIRE(*env.get_stack<cppush::Exec>().back() == body);
+	SECTION("index == dest\n"
+			"exec: (body) -> (body)\n"
+			"int:  0 0 -> 0")
+	{
+		env.push<int>(0);
+		env.push<int>(0);
+		expected_int = 0;
+		expected_exec = { body };
 	}
-
-	SECTION("index < dest") {
-		env.get_stack<int>().insert(env.get_stack<int>().end(), {0, 9});
-		op(env);
-		REQUIRE(env.get_stack<int>() == std::vector<int>{0});
-		REQUIRE(env.get_stack<cppush::Exec>().size() == 2);
-		auto& rcall = env.get_stack<cppush::Exec>()[0]->get_stack();
-		REQUIRE(rcall.size() == 4);
-		REQUIRE(*rcall[0] == cppush::Literal<int>(1));
-		REQUIRE(*rcall[1] == cppush::Literal<int>(9));
-		REQUIRE(*rcall[2] == op);
-		REQUIRE(*rcall[3] == body);
-		REQUIRE(*env.get_stack<cppush::Exec>()[1] == body);
+	SECTION("index < dest\n"
+			"exec: (body) -> (body) (1 9 exec_do*range (body))\n"
+			"int:  9 0 -> 0")
+	{
+		env.push<int>(0);
+		env.push<int>(9);
+		expected_int = 0;
+		expected_exec = { CodeList({ Literal(1), Literal(9), op, body }), body };
 	}
-
-	SECTION("index > dest") {
-		env.get_stack<int>().insert(env.get_stack<int>().end(), {9, 0});
-		op(env);
-		REQUIRE(env.get_stack<int>() == std::vector<int>{9});
-		REQUIRE(env.get_stack<cppush::Exec>().size() == 2);
-		auto& rcall = env.get_stack<cppush::Exec>()[0]->get_stack();
-		REQUIRE(rcall.size() == 4);
-		REQUIRE(*rcall[0] == cppush::Literal<int>(8));
-		REQUIRE(*rcall[1] == cppush::Literal<int>(0));
-		REQUIRE(*rcall[2] == op);
-		REQUIRE(*rcall[3] == body);
-		REQUIRE(*env.get_stack<cppush::Exec>()[1] == body);
+	SECTION("index > dest\n"
+			"exec: (body) -> (body) (8 0 exec_do*range (body))\n"
+			"int:  0 9 -> 8")
+	{
+		env.push<int>(9);
+		env.push<int>(0);
+		expected_int = 9;
+		expected_exec = { CodeList({ Literal(8), Literal(0), op, body }), body };
 	}
+	op(env);
+	REQUIRE(env.get_stack<int>() == std::vector<int>{ expected_int });
+	REQUIRE(env.get_stack<Exec>() == expected_exec);
 }
 
 TEST_CASE("Instruction: exec_do*count") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_do_count, "exec_do*count");
-	cppush::Instruction do_range(cppush::exec_do_range, "exec_do*range");
-	cppush::CodeList body;
-	env.push<cppush::Exec>(&body);
+	Env env;
+	Instruction op(exec_do_count, "exec_do*count");
+	Instruction do_range(exec_do_range, "exec_do*range");
+
+	CodeList body;
+	env.push<Exec>(body);
 
 	int count;
-
-	SECTION("count < 1") {
+	SECTION("count < 1 is noop") {
 		count = 0;
 		env.push<int>(count);
 		op(env);
 		REQUIRE(env.get_stack<int>() == std::vector<int>{count});
-		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
-		REQUIRE(*env.get_stack<cppush::Exec>().back() == body);
+		REQUIRE(env.get_stack<Exec>() == std::vector<Code>{body});
 	}
-
-	SECTION("count > 0") {
+	SECTION("count > 0\n"
+			"exec: (body) -> (0 1 exec_do*range (body))\n"
+			"int:  2 -> {}")
+	{
 		count = 2;
 		env.push<int>(count);
 		op(env);
 		REQUIRE(env.get_stack<int>().empty());
-		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
-		auto& rcall = env.get_stack<cppush::Exec>().back()->get_stack();
-		REQUIRE(rcall.size() == 4);
-		REQUIRE(*rcall[0] == cppush::Literal<int>(0));
-		REQUIRE(*rcall[1] == cppush::Literal<int>(count - 1));
-		REQUIRE(*rcall[2] == do_range);
-		REQUIRE(*rcall[3] == body);
+		REQUIRE(env.get_stack<Exec>() == std::vector<Code>{CodeList({
+			Literal(0), Literal(count - 1), do_range, body
+		})});
 	}
 }
 
 TEST_CASE("Instruction: exec_do*times") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_do_times, "exec_do*times");
-	cppush::Instruction do_range(cppush::exec_do_range, "exec_do*range");
-	cppush::Instruction pop_insn(cppush::protected_pop<int>, "integer_pop");
-	cppush::CodeList body;
-	env.push<cppush::Exec>(&body);
+	Env env;
+	Instruction op(exec_do_times, "exec_do*times");
+	Instruction do_range(exec_do_range, "exec_do*range");
+	Instruction pop_insn(protected_pop<int>, "integer_pop");
 
+	CodeList body;
+	env.push<Exec>(body);
 	int times;
 
-	SECTION("times < 1") {
+	SECTION("times < 1 is noop") {
 		times = 0;
 		env.push<int>(times);
 		op(env);
 		REQUIRE(env.get_stack<int>() == std::vector<int>{times});
-		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
-		REQUIRE(*env.get_stack<cppush::Exec>().back() == body);
+		REQUIRE(env.get_stack<Exec>() == std::vector<Code>{body});
 	}
-
-	SECTION("times > 0") {
+	SECTION("times > 0\n"
+			"exec: (body) -> (0 1 exec_do*range (integer_pop (body)))\n"
+			"int:  2 -> {}")
+	{
 		times = 2;
 		env.push<int>(times);
 		op(env);
 		REQUIRE(env.get_stack<int>().empty());
-		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
-		auto& rcall = env.get_stack<cppush::Exec>().back()->get_stack();
-		REQUIRE(rcall.size() == 4);
-		REQUIRE(*rcall[0] == cppush::Literal<int>(0));
-		REQUIRE(*rcall[1] == cppush::Literal<int>(times - 1));
-		REQUIRE(*rcall[2] == do_range);
-		auto& pop_code = rcall[3]->get_stack();
-		REQUIRE(pop_code.size() == 2);
-		REQUIRE(*pop_code[0] == pop_insn);
-		REQUIRE(*pop_code[1] == body);
+		REQUIRE(env.get_stack<Exec>() == std::vector<Code>{ CodeList({
+			Literal(0), Literal(times - 1), do_range, CodeList({ pop_insn, body })
+		}) });
 	}
 }
 
 TEST_CASE("Instruction: exec_if") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_if, "exec_if");
-	cppush::CodeList branchA;
-	cppush::CodeList branchB({ &branchA });
-	env.push<cppush::Exec>(&branchB);
-	env.push<cppush::Exec>(&branchA);
+	Env env;
+	Instruction op(exec_if, "exec_if");
+	CodeList branchA;
+	CodeList branchB({ Code(branchA) });
+	CodeList expected;
+
+	env.push<Exec>(branchB);
+	env.push<Exec>(branchA);
 
 	REQUIRE(!(branchA == branchB));
 
-	SECTION("true") {
+	SECTION("true\n"
+			"exec: A B -> A\n"
+			"bool: true -> {}")
+	{
 		env.push<bool>(true);
-		op(env);
-		REQUIRE(env.get_stack<bool>().empty());
-		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
-		REQUIRE(*env.get_stack<cppush::Exec>().back() == branchA);
+		expected = branchA;
 	}
-
-	SECTION("false") {
+	SECTION("false\n"
+			"exec: A B -> B\n"
+			"bool: false -> {}")
+	{
 		env.push<bool>(false);
-		op(env);
-		REQUIRE(env.get_stack<bool>().empty());
-		REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
-		REQUIRE(*env.get_stack<cppush::Exec>().back() == branchB);
+		expected = branchB;
 	}
+	op(env);
+	REQUIRE(env.get_stack<bool>().empty());
+	REQUIRE(env.get_stack<Exec>() == std::vector<Code>{expected});
 }
 
-TEST_CASE("Instruction: exec_k") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_k, "exec_k");
-	cppush::CodeList branchA;
-	cppush::CodeList branchB({ &branchA });
+TEST_CASE("Instruction: exec_k\nexec: A B -> A") {
+	Env env;
+	Instruction op(exec_k, "exec_k");
+	CodeList branchA;
+	CodeList branchB({ Code(branchA) });
 
-	env.push<cppush::Exec>(&branchB);
-	env.push<cppush::Exec>(&branchA);
+	env.push<Exec>(branchB);
+	env.push<Exec>(branchA);
 
 	REQUIRE(!(branchA == branchB));
-
-	// Before:	A B
-	// After:	A
 	op(env);
-	REQUIRE(env.get_stack<cppush::Exec>().size() == 1);
-	REQUIRE(*env.get_stack<cppush::Exec>().back() == branchA);
+	REQUIRE(env.get_stack<Exec>() == std::vector<Code>{branchA});
 }
 
-TEST_CASE("Instruction: exec_s") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_s, "exec_s");
-	cppush::CodeList a;
-	cppush::CodeList b({ &a });
-	cppush::CodeList c({ &b });
+TEST_CASE("Instruction: exec_s\nexec: A B C -> A C (B C)") {
+	Env env;
+	Instruction op(exec_s, "exec_s");
+	auto vec = generate_test_values<Code>(3);
 
-	env.push<cppush::Exec>(&c);
-	env.push<cppush::Exec>(&b);
-	env.push<cppush::Exec>(&a);
+	env.push<Exec>(vec[2]);
+	env.push<Exec>(vec[1]);
+	env.push<Exec>(vec[0]);
 
-	REQUIRE(!(a == b));
-	REQUIRE(!(a == c));
-	REQUIRE(!(b == c));
-
-	// Before:	A B C
-	// After:	A C (B C)
 	op(env);
-	REQUIRE(env.get_stack<cppush::Exec>().size() == 3);
-	REQUIRE(env.get_stack<cppush::Exec>()[0]->get_stack().size() == 2);
-
-	auto bc = cppush::CodeList({ &b, &c });
-	REQUIRE(*env.get_stack<cppush::Exec>()[0] == bc);
-	REQUIRE(*env.get_stack<cppush::Exec>()[1] == c);
-	REQUIRE(*env.get_stack<cppush::Exec>()[2] == a);
+	REQUIRE(env.get_stack<Exec>() == std::vector<Code>{
+		CodeList({ vec[1], vec[2] }), vec[2], vec[0]
+	});
 }
 
-TEST_CASE("Instruction: exec_y") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::exec_y, "exec_y");
-	cppush::CodeList body;
+TEST_CASE("Instruction: exec_y\nexec: A -> A (exec_y A)") {
+	Env env;
+	Instruction op(exec_y, "exec_y");
 
-	env.push<cppush::Exec>(&body);
+	CodeList body;
+	env.push<Exec>(body);
 
-	// Before:	A
-	// After:	A (EXEC.Y A)
 	op(env);
-	REQUIRE(env.get_stack<cppush::Exec>().size() == 2);
-	auto& rcall = env.get_stack<cppush::Exec>()[0]->get_stack();
-	REQUIRE(rcall.size() == 2);
-	REQUIRE(*rcall[0] == op);
-	REQUIRE(*rcall[1] == body);
-	REQUIRE(*env.get_stack<cppush::Exec>()[1] == body);
+	REQUIRE(env.get_stack<Exec>() == std::vector<Code>{
+		CodeList({ op, body }), body
+	});
 }

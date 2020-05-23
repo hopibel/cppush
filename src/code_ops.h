@@ -4,8 +4,6 @@
 #include "code.h"
 #include "common_ops.h"
 #include "env.h"
-#include "instruction.h"
-#include "literal.h"
 
 #include <algorithm>
 #include <cmath>
@@ -37,7 +35,7 @@ unsigned code_list(Env& env);
 unsigned code_member(Env& env);
 unsigned code_noop(Env&);
 unsigned code_nth(Env& env);
-unsigned code_nthcdr(Env& env);
+unsigned code_nthcdr(Env& env); // cdr (n % list size) times
 unsigned code_null(Env& env);
 unsigned code_position(Env& env);
 unsigned code_size(Env& env);

@@ -2,9 +2,7 @@
 #include "common_ops.h"
 #include "env.h"
 #include "exec_ops.h"
-#include "instruction.h"
 #include "instruction_set.h"
-#include "literal.h"
 
 #include <memory>
 #include <vector>
@@ -26,14 +24,9 @@ unsigned exec_do_range(Env& env) {
 		if (index != dest) {
 			index += index > dest ? -1 : 1;
 
-			std::vector<const Code*> rcall{
-				env.guard(std::make_unique<Literal<int>>(index)),
-				env.guard(std::make_unique<Literal<int>>(dest)),
-				&do_range_insn, code
-			};
-
-			// TODO(hopibel): push guard unique_ptr to avoid leak
-			env.push<Exec>(env.guard(std::make_unique<CodeList>(rcall)));
+			env.push<Exec>(CodeList({
+				Literal(index), Literal(dest), do_range_insn, code
+			}));
 		}
 		env.push<Exec>(code);
 	}
@@ -52,13 +45,11 @@ unsigned exec_do_count(Env& env) {
 		int count = env.pop<int>();
 		auto code = env.pop<Exec>();
 
-		std::vector<const Code*> rcall{
-			env.guard(std::make_unique<Literal<int>>(0)), // TODO: namespace global
-			env.guard(std::make_unique<Literal<int>>(count - 1)),
-			&do_range_insn, code
-		};
-
-		env.push<Exec>(env.guard(std::make_unique<CodeList>(rcall)));
+		env.push<Exec>(CodeList({
+			Literal(0), // TODO: namespace global
+			Literal(count - 1),
+			do_range_insn, code
+		}));
 	}
 	return 1;
 }
@@ -75,18 +66,11 @@ unsigned exec_do_times(Env& env) {
 		int times = env.pop<int>();
 		auto code = env.pop<Exec>();
 
-		auto pop_code = env.guard(std::make_unique<CodeList>(
-			std::vector<const Code*>{ &int_pop, code }
-		));
+		auto pop_code = CodeList({ int_pop, code });
 
-		std::vector<const Code*> rcall{
-			env.guard(std::make_unique<Literal<int>>(0)), // TODO: namespace global
-			env.guard(std::make_unique<Literal<int>>(times - 1)),
-			&do_range_insn, pop_code
-		};
-
-		// TODO(hopibel): push guard unique_ptr to avoid leak
-		env.push<Exec>(env.guard(std::make_unique<CodeList>(rcall)));
+		env.push<Exec>(CodeList({
+			Literal(0), Literal(times - 1), do_range_insn, pop_code
+		}));
 	}
 	return 1;
 }
@@ -119,9 +103,7 @@ unsigned exec_s(Env& env) {
 		auto b = env.pop<Exec>();
 		auto c = env.pop<Exec>();
 
-		env.push<Exec>(env.guard(std::make_unique<CodeList>(
-			std::vector<const Code*>{ b, c }
-		)));
+		env.push<Exec>(CodeList({ b, c }));
 		env.push<Exec>(c);
 		env.push<Exec>(a);
 	}
@@ -133,9 +115,7 @@ unsigned exec_y(Env& env) {
 		auto first = env.pop<Exec>();
 		static const auto y_insn = Instruction(exec_y, "exec_y");
 
-		env.push<Exec>(env.guard(std::make_unique<CodeList>(
-			std::vector<const Code*>{ &y_insn, first }
-		)));
+		env.push<Exec>(CodeList({ y_insn, first }));
 		env.push<Exec>(first);
 	}
 	return 1;

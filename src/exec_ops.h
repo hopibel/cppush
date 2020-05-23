@@ -4,8 +4,6 @@
 #include "code.h"
 #include "common_ops.h"
 #include "env.h"
-#include "instruction.h"
-#include "literal.h"
 
 #include <memory>
 #include <vector>

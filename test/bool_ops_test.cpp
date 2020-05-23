@@ -2,243 +2,202 @@
 
 #include "bool_ops.h"
 #include "env.h"
-#include "instruction.h"
 
 #include <vector>
 
-TEST_CASE("Instruction: BOOLEAN.AND") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::bool_and, "BOOLEAN.AND");
+using namespace cppush;
 
+TEST_CASE("Instruction: boolean_and") {
+	Env env;
+	Instruction op(bool_and, "boolean_and");
 	bool expected;
 
-	SECTION("F & F = F") {
+	SECTION("F F -> F") {
 		env.push<bool>(false);
 		env.push<bool>(false);
 		expected = false;
 	}
-
-	SECTION("F & T = F") {
+	SECTION("F T -> F") {
 		env.push<bool>(true);
 		env.push<bool>(false);
 		expected = false;
 	}
-
-	SECTION("T & T = T") {
+	SECTION("T T -> T") {
 		env.push<bool>(true);
 		env.push<bool>(true);
 		expected = true;
 	}
-
 	op(env);
-	REQUIRE(env.pop<bool>() == expected);
-	REQUIRE(env.get_stack<bool>().empty());
+	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
 }
 
-TEST_CASE("Instruction: BOOLEAN.OR") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::bool_or, "BOOLEAN.OR");
-
+TEST_CASE("Instruction: boolean_or") {
+	Env env;
+	Instruction op(bool_or, "boolean_or");
 	bool expected;
 
-	SECTION("F | F = F") {
+	SECTION("F F -> F") {
 		env.push<bool>(false);
 		env.push<bool>(false);
 		expected = false;
 	}
-
-	SECTION("F | T = T") {
+	SECTION("F T -> T") {
 		env.push<bool>(true);
 		env.push<bool>(false);
 		expected = true;
 	}
-
-	SECTION("T | T = T") {
+	SECTION("T T -> T") {
 		env.push<bool>(true);
 		env.push<bool>(true);
 		expected = true;
 	}
-
 	op(env);
-	REQUIRE(env.pop<bool>() == expected);
-	REQUIRE(env.get_stack<bool>().empty());
+	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
 }
 
-TEST_CASE("Instruction: BOOLEAN.NOT") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::bool_not, "BOOLEAN.NOT");
-
+TEST_CASE("Instruction: boolean_not") {
+	Env env;
+	Instruction op(bool_not, "boolean_not");
 	bool expected;
 
-	SECTION("!F = T") {
+	SECTION("F -> T") {
 		env.push<bool>(false);
 		expected = true;
 	}
-
-	SECTION("!T = F") {
+	SECTION("T -> F") {
 		env.push<bool>(true);
 		expected = false;
 	}
-
 	op(env);
-	REQUIRE(env.pop<bool>() == expected);
-	REQUIRE(env.get_stack<bool>().empty());
+	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
 }
 
-TEST_CASE("Instruction: BOOLEAN.NAND") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::bool_nand, "BOOLEAN.NAND");
-
+TEST_CASE("Instruction: boolean_nand") {
+	Env env;
+	Instruction op(bool_nand, "boolean_nand");
 	bool expected;
 
-	SECTION("F nand F = T") {
+	SECTION("F F -> T") {
 		env.push<bool>(false);
 		env.push<bool>(false);
 		expected = true;
 	}
-
-	SECTION("F nand T = T") {
+	SECTION("F T -> T") {
 		env.push<bool>(true);
 		env.push<bool>(false);
 		expected = true;
 	}
-
-	SECTION("T nand T = F") {
+	SECTION("T T -> F") {
 		env.push<bool>(true);
 		env.push<bool>(true);
 		expected = false;
 	}
-
 	op(env);
-	REQUIRE(env.pop<bool>() == expected);
-	REQUIRE(env.get_stack<bool>().empty());
+	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
 }
 
-
-TEST_CASE("Instruction: BOOLEAN.NOR") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::bool_nor, "BOOLEAN.NOR");
-
+TEST_CASE("Instruction: boolean_nor") {
+	Env env;
+	Instruction op(bool_nor, "boolean_nor");
 	bool expected;
 
-	SECTION("F nor F = T") {
+	SECTION("F F -> T") {
 		env.push<bool>(false);
 		env.push<bool>(false);
 		expected = true;
 	}
-
-	SECTION("F nor T = F") {
+	SECTION("F T -> F") {
 		env.push<bool>(true);
 		env.push<bool>(false);
 		expected = false;
 	}
-
-	SECTION("T nor T = F") {
+	SECTION("T T -> F") {
 		env.push<bool>(true);
 		env.push<bool>(true);
 		expected = false;
 	}
-
 	op(env);
-	REQUIRE(env.pop<bool>() == expected);
-	REQUIRE(env.get_stack<bool>().empty());
+	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
 }
 
-TEST_CASE("Instruction: BOOLEAN.XOR") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::bool_xor, "BOOLEAN.XOR");
-
+TEST_CASE("Instruction: boolean_xor") {
+	Env env;
+	Instruction op(bool_xor, "boolean_xor");
 	bool expected;
 
-	SECTION("F ^ F = F") {
+	SECTION("F F -> F") {
 		env.push<bool>(false);
 		env.push<bool>(false);
 		expected = false;
 	}
-
-	SECTION("F ^ T = T") {
+	SECTION("F T -> T") {
 		env.push<bool>(true);
 		env.push<bool>(false);
 		expected = true;
 	}
-
-	SECTION("T ^ T = F") {
+	SECTION("T T -> F") {
 		env.push<bool>(true);
 		env.push<bool>(true);
 		expected = false;
 	}
-
 	op(env);
-	REQUIRE(env.pop<bool>() == expected);
-	REQUIRE(env.get_stack<bool>().empty());
+	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
 }
 
-TEST_CASE("Instruction: BOOLEAN.INVERT_FIRST_THEN_AND") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::bool_invert_first_then_and, "BOOLEAN.INVERT_FIRST_THEN_AND");
-
+TEST_CASE("Instruction: boolean_invert_first_then_and") {
+	Env env;
+	Instruction op(bool_invert_first_then_and, "boolean_invert_first_then_and");
 	bool expected;
 
-	SECTION("!F & F = F") {
+	SECTION("F F -> F") {
 		env.push<bool>(false);
 		env.push<bool>(false);
 		expected = false;
 	}
-
-	SECTION("!F & T = T") {
+	SECTION("F T -> T") {
 		env.push<bool>(true);
 		env.push<bool>(false);
 		expected = true;
 	}
-
-	SECTION("!T & F = F") {
+	SECTION("T F -> F") {
 		env.push<bool>(false);
 		env.push<bool>(true);
 		expected = false;
 	}
-
-	SECTION("!T & T = F") {
+	SECTION("T T -> F") {
 		env.push<bool>(true);
 		env.push<bool>(true);
 		expected = false;
 	}
-
 	op(env);
-	REQUIRE(env.pop<bool>() == expected);
-	REQUIRE(env.get_stack<bool>().empty());
+	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
 }
 
-TEST_CASE("Instruction: BOOLEAN.INVERT_SECOND_THEN_AND") {
-	cppush::Env env;
-	cppush::Instruction op(cppush::bool_invert_second_then_and, "BOOLEAN.INVERT_SECOND_THEN_AND");
-
+TEST_CASE("Instruction: boolean_invert_second_then_and") {
+	Env env;
+	Instruction op(bool_invert_second_then_and, "boolean_invert_second_then_and");
 	bool expected;
 
-	SECTION("F & !F = F") {
+	SECTION("F F -> F") {
 		env.push<bool>(false);
 		env.push<bool>(false);
 		expected = false;
 	}
-
-	SECTION("F & !T = F") {
+	SECTION("F T -> F") {
 		env.push<bool>(true);
 		env.push<bool>(false);
 		expected = false;
 	}
-
-	SECTION("T & !F = T") {
+	SECTION("T F -> T") {
 		env.push<bool>(false);
 		env.push<bool>(true);
 		expected = true;
 	}
-
-	SECTION("T & !T = F") {
+	SECTION("T T -> F") {
 		env.push<bool>(true);
 		env.push<bool>(true);
 		expected = false;
 	}
-
 	op(env);
-	REQUIRE(env.pop<bool>() == expected);
-	REQUIRE(env.get_stack<bool>().empty());
+	REQUIRE(env.get_stack<bool>() == std::vector<bool>{expected});
 }

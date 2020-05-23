@@ -1,8 +1,6 @@
 #include "instruction_set.h"
 
 #include "code.h"
-#include "instruction.h"
-#include "input_instruction.h"
 #include "bool_ops.h"
 #include "code_ops.h"
 #include "common_ops.h"
@@ -16,6 +14,7 @@
 
 namespace cppush {
 
+// TODO: just store Instruction objects directly?
 const std::map<std::string, std::tuple<unsigned (*)(Env&), Types>> core_instructions{
 	// exec
 	{"exec_do*range", {exec_do_range, Type::Exec | Type::Int}},
@@ -66,8 +65,8 @@ const std::map<std::string, std::tuple<unsigned (*)(Env&), Types>> core_instruct
 	{"boolean_xor", {bool_xor, Type::Bool}},
 	{"boolean_invert_first_then_and", {bool_invert_first_then_and, Type::Bool}},
 	{"boolean_invert_second_then_and", {bool_invert_second_then_and, Type::Bool}},
-	{"boolean_fromint", {bool_from_int, Type::Bool | Type::Int}},
-	{"boolean_fromfloat", {bool_from_float, Type::Bool | Type::Float}},
+	{"boolean_from_integer", {bool_from_int, Type::Bool | Type::Int}},
+	{"boolean_from_float", {bool_from_float, Type::Bool | Type::Float}},
 
 	// int
 	{"integer_add", {add<int>, Type::Int}},
@@ -77,8 +76,8 @@ const std::map<std::string, std::tuple<unsigned (*)(Env&), Types>> core_instruct
 	{"integer_mod", {int_mod, Type::Int}},
 	{"integer_lt", {lt<int>, Type::Int | Type::Bool}},
 	{"integer_gt", {gt<int>, Type::Int | Type::Bool}},
-	{"integer_fromboolean", {int_from_bool, Type::Int | Type::Bool}},
-	{"integer_fromfloat", {int_from_float, Type::Int | Type::Float}},
+	{"integer_from_boolean", {int_from_bool, Type::Int | Type::Bool}},
+	{"integer_from_float", {int_from_float, Type::Int | Type::Float}},
 	{"integer_max", {max<int>, Type::Int}},
 	{"integer_min", {min<int>, Type::Int}},
 
@@ -90,8 +89,8 @@ const std::map<std::string, std::tuple<unsigned (*)(Env&), Types>> core_instruct
 	{"float_mod", {float_mod, Type::Float}},
 	{"float_lt", {lt<double>, Type::Float | Type::Bool}},
 	{"float_gt", {gt<double>, Type::Float | Type::Bool}},
-	{"float_fromboolean", {float_from_bool, Type::Float | Type::Bool}},
-	{"float_frominteger", {float_from_int, Type::Float | Type::Int}},
+	{"float_from_boolean", {float_from_bool, Type::Float | Type::Bool}},
+	{"float_from_integer", {float_from_int, Type::Float | Type::Int}},
 	{"float_max", {max<double>, Type::Float}},
 	{"float_min", {min<double>, Type::Float}},
 	{"float_cos", {trig_cos, Type::Float}},
@@ -161,11 +160,21 @@ void register_core(std::vector<Instruction>& instruction_set) {
 		instruction_set.push_back(load_instruction(el.first));
 	}
 }
+std::vector<Instruction> register_core() {
+	std::vector<Instruction> vec;
+	register_core(vec);
+	return vec;
+}
 
 void register_core_by_name(std::vector<Instruction>& instruction_set, std::initializer_list<std::string> names) {
 	for (auto name : names) {
 		instruction_set.push_back(load_instruction(name));
 	}
+}
+std::vector<Instruction> register_core_by_name(std::initializer_list<std::string> names) {
+	std::vector<Instruction> vec;
+	register_core_by_name(vec, names);
+	return vec;
 }
 
 void register_core_by_stack(std::vector<Instruction>& instruction_set, const Types& types) {
@@ -175,12 +184,20 @@ void register_core_by_stack(std::vector<Instruction>& instruction_set, const Typ
 		}
 	}
 }
+std::vector<Instruction> register_core_by_stack(const Types& types) {
+	std::vector<Instruction> vec;
+	register_core_by_stack(vec, types);
+	return vec;
+}
 
-//void register_n_inputs(std::vector<Instruction>& instruction_set, int n) {
-//	for (int i = 0; i < n; ++i) {
-//		instruction_set.push_back(InputInstruction("input_" + i, i));
-//	}
-//}
+/**
+ * register_n_inputs base case
+ */
+template <>
+void register_n_inputs<1>(std::vector<Instruction>& instruction_set) {
+	instruction_set.push_back(Instruction(input_n<0>, "input_0"));
+	return;
+}
 
 // Parentheses required
 //	// exec
