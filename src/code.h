@@ -20,31 +20,36 @@ using literal_t = std::variant<bool, int, double>;
 
 class Instruction {
 public:
-	Instruction(unsigned (*op)(Env&), std::string name) : op_(op), name_(name) {}
+	// parens is number of blocks to open after an instruction in a genome
+	Instruction(unsigned (*op)(Env&), std::string name, unsigned parens = 0) :
+		op(op), name(name), parens(parens) {}
 
-	unsigned operator()(Env& env) const { return op_(env); }
-	bool operator==(const Instruction& rhs) const { return op_ == rhs.op_; }
+	unsigned operator()(Env& env) const { return op(env); }
+	bool operator==(const Instruction& rhs) const { return op == rhs.op; }
 
-	std::string to_string() const { return name_; }
+	std::string to_string() const { return name; }
+	unsigned get_parens() const { return parens; }
 
 private:
-	unsigned (*op_)(Env&);
-	std::string name_;
+	unsigned (*op)(Env&);
+	std::string name;
+	unsigned parens;
 };
 
 class Literal {
 public:
-	Literal(bool value) : value_(value) {}
-	Literal(int value) : value_(value) {}
-	Literal(double value) : value_(value) {}
+	Literal(bool value) : value(value) {}
+	Literal(int value) : value(value) {}
+	Literal(double value) : value(value) {}
 
 	unsigned operator()(Env& env) const;
-	bool operator==(const Literal& rhs) const { return value_ == rhs.value_; }
+	bool operator==(const Literal& rhs) const { return value == rhs.value; }
 
+	literal_t get() const { return value; }
 	std::string to_string() const;
 
 private:
-	literal_t value_;
+	literal_t value;
 };
 
 class CodeList {

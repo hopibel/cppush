@@ -8,7 +8,7 @@
 #include "numeric_ops.h"
 #include "types.h"
 
-#include <initializer_list>
+#include <map>
 #include <string>
 #include <utility>
 
@@ -150,9 +150,34 @@ const std::map<std::string, std::tuple<unsigned (*)(Env&), Types>> core_instruct
 	{"exec_yankdup", {yankdup<Exec>, Type::Exec | Type::Int}},
 };
 
+const std::map<std::string, unsigned> parens_required{
+	// exec
+	{"exec_do*range", 1},
+	{"exec_do*count", 1},
+	{"exec_do*times", 1},
+	{"exec_if", 2},
+	{"exec_k", 2},
+	{"exec_s", 3},
+	{"exec_y", 1},
+
+	// code
+	{"code_quote", 1},
+
+	// common stack ops
+	{"exec_pop", 1},
+	{"exec_dup", 1},
+	{"exec_rot", 3},
+	{"exec_shove", 1},
+	{"exec_swap", 2},
+};
+
 Instruction load_instruction(std::string name) {
 	auto insn = core_instructions.at(name);
-	return Instruction(std::get<0>(insn), name);
+	unsigned parens = 0;
+	if (parens_required.find(name) != parens_required.end()) {
+		parens = parens_required.at(name);
+	}
+	return Instruction(std::get<0>(insn), name, parens);
 }
 
 void register_core(std::vector<Instruction>& instruction_set) {
@@ -166,12 +191,12 @@ std::vector<Instruction> register_core() {
 	return vec;
 }
 
-void register_core_by_name(std::vector<Instruction>& instruction_set, std::initializer_list<std::string> names) {
+void register_core_by_name(std::vector<Instruction>& instruction_set, std::vector<std::string> names) {
 	for (auto name : names) {
 		instruction_set.push_back(load_instruction(name));
 	}
 }
-std::vector<Instruction> register_core_by_name(std::initializer_list<std::string> names) {
+std::vector<Instruction> register_core_by_name(std::vector<std::string> names) {
 	std::vector<Instruction> vec;
 	register_core_by_name(vec, names);
 	return vec;
@@ -189,34 +214,5 @@ std::vector<Instruction> register_core_by_stack(const Types& types) {
 	register_core_by_stack(vec, types);
 	return vec;
 }
-
-/**
- * register_n_inputs base case
- */
-template <>
-void register_n_inputs<1>(std::vector<Instruction>& instruction_set) {
-	instruction_set.push_back(Instruction(input_n<0>, "input_0"));
-	return;
-}
-
-// Parentheses required
-//	// exec
-//	exec_do*range	1
-//	exec_do*count	1
-//	exec_do*times	1
-//	exec_if			2
-//	exec_k			2
-//	exec_s			3
-//	exec_y			1
-//
-//	// code
-//	code_quote		1
-//
-//	// common stack ops
-//	exec_pop		1
-//	exec_dup		1
-//	exec_rot		3
-//	exec_shove		1
-//	exec_swap		2
 
 } // namespace cppush

@@ -1,8 +1,12 @@
 add_library(cppush
 	code.cpp
 	code.h
+	cppushgp.h
+	cppushgp.cpp
 	env.cpp
 	env.h
+	estimators.h
+	estimators.cpp
 	instruction_set.h
 	instruction_set.cpp
 	bool_ops.h
@@ -15,6 +19,8 @@ add_library(cppush
 	exec_ops.cpp
 	numeric_ops.h
 	numeric_ops.cpp
+	rng.h
+	rng.cpp
 	types.h
 	util.h
 )

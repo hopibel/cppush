@@ -23,12 +23,12 @@ TEST_CASE("register_core_by_stack()") {
 TEST_CASE("register_n_inputs()") {
 	auto iset = register_n_inputs<2>();
 	Env env;
-	env.load_program(
-		Program{CodeList()},
+	env.run(
+		Program{CodeList(), PushConfig{2}},
 		{ 1, 2.0 }
 	);
 	iset[0](env);
 	iset[1](env);
-	REQUIRE(env.get_stack<int>() == std::vector<int>{1});
-	REQUIRE(env.get_stack<double>() == std::vector<double>{2.0});
+	REQUIRE(env.get_stack<int>() == std::vector<int>{1, 1});
+	REQUIRE(env.get_stack<double>() == std::vector<double>{2.0, 2.0});
 }

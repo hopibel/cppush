@@ -12,7 +12,7 @@ unsigned Literal::operator()(Env& env) const {
 		[&](bool arg) { env.push<bool>(arg); },
 		[&](int arg) { env.push<int>(arg); },
 		[&](double arg) { env.push<double>(arg); }
-	}, value_);
+	}, value);
 	return 1;
 }
 
@@ -36,7 +36,7 @@ void CodeList::calc_size_() {
 std::string Literal::to_string() const {
 	return std::visit(overloaded{
 		[](auto&& arg) -> std::string { return std::to_string(arg); }
-	}, value_);
+	}, value);
 }
 
 // wrap string representation in parentheses

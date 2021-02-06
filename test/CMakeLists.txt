@@ -7,7 +7,7 @@ add_executable(cppush_test
 	bool_ops_test.cpp
 	code_ops_test.cpp
 	common_ops_test.cpp
-	#cppushgp_test.cpp
+	cppushgp_test.cpp
 	exec_ops_test.cpp
 	numeric_ops_test.cpp
 

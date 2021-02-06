@@ -122,15 +122,23 @@ unsigned yankdup(Env& env) {
 	return 1;
 }
 
-/**
- * Templated input instruction. No need to subclass Instruction
- */
-template <unsigned N>
-unsigned input_n(Env& env) {
-	return env.push_input_(N);
+// Templated input instruction. pushes Literal to appropriate stack
+template <int N>
+inline unsigned input_n(Env& env) {
+	static_assert(N >= 0, "input_n<N>(): N must be >= 0");
+	env.push_input(N);
+	return 1;
 }
-// base case
-template <> unsigned input_n<0>(Env& env);
+
+// templated output instruction. sets Nth output Literal to top of T stack
+template <typename T, int N>
+inline unsigned output_n(Env& env) {
+	static_assert(N >= 0, "output_n<T, N>(): N must be >= 0");
+	if (env.get_stack<T>().size() > 0) {
+		env.set_output(N, env.pop<T>());
+	}
+	return 1;
+}
 
 } // namespace cppush
 

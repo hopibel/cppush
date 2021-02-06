@@ -34,12 +34,4 @@ unsigned equal<Code>(Env& env) {return detail::code_equal_impl(env, env.get_stac
 template <>
 unsigned equal<Exec>(Env& env) {return detail::code_equal_impl(env, env.get_stack<Exec>());}
 
-/**
- * input_n base case
- */
-template <>
-unsigned input_n<0>(Env& env) {
-	return env.push_input_(0);
-}
-
 } // namespace cppush
