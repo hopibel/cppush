@@ -1,12 +1,28 @@
-#include "code.h"
-#include "env.h"
-#include "util.h"
+#include "cppush/code.hpp"
+#include "cppush/state.hpp"
 
+#include <algorithm>
 #include <string>
 #include <typeinfo>
 
 namespace cppush {
 
+Instruction::Instruction(Op op) : op(op) {}
+
+unsigned Instruction::operator()(State& state) {
+	return (*op)(state);
+}
+
+CodeList::CodeList(std::vector<std::shared_ptr<Code>> code) : vec(code) {}
+
+unsigned CodeList::operator()(State& state) {
+	auto& exec_stack = state.get_stack<Exec>();
+	std::copy(vec.rbegin(), vec.rend(), exec_stack.end());
+
+	return vec.size();
+}
+
+/*
 unsigned Literal::operator()(Env& env) const {
 	std::visit(overloaded{
 		[&](bool arg) { env.push<bool>(arg); },
@@ -60,5 +76,6 @@ std::ostream& operator<<(std::ostream& os, const Code& value) {
 	}, value);
 	return os;
 }
+*/
 
 } // namespace cppush

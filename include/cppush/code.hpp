@@ -1,14 +1,44 @@
 #ifndef CODE_H
 #define CODE_H
 
-#include "util.h"
-
-#include <string>
-#include <variant>
+#include <memory>
 #include <vector>
 
 namespace cppush {
 
+class State;
+using Op = unsigned (*)(State&);
+
+class Code {
+public:
+	virtual ~Code() = default;
+
+	virtual unsigned operator()(State&) = 0;
+};
+
+class Instruction : public Code {
+public:
+	Instruction(Op);
+	~Instruction() override {}
+	unsigned operator()(State&) override;
+
+private:
+	Op op;
+};
+
+class CodeList : public Code {
+public:
+	CodeList(std::vector<std::shared_ptr<Code>>);
+	~CodeList() override {}
+	unsigned operator()(State&) override;
+
+private:
+	std::vector<std::shared_ptr<Code>> vec;
+};
+
+} // namespace cppush
+
+/*
 class Env;
 
 class Instruction;
@@ -92,5 +122,6 @@ std::ostream& operator<<(std::ostream& os, const Code& value);
 } // namespace cppush
 
 #include "env.h"
+*/
 
 #endif // CODE_H
