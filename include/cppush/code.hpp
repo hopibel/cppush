@@ -1,5 +1,5 @@
-#ifndef CODE_H
-#define CODE_H
+#ifndef CODE_HPP
+#define CODE_HPP
 
 #include <memory>
 #include <vector>
@@ -124,4 +124,4 @@ std::ostream& operator<<(std::ostream& os, const Code& value);
 #include "env.h"
 */
 
-#endif // CODE_H
+#endif // CODE_HPP

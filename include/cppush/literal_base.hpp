@@ -1,5 +1,5 @@
-#ifndef LITERAL_BASE_H
-#define LITERAL_BASE_H
+#ifndef LITERAL_BASE_HPP
+#define LITERAL_BASE_HPP
 
 namespace cppush {
 
@@ -14,4 +14,4 @@ public:
 
 } // namespace cppush
 
-#endif // LITERAL_BASE_H
+#endif // LITERAL_BASE_HPP

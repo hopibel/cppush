@@ -1,5 +1,5 @@
-#ifndef PROGRAM_H
-#define PROGRAM_H
+#ifndef PROGRAM_HPP
+#define PROGRAM_HPP
 
 #include "literal_base.hpp"
 
@@ -23,4 +23,4 @@ struct Program {
 
 } // namespace cppush
 
-#endif // PROGRAM_H
+#endif // PROGRAM_HPP

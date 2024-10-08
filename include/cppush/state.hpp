@@ -1,5 +1,5 @@
-#ifndef STATE_H
-#define STATE_H
+#ifndef STATE_HPP
+#define STATE_HPP
 
 #include "code.hpp"
 
@@ -41,4 +41,4 @@ auto State::pop() {
 
 } // namespace cppush
 
-#endif // STATE_H
+#endif // STATE_HPP

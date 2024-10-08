@@ -1,5 +1,5 @@
-#ifndef LITERAL_H
-#define LITERAL_H
+#ifndef LITERAL_HPP
+#define LITERAL_HPP
 
 #include "literal_base.hpp"
 #include "state.hpp"
@@ -17,4 +17,4 @@ private:
 
 } // namespace cppush
 
-#endif // LITERAL_H
+#endif // LITERAL_HPP

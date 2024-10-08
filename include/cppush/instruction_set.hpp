@@ -1,9 +1,5 @@
-#ifndef INSTRUCTION_SET_H
-#define INSTRUCTION_SET_H
-
-//#include "code.h"
-//#include "common_ops.h"
-//#include "types.h"
+#ifndef INSTRUCTION_SET_HPP
+#define INSTRUCTION_SET_HPP
 
 #include <cstdint>
 #include <stdexcept>
@@ -80,4 +76,4 @@ private:
 
 } // namespace cppush
 
-#endif // INSTRUCTION_SET_H
+#endif // INSTRUCTION_SET_HPP
